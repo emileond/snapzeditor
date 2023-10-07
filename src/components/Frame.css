@@ -1,0 +1,24 @@
+/* Base frame styles */
+.frame {
+  position: absolute;
+  top: 0;
+  left: 0;
+  box-sizing: border-box;
+  pointer-events: none; /* To ensure it doesn't interfere with canvas interactions */
+}
+
+/* Browser frame style */
+.browser {
+  width: 810px;
+  height: 620px;
+  border: 5px solid #000;
+  border-top: 30px solid #000; /* Mimicking a browser address bar */
+}
+
+/* Phone frame style (just a basic example, you can enhance this) */
+.phone {
+  width: 410px;
+  height: 720px;
+  border: 15px solid #555;
+  border-radius: 30px;
+}
