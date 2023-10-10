@@ -19,6 +19,7 @@ import {
   PopoverContent,
   Select,
   SelectItem,
+  Switch,
 } from '@nextui-org/react'
 import {
   PiExportBold,
@@ -42,6 +43,8 @@ import {
   PiTiktokLogo,
   PiFrameCorners,
   PiBrowserBold,
+  PiFrameCornersBold,
+  PiGhostBold,
 } from 'react-icons/pi'
 import Slider from './components/Slider'
 import CanvasComponent from './components/CanvasComponent'
@@ -52,9 +55,10 @@ import { useForm, Controller } from 'react-hook-form'
 import { toPng, toBlob } from 'html-to-image'
 
 function App() {
-  const [canvasBg, setCanvasBg] = useState(
-    'linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%)'
-  )
+  const [canvasBg, setCanvasBg] = useState({
+    style: 'linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%)',
+    imgSrc: null,
+  })
   const [imgScale, setImgScale] = useState(1.2)
   const [imgShadow, setImgShadow] = useState(50) // 0 means no shadow by default
   const [borderRadius, setBorderRadius] = useState(20)
@@ -65,6 +69,7 @@ function App() {
   const [sizeError, setSizeError] = useState(false)
   const [fileName, setFileName] = useState('my-snapshot')
   const [imgFrame, setImgFrame] = useState('macOS-dark')
+  const [snapzWatermark, setSnapzWatermark] = useState(true)
 
   const canvasRef = useRef(null)
 
@@ -519,7 +524,7 @@ function App() {
                 <Tab title="Color">
                   <ColorPicker
                     onChange={(color) => {
-                      setCanvasBg(color)
+                      setCanvasBg({ style: color, imgSrc: null })
                     }}
                   />
                 </Tab>
@@ -606,12 +611,48 @@ function App() {
                 defaultValue={[0]}
               />
             </div>
-            {/* <div>
+            <div>
               <div className="flex items-center gap-2">
-                <PiImageBold fontSize="1.1rem" />
+                <PiFrameCornersBold fontSize="1.1rem" />
                 <h5>Inset</h5>
               </div>
-            </div> */}
+              <Slider
+                onValueChange={(value) => {
+                  setRotationY(value)
+                }}
+                min={-15}
+                max={15}
+                step={1}
+                defaultValue={[0]}
+              />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <PiGhostBold fontSize="1.1rem" />
+                <h5>Watermark</h5>
+              </div>
+              <div>
+                <Switch
+                  size="sm"
+                  color="secondary"
+                  defaultSelected={snapzWatermark}
+                  onChange={() => setSnapzWatermark(!snapzWatermark)}
+                >
+                  SnapzEditor watermark
+                </Switch>
+              </div>
+              <div>
+                <Switch size="sm" color="secondary">
+                  Custom watermark
+                </Switch>
+                <Input
+                  variant="faded"
+                  size="sm"
+                  className="w-48"
+                  placeholder="Add your text"
+                />
+              </div>
+            </div>
           </Card>
         </div>
         <div className="w-full flex items-center justify-center">
@@ -626,6 +667,7 @@ function App() {
               canvasWidth={canvasWidth}
               canvasHeight={canvasHeight}
               imgFrame={imgFrame}
+              snapzWatermark={snapzWatermark}
             />
           </div>
         </div>

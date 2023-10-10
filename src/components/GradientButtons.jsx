@@ -28,9 +28,10 @@ function GradientButtons({ setCanvasBg }) {
   }
 
   useEffect(() => {
-    setCanvasBg(
-      `linear-gradient(135deg, ${gradientFrom} 0%, ${gradientTo} 100%)`
-    )
+    setCanvasBg({
+      style: `linear-gradient(135deg, ${gradientFrom} 0%, ${gradientTo} 100%)`,
+      imgSrc: null,
+    })
   }, [gradientFrom, gradientTo])
 
   return (

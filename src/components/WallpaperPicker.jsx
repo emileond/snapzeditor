@@ -17,7 +17,7 @@ function WallpaperPicker({ setCanvasBg }) {
 
   const handleWallpaperClick = (index) => {
     setSelectedWallpaperIndex(index)
-    setCanvasBg(`url(${wallpapers[index]}) center/cover no-repeat`)
+    setCanvasBg({ style: null, imgSrc: wallpapers[index] })
   }
 
   return (

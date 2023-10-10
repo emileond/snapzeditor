@@ -43,6 +43,8 @@ function CanvasComponent({
   canvasWidth,
   canvasHeight,
   imgFrame,
+  snapzWatermark,
+  customWatermark,
 }) {
   const [imageSrc, setImageSrc] = useState(null)
   const [initialScale, setInitialScale] = useState(1)
@@ -157,13 +159,20 @@ function CanvasComponent({
 
   return (
     <div
-      className={`canvas relative flex items-center justify-center bg-content4 w-full h-full overflow-hidden`}
+      className={`canvas relative flex items-center justify-center w-full h-full overflow-hidden`}
       style={{
-        background: canvasBg,
+        background: canvasBg?.style,
         width: `${MAX_WIDTH}px`,
         height: `${MAX_HEIGHT}px`,
       }}
     >
+      {canvasBg?.imgSrc && (
+        <img
+          className="absolute top-0 w-full h-full object-cover"
+          src={canvasBg?.imgSrc}
+          alt="Custom watermark"
+        />
+      )}
       {!imageSrc && (
         <div className="flex justify-center">
           <Card className="p-4">
@@ -299,6 +308,17 @@ function CanvasComponent({
               </div>
             </div>
           )}
+        </div>
+      )}
+      {snapzWatermark && (
+        <div className="absolute bottom-0 right-0 m-4 bg-white/50 px-2 py-1 rounded-lg backdrop-blur-sm">
+          <div className="flex gap-1">
+            <Image src="/snapzeditor-icon.svg" width={16} height={16} />
+            <span className="text-default text-xs">Made with </span>
+            <span className="text-default text-xs font-semibold">
+              SnapzEditor.com
+            </span>
+          </div>
         </div>
       )}
     </div>
