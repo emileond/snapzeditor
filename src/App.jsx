@@ -287,7 +287,7 @@ function App() {
 
   return (
     <div
-      className={`w-full min-w-[1024px] max-w-[1600px] flex flex-col items-start mx-auto`}
+      className={`w-full min-w-[1024px] max-w-[1600px] flex flex-col items-start mx-auto bg-background`}
     >
       <div className="flex justify-between py-2 px-4 bg-content1 w-full">
         <div className="flex items-center gap-2 ">

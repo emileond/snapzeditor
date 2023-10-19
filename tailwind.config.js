@@ -9,7 +9,12 @@ export default {
     './node_modules/@nextui-org/theme/dist/**/*.{js,ts,jsx,tsx}',
   ],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        inter: ['var(--font-inter)', 'sans-serif'],
+        hkgrotesk: ['var(--font-hkgrotesk)', 'sans-serif'],
+      },
+    },
   },
   darkMode: 'class',
   plugins: [nextui()],
