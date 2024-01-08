@@ -53,6 +53,8 @@ import GradientButtons from './components/GradientButtons'
 import WallpaperPicker from './components/WallpaperPicker'
 import { useForm, Controller } from 'react-hook-form'
 import { toPng, toBlob } from 'html-to-image'
+import ExportOverlay from './components/ExportOverlay'
+import toast from 'react-hot-toast'
 
 function App() {
   const [canvasBg, setCanvasBg] = useState({
@@ -70,6 +72,10 @@ function App() {
   const [fileName, setFileName] = useState('my-snapshot')
   const [imgFrame, setImgFrame] = useState('macOS-dark')
   const [snapzWatermark, setSnapzWatermark] = useState(true)
+  const [customWatermarkToggle, setCustomWatermarkToggle] = useState(false)
+  const [customWatermarkImg, setCustomWatermarkImg] = useState()
+  const [customWatermarkText, setCustomWatermarkText] = useState()
+  const [showOverlay, setShowOverlay] = useState(false)
 
   const canvasRef = useRef(null)
 
@@ -153,6 +159,30 @@ function App() {
     }
   }
 
+  const displayToast = (variant, text) => {
+    const style = {
+      background: '#1d1d1d',
+      color: '#fff',
+    }
+    switch (variant) {
+      case 'success':
+        toast.success(text, {
+          style,
+        })
+        break
+      case 'error':
+        toast.error(text, {
+          style,
+        })
+        break
+      default:
+        toast(text, {
+          style,
+        })
+        break
+    }
+  }
+
   const validateSizeDimensions = () => {
     let error = ''
 
@@ -190,6 +220,7 @@ function App() {
   }
 
   const handleDownload = () => {
+    setShowOverlay(true) // Show overlay when download starts
     let node = canvasRef.current
 
     applyScaling(node)
@@ -209,6 +240,9 @@ function App() {
         link.download = `${fileName}.png`
         link.href = dataUrl
         link.click()
+
+        setShowOverlay(false) // Hide overlay on success
+        displayToast('success', 'Image downloaded!')
       })
       .catch(function (error) {
         console.error('Error capturing image:', error)
@@ -216,10 +250,14 @@ function App() {
         // Ensure scaling is reverted even if there's an error
         node.style.transform = ''
         node.style.transformOrigin = ''
+
+        setShowOverlay(false) // Hide overlay on error
+        displayToast('error', 'Error, please try again')
       })
   }
 
   const handleCopyToClipboard = () => {
+    setShowOverlay(true)
     let node = canvasRef.current
 
     applyScaling(node)
@@ -233,12 +271,11 @@ function App() {
         return navigator.clipboard.write([clipboardItem])
       })
       .then(() => {
-        // Success! The image is now in the clipboard.
-        console.log('Image copied to clipboard!')
-
         // Revert scaling after copying to ensure the display remains unchanged
         node.style.transform = ''
         node.style.transformOrigin = ''
+        setShowOverlay(false)
+        displayToast('success', 'Image copied to clipboard!')
       })
       .catch((error) => {
         console.error('Error copying image to clipboard:', error)
@@ -246,7 +283,29 @@ function App() {
         // Ensure scaling is reverted even if there's an error
         node.style.transform = ''
         node.style.transformOrigin = ''
+        setShowOverlay(false)
+        displayToast('error', 'Error, please try again')
       })
+  }
+
+  const handleWatermarkUpload = () => {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = 'image/png, image/jpeg, image/webp'
+
+    input.onchange = (event) => {
+      const file = event.target.files[0]
+      if (file) {
+        const reader = new FileReader()
+        reader.onload = (e) => {
+          setCustomWatermarkImg(e.target.result)
+        }
+        reader.readAsDataURL(file)
+      }
+    }
+
+    // Simulate a click on the input element to open the file dialog
+    input.click()
   }
 
   useEffect(() => {
@@ -286,10 +345,8 @@ function App() {
   }, [watchedFileName])
 
   return (
-    <div
-      className={`w-full min-w-[1024px] max-w-[1600px] flex flex-col items-start mx-auto bg-background`}
-    >
-      <div className="flex justify-between py-2 px-4 bg-content1 w-full">
+    <div className={`flex flex-col items-start mx-auto bg-background h-dvh`}>
+      <div className="flex justify-between items-center py-1 px-4 bg-content1 w-full">
         <div className="flex items-center gap-2 ">
           <PiFrameCorners fontSize="1.3rem" />
           <Input
@@ -301,11 +358,11 @@ function App() {
             })}
             isInvalid={sizeError && true}
             type="number"
-            size="sm"
+            size="xs"
             variant="bordered"
             placeholder="Width"
             endContent="px"
-            className="w-24"
+            className="w-28"
             defaultValue={canvasWidth}
           />
           <p className="text-default-500">x</p>
@@ -318,11 +375,11 @@ function App() {
             })}
             isInvalid={sizeError && true}
             type="number"
-            size="sm"
+            size="xs"
             variant="bordered"
             placeholder="Height"
             endContent="px"
-            className="w-24"
+            className="w-28"
             defaultValue={canvasHeight}
           />
           {sizeError && <p className="text-danger text-sm">{sizeError}</p>}
@@ -354,6 +411,7 @@ function App() {
         <div className="flex flex-row gap-3 items-baseline">
           <p className="text-default-500 text-xs">File name</p>
           <Input
+            size="sm"
             {...register('inputFileName', {
               required: true,
             })}
@@ -440,9 +498,14 @@ function App() {
           </Popover>
         </div>
       </div>
-      <div className="w-full flex flex-row p-2">
+      <div className="w-full flex flex-row p-2 h-full min-h-[700px]">
+        {showOverlay && (
+          <div className="absolute w-full h-full z-50">
+            <ExportOverlay isVisible />
+          </div>
+        )}
         <div className="w-96 px-3">
-          <Card className="h-full bg-content2 p-4 gap-2">
+          <Card className="h-full overflow-auto bg-content2 p-4 gap-2">
             <div>
               <div className="flex items-center gap-2">
                 <PiBrowserBold fontSize="1.1rem" />
@@ -626,32 +689,52 @@ function App() {
                 defaultValue={[0]}
               />
             </div>
-            <div>
+            <div className="flex flex-col gap-2 items-start">
               <div className="flex items-center gap-2">
                 <PiGhostBold fontSize="1.1rem" />
                 <h5>Watermark</h5>
               </div>
-              <div>
-                <Switch
-                  size="sm"
-                  color="secondary"
-                  defaultSelected={snapzWatermark}
-                  onChange={() => setSnapzWatermark(!snapzWatermark)}
-                >
-                  SnapzEditor watermark
-                </Switch>
-              </div>
-              <div>
-                <Switch size="sm" color="secondary">
-                  Custom watermark
-                </Switch>
-                <Input
-                  variant="faded"
-                  size="sm"
-                  className="w-48"
-                  placeholder="Add your text"
-                />
-              </div>
+
+              <Switch
+                size="sm"
+                color="secondary"
+                defaultSelected={snapzWatermark}
+                onChange={() => setSnapzWatermark(!snapzWatermark)}
+              >
+                SnapzEditor watermark
+              </Switch>
+
+              <Switch
+                size="sm"
+                color="secondary"
+                defaultSelected={customWatermarkToggle}
+                onChange={() =>
+                  setCustomWatermarkToggle(!customWatermarkToggle)
+                }
+              >
+                Custom watermark
+              </Switch>
+              {customWatermarkToggle && (
+                // add custom image upload
+                <div className="flex flex-col gap-2 items-start w-full">
+                  <span className="text-sm">Watermark icon</span>
+                  <Button
+                    size="sm"
+                    variant="shadow"
+                    onClick={handleWatermarkUpload}
+                  >
+                    Upload
+                  </Button>
+                  <span className="text-sm">Watermark text</span>
+                  <Input
+                    className="w-full"
+                    variant="faded"
+                    size="sm"
+                    placeholder="Add your text"
+                    onChange={(e) => setCustomWatermarkText(e.target.value)}
+                  />
+                </div>
+              )}
             </div>
           </Card>
         </div>
@@ -668,6 +751,9 @@ function App() {
               canvasHeight={canvasHeight}
               imgFrame={imgFrame}
               snapzWatermark={snapzWatermark}
+              customWatermark={customWatermarkToggle}
+              customWatermarkImg={customWatermarkImg}
+              customWatermarkText={customWatermarkText}
             />
           </div>
         </div>

@@ -17,7 +17,7 @@ export default function Hero() {
             <Button color="primary" variant="shadow" size="lg">
               Download
             </Button>
-            <Button as={Link} href="/#app" variant="ghost" size="lg">
+            <Button as={Link} href="/app" variant="ghost" size="lg">
               Try it
             </Button>
           </div>

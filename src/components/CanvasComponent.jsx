@@ -13,13 +13,8 @@ import SampleImage from '/images/sample.png'
 import {
   PiAlienBold,
   PiHardDriveBold,
-  PiMinus,
-  PiRectangle,
   PiTerminalBold,
-  PiWaveSawtooth,
-  PiWaveSawtoothBold,
   PiWaveSineBold,
-  PiX,
 } from 'react-icons/pi'
 import {
   MdMinimize,
@@ -45,6 +40,8 @@ function CanvasComponent({
   imgFrame,
   snapzWatermark,
   customWatermark,
+  customWatermarkImg,
+  customWatermarkText,
 }) {
   const [imageSrc, setImageSrc] = useState(null)
   const [initialScale, setInitialScale] = useState(1)
@@ -54,31 +51,34 @@ function CanvasComponent({
   const MAX_HEIGHT = canvasHeight / 2
   const MARGIN = 20
 
-  const loadImage = (imgSrc) => {
-    const img = new window.Image()
-    img.src = imgSrc
-    img.onload = () => {
-      let aspectScale
+  const loadImage = useCallback(
+    (imgSrc) => {
+      const img = new window.Image()
+      img.src = imgSrc
+      img.onload = () => {
+        let aspectScale
 
-      // Compute the width and height scale factors
-      const widthScale = (MAX_WIDTH - 2 * MARGIN) / img.width
-      const heightScale = (MAX_HEIGHT - 2 * MARGIN) / img.height
+        // Compute the width and height scale factors
+        const widthScale = (MAX_WIDTH - 2 * MARGIN) / img.width
+        const heightScale = (MAX_HEIGHT - 2 * MARGIN) / img.height
 
-      // Check if image dimensions are smaller than canvas
-      if (
-        img.width <= MAX_WIDTH - 2 * MARGIN &&
-        img.height <= MAX_HEIGHT - 2 * MARGIN
-      ) {
-        aspectScale = 1 // Use the original image size
-      } else {
-        // Use the smallest scale value to ensure the image fits inside the canvas bounds
-        aspectScale = Math.min(widthScale, heightScale)
+        // Check if image dimensions are smaller than canvas
+        if (
+          img.width <= MAX_WIDTH - 2 * MARGIN &&
+          img.height <= MAX_HEIGHT - 2 * MARGIN
+        ) {
+          aspectScale = 1 // Use the original image size
+        } else {
+          // Use the smallest scale value to ensure the image fits inside the canvas bounds
+          aspectScale = Math.min(widthScale, heightScale)
+        }
+
+        setInitialScale(aspectScale)
+        setImageSrc(imgSrc)
       }
-
-      setInitialScale(aspectScale)
-      setImageSrc(imgSrc)
-    }
-  }
+    },
+    [MAX_WIDTH, MAX_HEIGHT, MARGIN, setInitialScale, setImageSrc]
+  )
 
   const handleUpload = () => {
     const input = document.createElement('input')
@@ -203,7 +203,7 @@ function CanvasComponent({
                 >
                   Upload image
                 </Button>
-                <p className="pt-1 text-default-500">or</p>
+                <p className="text-center pt-1 text-default-500">or</p>
                 <Button
                   fullWidth
                   variant="faded"
@@ -215,8 +215,7 @@ function CanvasComponent({
             </CardBody>
             <CardFooter>
               <p className="text-small text-default-500">
-                Or paste your image with <Kbd>cmd + v</Kbd> /{' '}
-                <Kbd>ctrl + v</Kbd>
+                Paste your image with <Kbd>cmd + v</Kbd> / <Kbd>ctrl + v</Kbd>
               </p>
             </CardFooter>
           </Card>
@@ -312,15 +311,34 @@ function CanvasComponent({
       )}
       {snapzWatermark && (
         <div className="absolute bottom-0 right-0 m-4 bg-white/50 px-2 py-1 rounded-lg backdrop-blur-sm">
-          <div className="flex gap-1">
-            <Image src="/snapzeditor-icon.svg" width={16} height={16} />
+          <div className="flex flex-col">
             <span className="text-default text-xs">Made with </span>
-            <span className="text-default text-xs font-semibold">
-              SnapzEditor.com
-            </span>
+            <div className="flex gap-1 items-center">
+              <Image src="/snapzeditor-icon.svg" width={16} height={16} />
+              <span className="text-default text-xs font-semibold">
+                snapseditor.com
+              </span>
+            </div>
           </div>
         </div>
       )}
+      {
+        // if customWatermark is true, then show the custom watermark using customWatermark.img and customWatermark.text
+        // else if customWatermark is false, don't show the custom watermark
+        // else show the default watermark
+        customWatermark && (
+          <div className="absolute bottom-0 right-0 m-4 bg-white/50 px-2 py-1 rounded-lg backdrop-blur-sm">
+            <div className="flex flex-col">
+              <div className="flex gap-1 items-center">
+                <Image src={customWatermarkImg} width={16} height={16} />
+                <span className="text-default text-xs font-semibold">
+                  {customWatermarkText}
+                </span>
+              </div>
+            </div>
+          </div>
+        )
+      }
     </div>
   )
 }
