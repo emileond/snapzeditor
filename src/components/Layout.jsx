@@ -10,8 +10,11 @@ import {
   NavbarItem,
 } from '@nextui-org/react'
 import Illustration from '/images/hero-illustration.svg'
+import UserMenu from './UserMenu'
+import { useUser } from '@supabase/auth-helpers-react'
 
 export default function Layout({ children }) {
+  const user = useUser()
   return (
     <>
       <Navbar
@@ -25,21 +28,15 @@ export default function Layout({ children }) {
 
         <NavbarContent className="sm:hidden pr-3" justify="center">
           <NavbarBrand>
-            <img
-              src="/snapzeditor-logo-w.svg"
-              alt="SnapzEditor Logo"
-              className="w-[140px]"
-            />
+            <Image src="/snapzeditor-icon.svg" width={32} height={32} />
+            <h4 className="ml-2 font-bold">Snapseditor</h4>
           </NavbarBrand>
         </NavbarContent>
 
         <NavbarContent className="hidden sm:flex gap-4" justify="center">
           <NavbarBrand>
-            <img
-              src="/snapzeditor-logo-w.svg"
-              alt="SnapzEditor Logo"
-              className="w-[140px]"
-            />
+            <Image src="/snapzeditor-icon.svg" width={32} height={32} />
+            <h4 className="ml-2 font-bold">Snapseditor</h4>
           </NavbarBrand>
           <NavbarItem>
             <Link href="/#features" color="foreground">
@@ -60,15 +57,20 @@ export default function Layout({ children }) {
 
         <NavbarContent justify="end">
           <NavbarItem className="hidden lg:flex">
-            <Button as={Link} href="#" variant="light">
-              Login
-            </Button>
+            {user && (
+              <Button
+                variant="shadow"
+                color="primary"
+                size="sm"
+                onClick={() => {
+                  window.location.href = '/app'
+                }}
+              >
+                Go to app
+              </Button>
+            )}
           </NavbarItem>
-          <NavbarItem>
-            <Button as={Link} color="secondary" href="#" variant="flat">
-              Sign Up
-            </Button>
-          </NavbarItem>
+          <UserMenu />
         </NavbarContent>
       </Navbar>
       {/* <header className="w-full flex justify-center bg-background py-4"></header> */}
