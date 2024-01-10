@@ -1,17 +1,9 @@
 import {
-  PiFrameCorners,
   PiCaretDownBold,
   PiExportBold,
   PiFilePng,
   PiDownloadBold,
   PiCopy,
-  PiInstagramLogo,
-  PiTiktokLogo,
-  PiTwitterLogo,
-  PiFacebookLogo,
-  PiLinkedinLogo,
-  PiYoutubeLogo,
-  PiTwitchLogo,
 } from 'react-icons/pi'
 import {
   Button,
@@ -25,8 +17,6 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-  Select,
-  SelectItem,
 } from '@nextui-org/react'
 import { toPng, toBlob } from 'html-to-image'
 import toast from 'react-hot-toast'
@@ -37,68 +27,10 @@ const TopBar = ({
   canvasRef, // Add this prop
   canvasWidth,
   canvasHeight,
-  sizeError,
   fileName,
   register,
-  setValue,
   setShowOverlay, // Passed from parent component
 }) => {
-  const canvasTemplates = [
-    {
-      name: 'Default',
-      width: 1800,
-      height: 1400,
-    },
-    {
-      name: 'Instagram post',
-      width: 1080,
-      height: 1080,
-      icon: <PiInstagramLogo fontSize="1.2rem" />,
-    },
-    {
-      name: 'Instagram story',
-      width: 1080,
-      height: 1920,
-      icon: <PiInstagramLogo fontSize="1.2rem" />,
-    },
-    {
-      name: 'TikTok',
-      width: 1080,
-      height: 1920,
-      icon: <PiTiktokLogo fontSize="1.1rem" />,
-    },
-    {
-      name: 'X/Twitter post',
-      width: 1600,
-      height: 900,
-      icon: <PiTwitterLogo fontSize="1.2rem" />,
-    },
-    {
-      name: 'Facebook',
-      width: 1200,
-      height: 630,
-      icon: <PiFacebookLogo fontSize="1.2rem" />,
-    },
-    {
-      name: 'LinkedIn post',
-      width: 1200,
-      height: 627,
-      icon: <PiLinkedinLogo fontSize="1.2rem" />,
-    },
-    {
-      name: 'YouTube thumbnail',
-      width: 1280,
-      height: 720,
-      icon: <PiYoutubeLogo fontSize="1.2rem" />,
-    },
-    {
-      name: 'Twitch',
-      width: 1920,
-      height: 1080,
-      icon: <PiTwitchLogo fontSize="1.2rem" />,
-    },
-  ]
-
   const [exportSize, setExportSize] = useState('1x')
 
   const displayToast = (variant, text) => {
@@ -218,65 +150,6 @@ const TopBar = ({
     >
       <div className="flex items-center gap-2 ">
         <Image src="/snapzeditor-icon.svg" width={32} height={32} />
-        <PiFrameCorners className="ml-3" fontSize="1.3rem" />
-        <Input
-          {...register('inputWidth', {
-            min: 10,
-            max: 4096,
-            valueAsNumber: true,
-            validate: (value) => value >= 10 && value <= 4096,
-          })}
-          isInvalid={sizeError && true}
-          type="number"
-          size="xs"
-          variant="bordered"
-          placeholder="Width"
-          endContent="px"
-          className="w-28"
-          defaultValue={canvasWidth}
-        />
-        <p className="text-default-500">x</p>
-        <Input
-          {...register('inputHeight', {
-            min: 10,
-            max: 4096,
-            valueAsNumber: true,
-            validate: (value) => value >= 10 && value <= 4096,
-          })}
-          isInvalid={sizeError && true}
-          type="number"
-          size="xs"
-          variant="bordered"
-          placeholder="Height"
-          endContent="px"
-          className="w-28"
-          defaultValue={canvasHeight}
-        />
-        {sizeError && <p className="text-danger text-sm">{sizeError}</p>}
-        <Dropdown className="dark">
-          <DropdownTrigger>
-            <Button isIconOnly size="sm" variant="faded">
-              <PiCaretDownBold fontSize="1rem" />
-            </Button>
-          </DropdownTrigger>
-          <DropdownMenu>
-            {canvasTemplates.map((template) => (
-              <DropdownItem
-                key={template.name}
-                startContent={template.icon && template.icon}
-                endContent={
-                  <p className="text-default-400 text-xs">{`${template.width} x ${template.height}`}</p>
-                }
-                onClick={() => {
-                  setValue('inputWidth', template.width)
-                  setValue('inputHeight', template.height)
-                }}
-              >
-                {template.name}
-              </DropdownItem>
-            ))}
-          </DropdownMenu>
-        </Dropdown>
       </div>
       <div className="flex flex-row gap-3 items-baseline">
         <p className="text-default-500 text-sm">File name</p>

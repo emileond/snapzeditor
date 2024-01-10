@@ -108,16 +108,9 @@ function App() {
       <TopBar
         canvasRef={canvasRef}
         canvasWidth={canvasWidth}
-        setCanvasWidth={setCanvasWidth}
         canvasHeight={canvasHeight}
-        setCanvasHeight={setCanvasHeight}
-        sizeError={sizeError}
-        setSizeError={setSizeError}
         fileName={fileName}
-        setFileName={setFileName}
         register={register}
-        setValue={setValue}
-        showOverlay={showOverlay}
         setShowOverlay={setShowOverlay}
       />
       <div className="w-full flex flex-row p-2 h-full min-h-[700px] min-w-[900px]">
@@ -127,6 +120,11 @@ function App() {
           </div>
         )}
         <ToolBar
+          canvasWidth={canvasWidth}
+          canvasHeight={canvasHeight}
+          sizeError={sizeError}
+          register={register}
+          setValue={setValue}
           imgFrame={imgFrame}
           setCanvasBg={setCanvasBg}
           setImgScale={setImgScale}
