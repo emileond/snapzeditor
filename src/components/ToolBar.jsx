@@ -201,7 +201,7 @@ const ToolBar = ({
                       <PiCaretDownBold fontSize="1rem" />
                     </Button>
                   </DropdownTrigger>
-                  <DropdownMenu>
+                  <DropdownMenu aria-label="Templates">
                     {canvasTemplates.map((template) => (
                       <DropdownItem
                         key={template.name}

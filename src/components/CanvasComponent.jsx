@@ -160,11 +160,11 @@ function CanvasComponent({
   return (
     <div
       className={`canvas relative flex items-center justify-center w-full h-full overflow-hidden`}
-      style={{
-        background: canvasBg?.style,
-        width: `${MAX_WIDTH}px`,
-        height: `${MAX_HEIGHT}px`,
-      }}
+      // style={{
+      // background: canvasBg?.style,
+      // width: `${MAX_WIDTH}px`,
+      // height: `${MAX_HEIGHT}px`,
+      // }}
     >
       {canvasBg?.imgSrc && (
         <img
@@ -174,7 +174,7 @@ function CanvasComponent({
         />
       )}
       {!imageSrc && (
-        <div className="flex justify-center">
+        <div className="flex justify-center z-10">
           <Card className="p-4">
             <CardHeader w="100%" className="justify-center">
               <h3>Add an image to get started</h3>
@@ -310,7 +310,7 @@ function CanvasComponent({
         </div>
       )}
       {snapzWatermark && (
-        <div className="absolute bottom-0 right-0 m-4 bg-white/50 px-2 py-1 rounded-lg backdrop-blur-sm">
+        <div className="absolute bottom-0 right-0 m-4 bg-white/50 px-2 py-1 rounded-lg backdrop-blur-sm z-10">
           <div className="flex flex-col">
             <span className="text-default text-xs">Made with </span>
             <div className="flex gap-1 items-center">
@@ -327,7 +327,7 @@ function CanvasComponent({
         // else if customWatermark is false, don't show the custom watermark
         // else show the default watermark
         customWatermark && (
-          <div className="absolute bottom-0 right-0 m-4 bg-white/50 px-2 py-1 rounded-lg backdrop-blur-sm">
+          <div className="absolute bottom-0 right-0 m-4 bg-white/50 px-2 py-1 rounded-lg backdrop-blur-sm z-10">
             <div className="flex flex-col">
               <div className="flex gap-1 items-center">
                 <Image src={customWatermarkImg} width={16} height={16} />

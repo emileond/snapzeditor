@@ -41,7 +41,7 @@ function UserMenu() {
               src={user.user_metadata.avatar_url}
             />
           </DropdownTrigger>
-          <DropdownMenu variant="flat">
+          <DropdownMenu variant="flat" aria-label="User menu">
             <DropdownSection>
               <DropdownItem isReadOnly isDisabled>
                 {user.email}

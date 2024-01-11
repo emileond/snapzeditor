@@ -19,7 +19,9 @@ function App() {
   const [canvasWidth, setCanvasWidth] = useState(1800)
   const [canvasHeight, setCanvasHeight] = useState(1400)
   const [sizeError, setSizeError] = useState(false)
-  const [fileName, setFileName] = useState('my-snapshot')
+  const [fileName, setFileName] = useState(
+    `snap-${Intl.DateTimeFormat('sv-SE').format(Date.now())}`
+  )
   const [imgFrame, setImgFrame] = useState('macOS-dark')
   const [snapzWatermark, setSnapzWatermark] = useState(true)
   const [customWatermarkToggle, setCustomWatermarkToggle] = useState(false)

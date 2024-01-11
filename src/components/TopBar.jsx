@@ -4,6 +4,7 @@ import {
   PiFilePng,
   PiDownloadBold,
   PiCopy,
+  PiTextTBold,
 } from 'react-icons/pi'
 import {
   Button,
@@ -148,7 +149,7 @@ const TopBar = ({
       id="topbar"
       className="flex justify-between items-center py-1 px-4 bg-content1 w-full"
     >
-      <div className="flex items-center gap-2 ">
+      <div className="flex items-center gap-4">
         <Image src="/snapzeditor-icon.svg" width={32} height={32} />
       </div>
       <div className="flex flex-row gap-3 items-baseline">
@@ -192,7 +193,7 @@ const TopBar = ({
                 <Dropdown className="dark">
                   <DropdownTrigger>
                     <Button size="xs" variant="faded">
-                      {exportSize}x
+                      {exportSize}
                       <PiCaretDownBold fontSize="1rem" />
                     </Button>
                   </DropdownTrigger>

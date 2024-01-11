@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Input } from '@nextui-org/react'
 
-function ColorPicker({ onChange, defaultColor = '#FFFFFF' }) {
+function ColorPicker({ onChange, defaultColor = '#FFFFFF', showInput = true }) {
   const [color, setColor] = useState(defaultColor)
 
   useEffect(() => {
@@ -29,19 +29,24 @@ function ColorPicker({ onChange, defaultColor = '#FFFFFF' }) {
           onChange={handleColorChange}
         />
       </label>
-      <Input
-        size="sm"
-        variant="bordered"
-        startContent="#"
-        className="w-20"
-        placeholder={
-          defaultColor.startsWith('#')
-            ? defaultColor.substring(1)
-            : defaultColor
-        }
-        value={color.startsWith('#') ? color.substring(1) : color}
-        onChange={(e) => handleColorChange(e)}
-      />
+      {showInput && (
+        <Input
+          size="sm"
+          variant="bordered"
+          startContent="#"
+          className="w-24"
+          classNames={{
+            inputWrapper: ['min-h-9', 'h-9'],
+          }}
+          placeholder={
+            defaultColor.startsWith('#')
+              ? defaultColor.substring(1)
+              : defaultColor
+          }
+          value={color.startsWith('#') ? color.substring(1) : color}
+          onChange={(e) => handleColorChange(e)}
+        />
+      )}
     </div>
   )
 }
