@@ -37,6 +37,7 @@ import {
 } from 'react-icons/pi'
 import ColorPicker from './ColorPicker'
 import useDebounce from '../hooks/useDebounce'
+import { toPng } from 'html-to-image'
 
 const CanvasArea = ({
   canvasRef,
@@ -57,6 +58,8 @@ const CanvasArea = ({
   const [scaledWidth, setScaledWidth] = useState(0)
   const [scaledHeight, setScaledHeight] = useState(0)
   const wrapperRef = useRef()
+  const canvasComponentRef = useRef()
+
   // Debounce the dimensions
   const debouncedWidth = useDebounce(canvasWidth, 300)
   const debouncedHeight = useDebounce(canvasHeight, 300)
@@ -178,30 +181,25 @@ const CanvasArea = ({
   }
   const resizeCanvas = () => {
     const wrapper = wrapperRef.current
-    console.log('wrapper', wrapper)
     if (wrapper) {
-      console.log('resizeCanvas')
-      const aspectRatio = debouncedWidth / debouncedHeight
       const maxWidth = wrapper.clientWidth
       const maxHeight = wrapper.clientHeight
 
-      let newWidth, newHeight
+      let newWidth = debouncedWidth
+      let newHeight = debouncedHeight
 
-      if (debouncedWidth <= maxWidth && debouncedHeight <= maxHeight) {
-        newWidth = debouncedWidth
-        newHeight = debouncedHeight
-      } else {
-        newWidth = Math.min(maxWidth, debouncedWidth)
-        newHeight = newWidth / aspectRatio
-
-        if (newHeight > maxHeight) {
-          newHeight = Math.min(maxHeight, debouncedHeight)
-          newWidth = newHeight * aspectRatio
-        }
+      // Keep reducing the size by 10% until it fits within the maximum dimensions
+      while (newWidth > maxWidth || newHeight > maxHeight) {
+        newWidth *= 0.85 // Reduce width by 10%
+        newHeight *= 0.85 // Reduce height by 10%
       }
 
-      setScaledWidth(Math.round(newWidth))
-      setScaledHeight(Math.round(newHeight))
+      // Apply Math.floor to avoid subpixel rendering issues and to ensure the canvas is not larger than the max dimensions
+      newWidth = Math.floor(newWidth)
+      newHeight = Math.floor(newHeight)
+
+      setScaledWidth(newWidth)
+      setScaledHeight(newHeight)
     }
   }
 
@@ -221,8 +219,8 @@ const CanvasArea = ({
         width: scaledWidth,
         height: scaledHeight,
       })
-      editor.rescale()
-      console.log('editor', editor.board.stage.getSize())
+      editor.board.stage.draw()
+      console.log('stage size', editor.board.stage.getSize())
     }
   }, [scaledWidth, scaledHeight])
 
@@ -233,64 +231,54 @@ const CanvasArea = ({
     }
   }, [editor])
 
-  // if editorExport changes, load the new board
-  useEffect(() => {
-    if (editorExport && editor) {
-      const stringifiedConfig = JSON.stringify({
-        stage: {
-          attrs: {
-            width: canvasWidth / 2,
-            height: canvasHeight / 2,
-            x: 0,
-            y: 0,
-          },
-          filters: [],
-          className: 'Stage',
-        },
-        layer: {
-          attrs: {
-            x: 0,
-            y: 0,
-            width: canvasWidth / 2,
-            height: canvasHeight / 2,
-          },
-          filters: [],
-          className: 'Layer',
-        },
-        background: {
-          image: {
-            attrs: {
-              x: 0,
-              y: 0,
-            },
-            filters: [],
-            className: 'Image',
-            zIndex: 0,
-          },
-          overlay: {
-            attrs: {
-              x: 0,
-              y: 0,
-            },
-            filters: [],
-            className: 'Rect',
-            zIndex: 1,
-          },
-        },
-        shapes: editorExport.shapes,
-      })
-      editor.load(stringifiedConfig)
-      setupEditorListeners()
-    }
-  }, [editorExport, editor])
-
   // shortcuts modal
   const { isOpen, onOpen, onOpenChange } = useDisclosure()
+
+  const handleExport = async () => {
+    if (canvasRef.current) {
+      // editor.board.stage.size({
+      //   width: canvasWidth,
+      //   height: canvasHeight,
+      // })
+      // ref.current.style.transform = `scale(${1})`
+      // editor.board.stage.draw()
+
+      canvasComponentRef.current.style.width = `${canvasWidth}px`
+      canvasComponentRef.current.style.height = `${canvasHeight}px`
+
+      canvasRef.current.style.width = `${canvasWidth}px`
+      canvasRef.current.style.height = `${canvasHeight}px`
+
+      // calculate the scale factor
+      const scale = canvasWidth / scaledWidth
+      editor.board.stage.scale({ x: scale, y: scale })
+      editor.board.stage.size({
+        width: canvasWidth,
+        height: canvasHeight,
+      })
+
+      try {
+        // Use the original aspect ratio for scaling
+        const dataUrl = await toPng(canvasRef.current, {
+          width: canvasWidth,
+          height: canvasHeight,
+        })
+
+        // Trigger download
+        const link = document.createElement('a')
+        link.download = 'exported-image.png'
+        link.href = dataUrl
+        link.click()
+      } catch (err) {
+        console.error('Could not export to PNG:', err)
+      }
+    }
+  }
 
   return (
     <div
       ref={wrapperRef}
-      className="w-full max-w-[70vw] mx-auto flex flex-col items-center justify-center"
+      className="w-full flex flex-col items-center justify-center"
     >
       <div
         ref={canvasRef}
@@ -298,7 +286,7 @@ const CanvasArea = ({
         style={{
           width: scaledWidth,
           height: scaledHeight,
-          background: canvasBg.style,
+          // background: canvasBg.style,
         }}
       >
         <div
@@ -311,7 +299,8 @@ const CanvasArea = ({
           }}
         />
         <CanvasComponent
-          canvasBg={canvasBg}
+          ref={canvasComponentRef}
+          canvasBg={canvasBg.style}
           sliderScale={imgScale}
           shadow={imgShadow}
           borderRadius={borderRadius}
@@ -408,6 +397,7 @@ const CanvasArea = ({
             </>
           ) : (
             <>
+              <Button onClick={handleExport}>export</Button>
               <h6 className="text-default-700 text-sm font-medium">
                 Annotations
               </h6>
