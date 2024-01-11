@@ -170,7 +170,7 @@ const ToolBar = ({
                     input: 'w-full',
                     inputWrapper: ['min-h-9', 'h-9'],
                   }}
-                  defaultValue={canvasWidth}
+                  value={canvasWidth}
                 />
                 <p className="text-default-500">x</p>
                 <Input
@@ -190,7 +190,7 @@ const ToolBar = ({
                     input: 'w-full',
                     inputWrapper: ['min-h-9', 'h-9'],
                   }}
-                  defaultValue={canvasHeight}
+                  value={canvasHeight}
                 />
                 {sizeError && (
                   <p className="text-danger text-sm">{sizeError}</p>

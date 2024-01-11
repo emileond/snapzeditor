@@ -79,7 +79,7 @@ const TopBar = ({
     setShowOverlay(true) // Show overlay when download starts
     let node = canvasRef.current
 
-    applyScaling(node)
+    // applyScaling(node)
 
     // Capture the upscaled node as an image
     toPng(node, {

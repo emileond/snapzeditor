@@ -36,6 +36,7 @@ import {
   PiTrashSimpleBold,
 } from 'react-icons/pi'
 import ColorPicker from './ColorPicker'
+import useDebounce from '../hooks/useDebounce'
 
 const CanvasArea = ({
   canvasRef,
@@ -53,6 +54,13 @@ const CanvasArea = ({
   customWatermarkImg,
   customWatermarkText,
 }) => {
+  const [scaledWidth, setScaledWidth] = useState(0)
+  const [scaledHeight, setScaledHeight] = useState(0)
+  const wrapperRef = useRef()
+  // Debounce the dimensions
+  const debouncedWidth = useDebounce(canvasWidth, 300)
+  const debouncedHeight = useDebounce(canvasHeight, 300)
+
   const [showPopover, setShowPopover] = useState(false)
   const [selectedShape, setSelectedShape] = useState(null)
   const [defaultColor, setDefaultColor] = useState('#FFFFFF')
@@ -168,17 +176,55 @@ const CanvasArea = ({
     const data = await editor.export.toJson()
     return setEditorExport(data)
   }
+  const resizeCanvas = () => {
+    const wrapper = wrapperRef.current
+    console.log('wrapper', wrapper)
+    if (wrapper) {
+      console.log('resizeCanvas')
+      const aspectRatio = debouncedWidth / debouncedHeight
+      const maxWidth = wrapper.clientWidth
+      const maxHeight = wrapper.clientHeight
 
-  // if canvasWidth or canvasHeight changes, save the current board shapes to state, and remove the board, then re-add the board with the new dimensions
-  useEffect(() => {
-    if (editor) {
-      // console.log(editor)
-      // const shapes = editor.board.shapes
-      // setBoardShapes(shapes)
-      exportEditor()
-      // editor.reset()
+      let newWidth, newHeight
+
+      if (debouncedWidth <= maxWidth && debouncedHeight <= maxHeight) {
+        newWidth = debouncedWidth
+        newHeight = debouncedHeight
+      } else {
+        newWidth = Math.min(maxWidth, debouncedWidth)
+        newHeight = newWidth / aspectRatio
+
+        if (newHeight > maxHeight) {
+          newHeight = Math.min(maxHeight, debouncedHeight)
+          newWidth = newHeight * aspectRatio
+        }
+      }
+
+      setScaledWidth(Math.round(newWidth))
+      setScaledHeight(Math.round(newHeight))
     }
-  }, [canvasWidth, canvasHeight])
+  }
+
+  useEffect(() => {
+    window.addEventListener('resize', resizeCanvas)
+    resizeCanvas() // Initial setup
+
+    return () => {
+      window.removeEventListener('resize', resizeCanvas)
+    }
+  }, [debouncedWidth, debouncedHeight])
+
+  useEffect(() => {
+    console.log('dimensions', scaledWidth, scaledHeight)
+    if (editor) {
+      editor?.board?.stage?.size({
+        width: scaledWidth,
+        height: scaledHeight,
+      })
+      editor.rescale()
+      console.log('editor', editor.board.stage.getSize())
+    }
+  }, [scaledWidth, scaledHeight])
 
   useEffect(() => {
     if (editor) {
@@ -242,13 +288,16 @@ const CanvasArea = ({
   const { isOpen, onOpen, onOpenChange } = useDisclosure()
 
   return (
-    <div className="w-full flex flex-col items-center justify-center">
+    <div
+      ref={wrapperRef}
+      className="w-full max-w-[70vw] mx-auto flex flex-col items-center justify-center"
+    >
       <div
         ref={canvasRef}
         className="relative"
         style={{
-          width: canvasWidth / 2,
-          height: canvasHeight / 2,
+          width: scaledWidth,
+          height: scaledHeight,
           background: canvasBg.style,
         }}
       >
