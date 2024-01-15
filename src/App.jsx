@@ -5,6 +5,7 @@ import ExportOverlay from './components/ExportOverlay'
 import TopBar from './components/TopBar'
 import ToolBar from './components/ToolBar'
 import CanvasArea from './components/CanvasArea'
+import toast from 'react-hot-toast'
 
 function App() {
   const [canvasBg, setCanvasBg] = useState({
@@ -30,6 +31,30 @@ function App() {
   const [showOverlay, setShowOverlay] = useState(false)
 
   const canvasRef = useRef(null)
+
+  const displayToast = (variant, text) => {
+    const style = {
+      background: '#1d1d1d',
+      color: '#fff',
+    }
+    switch (variant) {
+      case 'success':
+        toast.success(text, {
+          style,
+        })
+        break
+      case 'error':
+        toast.error(text, {
+          style,
+        })
+        break
+      default:
+        toast(text, {
+          style,
+        })
+        break
+    }
+  }
 
   const { register, watch, setValue } = useForm()
 
@@ -105,15 +130,28 @@ function App() {
     }
   }, [watchedFileName])
 
+  // export functionality
+  const [startExport, setStartExport] = useState()
+
+  const handleExport = (options) => {
+    setShowOverlay(true)
+    setStartExport(options)
+  }
+
+  const handleExported = () => {
+    setShowOverlay(false)
+    displayToast('success', 'Image exported')
+    setStartExport(null)
+  }
+
   return (
     <div className={`flex flex-col items-start mx-auto bg-background h-dvh`}>
       <TopBar
-        canvasRef={canvasRef}
         canvasWidth={canvasWidth}
         canvasHeight={canvasHeight}
         fileName={fileName}
         register={register}
-        setShowOverlay={setShowOverlay}
+        onExport={handleExport}
       />
       <div className="w-full flex flex-row p-2 h-full min-h-[700px] min-w-[900px]">
         {showOverlay && (
@@ -157,6 +195,8 @@ function App() {
           customWatermarkToggle={customWatermarkToggle}
           customWatermarkImg={customWatermarkImg}
           customWatermarkText={customWatermarkText}
+          startExport={startExport}
+          onExported={handleExported}
         />
       </div>
     </div>

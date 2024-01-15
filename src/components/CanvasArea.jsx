@@ -1,4 +1,4 @@
-import { useState, useRef, createRef, useEffect } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import CanvasComponent from './CanvasComponent'
 import usePikaso from 'pikaso-react-hook'
 import {
@@ -17,9 +17,7 @@ import {
   ModalHeader,
   Popover,
   PopoverContent,
-  Select,
-  SelectItem,
-  Textarea,
+  PopoverTrigger,
   useDisclosure,
 } from '@nextui-org/react'
 import {
@@ -28,16 +26,14 @@ import {
   PiCaretDownBold,
   PiCircleBold,
   PiCommandBold,
-  PiKeyboardBold,
-  PiShapes,
   PiShapesBold,
+  PiStickerBold,
   PiTextTBold,
-  PiTrash,
   PiTrashSimpleBold,
 } from 'react-icons/pi'
 import ColorPicker from './ColorPicker'
 import useDebounce from '../hooks/useDebounce'
-import { toPng } from 'html-to-image'
+import { toBlob, toPng } from 'html-to-image'
 
 const CanvasArea = ({
   canvasRef,
@@ -54,11 +50,14 @@ const CanvasArea = ({
   customWatermarkToggle,
   customWatermarkImg,
   customWatermarkText,
+  startExport,
+  onExported,
 }) => {
   const [scaledWidth, setScaledWidth] = useState(0)
   const [scaledHeight, setScaledHeight] = useState(0)
   const wrapperRef = useRef()
   const canvasComponentRef = useRef()
+  const stickers = 28
 
   // Debounce the dimensions
   const debouncedWidth = useDebounce(canvasWidth, 300)
@@ -153,6 +152,13 @@ const CanvasArea = ({
     })
   }
 
+  const createSticker = (n) => {
+    editor.shapes.image.insert(`/stickers/${n}.svg`, {
+      scaleX: 0.25,
+      scaleY: 0.25,
+    })
+  }
+
   const updateShape = (attr, val) => {
     editor.board.selection.shapes[0].update({ [attr]: val })
   }
@@ -171,14 +177,6 @@ const CanvasArea = ({
     setupEditorListeners()
   }
 
-  // useEffect to update the canvas when the props change
-  const [editorExport, setEditorExport] = useState()
-
-  // export editor
-  async function exportEditor() {
-    const data = await editor.export.toJson()
-    return setEditorExport(data)
-  }
   const resizeCanvas = () => {
     const wrapper = wrapperRef.current
     if (wrapper) {
@@ -234,15 +232,8 @@ const CanvasArea = ({
   // shortcuts modal
   const { isOpen, onOpen, onOpenChange } = useDisclosure()
 
-  const handleExport = async () => {
+  const handleExport = async (options) => {
     if (canvasRef.current) {
-      // editor.board.stage.size({
-      //   width: canvasWidth,
-      //   height: canvasHeight,
-      // })
-      // ref.current.style.transform = `scale(${1})`
-      // editor.board.stage.draw()
-
       canvasComponentRef.current.style.width = `${canvasWidth}px`
       canvasComponentRef.current.style.height = `${canvasHeight}px`
 
@@ -257,28 +248,61 @@ const CanvasArea = ({
         height: canvasHeight,
       })
 
-      try {
-        // Use the original aspect ratio for scaling
-        const dataUrl = await toPng(canvasRef.current, {
-          width: canvasWidth,
-          height: canvasHeight,
-        })
+      if (options.type === 'download') {
+        try {
+          // Use the original aspect ratio for scaling
+          const dataUrl = await toPng(canvasRef.current, {
+            width: canvasWidth,
+            height: canvasHeight,
+          })
 
-        // Trigger download
-        const link = document.createElement('a')
-        link.download = 'exported-image.png'
-        link.href = dataUrl
-        link.click()
-      } catch (err) {
-        console.error('Could not export to PNG:', err)
+          // Trigger download
+          const link = document.createElement('a')
+          link.download = 'exported-image.png'
+          link.href = dataUrl
+          link.click()
+        } catch (err) {
+          console.error('Could not export to PNG:', err)
+        }
+      } else if (options.type === 'clipboard') {
+        try {
+          const blob = await toBlob(canvasRef.current, {
+            width: canvasWidth,
+            height: canvasHeight,
+          })
+
+          const clipboardItem = new ClipboardItem({ [blob.type]: blob })
+          await navigator.clipboard.write([clipboardItem])
+        } catch (err) {
+          console.error('Could not export to clipboard:', err)
+        }
       }
     }
+    // Revert scaling after capturing to ensure the display remains unchanged
+    editor.board.stage.scale({ x: 1, y: 1 })
+    editor.board.stage.size({
+      width: scaledWidth,
+      height: scaledHeight,
+    })
+    editor.board.stage.draw()
+    canvasComponentRef.current.style.width = `${scaledWidth}px`
+    canvasComponentRef.current.style.height = `${scaledHeight}px`
+
+    canvasRef.current.style.width = `${scaledWidth}px`
+    canvasRef.current.style.height = `${scaledHeight}px`
+    onExported(true)
   }
+
+  useEffect(() => {
+    if (startExport?.type) {
+      handleExport(startExport)
+    }
+  }, [startExport])
 
   return (
     <div
       ref={wrapperRef}
-      className="w-full flex flex-col items-center justify-center"
+      className="w-full flex flex-col items-center justify-center overflow-hidden"
     >
       <div
         ref={canvasRef}
@@ -306,8 +330,8 @@ const CanvasArea = ({
           borderRadius={borderRadius}
           rotationX={rotationX}
           rotationY={rotationY}
-          canvasWidth={canvasWidth}
-          canvasHeight={canvasHeight}
+          canvasWidth={scaledWidth}
+          canvasHeight={scaledHeight}
           imgFrame={imgFrame}
           snapzWatermark={snapzWatermark}
           customWatermark={customWatermarkToggle}
@@ -386,7 +410,6 @@ const CanvasArea = ({
                 </div>
               )}
               <Button
-                // size="sm"
                 color="danger"
                 variant="light"
                 onClick={() => editor.board.selection.shapes[0].delete()}
@@ -397,7 +420,6 @@ const CanvasArea = ({
             </>
           ) : (
             <>
-              <Button onClick={handleExport}>export</Button>
               <h6 className="text-default-700 text-sm font-medium">
                 Annotations
               </h6>
@@ -444,6 +466,36 @@ const CanvasArea = ({
               >
                 Add text
               </Button>
+              <Popover className="dark">
+                <PopoverTrigger>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    startContent={<PiStickerBold fontSize="1.1rem" />}
+                  >
+                    Stickers
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent>
+                  <div className="flex flex-wrap gap-2 max-w-[200px]">
+                    {Array.from(Array(stickers).keys()).map((i) => (
+                      <Button
+                        key={i}
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => createSticker(i + 1)}
+                        isIconOnly
+                      >
+                        <img
+                          src={`/stickers/${i + 1}.svg`}
+                          alt={`Sticker ${i + 1}`}
+                          className="w-6 h-6"
+                        />
+                      </Button>
+                    ))}
+                  </div>
+                </PopoverContent>
+              </Popover>
               <Button
                 size="sm"
                 variant="ghost"
