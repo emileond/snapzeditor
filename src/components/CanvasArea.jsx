@@ -1,13 +1,18 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import CanvasComponent from './CanvasComponent'
 import usePikaso from 'pikaso-react-hook'
 import {
   Button,
+  Card,
+  CardBody,
+  CardFooter,
+  CardHeader,
   Divider,
   Dropdown,
   DropdownItem,
   DropdownMenu,
   DropdownTrigger,
+  Image,
   Input,
   Kbd,
   Modal,
@@ -34,6 +39,8 @@ import {
 import ColorPicker from './ColorPicker'
 import useDebounce from '../hooks/useDebounce'
 import { toBlob, toPng } from 'html-to-image'
+import { createWorker } from 'tesseract.js'
+import ImgEmptyState from './ImgEmptyState'
 
 const CanvasArea = ({
   canvasRef,
@@ -52,6 +59,8 @@ const CanvasArea = ({
   customWatermarkText,
   startExport,
   onExported,
+  extractText,
+  onExtractedText,
 }) => {
   const [scaledWidth, setScaledWidth] = useState(0)
   const [scaledHeight, setScaledHeight] = useState(0)
@@ -211,14 +220,12 @@ const CanvasArea = ({
   }, [debouncedWidth, debouncedHeight])
 
   useEffect(() => {
-    console.log('dimensions', scaledWidth, scaledHeight)
     if (editor) {
       editor?.board?.stage?.size({
         width: scaledWidth,
         height: scaledHeight,
       })
       editor.board.stage.draw()
-      console.log('stage size', editor.board.stage.getSize())
     }
   }, [scaledWidth, scaledHeight])
 
@@ -293,20 +300,136 @@ const CanvasArea = ({
     onExported(true)
   }
 
+  // OCR
+  async function doOCR(lang = 'eng') {
+    const worker = await createWorker(lang)
+    const data = await (await worker.recognize(imageSrc)).data.lines
+
+    const filteredData = data.filter((line) => line.confidence >= 85)
+
+    await worker.terminate()
+
+    onExtractedText(filteredData)
+  }
+
+  useEffect(() => {
+    if (extractText) {
+      doOCR(extractText)
+    }
+  }, [extractText])
+
   useEffect(() => {
     if (startExport?.type) {
       handleExport(startExport)
     }
   }, [startExport])
 
+  const [imageSrc, setImageSrc] = useState(null)
+  const [initialScale, setInitialScale] = useState(1)
+
+  const loadImage = useCallback(
+    (imgSrc) => {
+      const img = new window.Image()
+      img.src = imgSrc
+      img.onload = () => {
+        let aspectScale
+
+        const MARGIN = 16
+
+        // Compute the width and height scale factors
+        const widthScale = scaledWidth / (img.width + MARGIN)
+
+        const heightScale = scaledHeight / (img.height + MARGIN)
+
+        // Check if image dimensions are smaller than canvas
+        if (
+          img.width < scaledWidth - MARGIN &&
+          img.height < scaledHeight - MARGIN
+        ) {
+          aspectScale = 1 // Use the original image size
+        } else {
+          // Use the smaller scale factor to ensure the image fits within the canvas
+          if (scaledWidth > scaledHeight) {
+            aspectScale = widthScale
+          } else {
+            aspectScale = heightScale
+          }
+        }
+
+        setInitialScale(aspectScale)
+        setImageSrc(imgSrc)
+      }
+    },
+    [scaledWidth, scaledHeight]
+  )
+
+  const handleUpload = () => {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = 'image/*'
+    input.onchange = () => {
+      const reader = new FileReader()
+      reader.readAsDataURL(input.files[0])
+      reader.onload = () => {
+        loadImage(reader.result)
+      }
+    }
+    input.click()
+  }
+
+  const handlePaste = (e) => {
+    const clipboardData = e.clipboardData || window.Clipboard
+    if (!clipboardData) {
+      return
+    }
+
+    // Check for items (modern browsers)
+    if (clipboardData.items) {
+      const items = clipboardData.items
+      for (let i = 0; i < items.length; i++) {
+        // If the item is an image
+        if (items[i].type.indexOf('image') !== -1) {
+          // Convert the clipboard item to a blob
+          const blob = items[i].getAsFile()
+          const reader = new FileReader()
+
+          reader.onload = (event) => {
+            loadImage(event.target.result)
+          }
+
+          // Read the blob as a data URL
+          reader.readAsDataURL(blob)
+          break
+        }
+      }
+    } else if (clipboardData.files && clipboardData.files.length > 0) {
+      // Check for files (older browsers)
+      const file = clipboardData.files[0]
+      const reader = new FileReader()
+
+      reader.onload = (event) => {
+        loadImage(event.target.result)
+      }
+
+      reader.readAsDataURL(file)
+    }
+  }
+
   return (
     <div
       ref={wrapperRef}
       className="w-full flex flex-col items-center justify-center overflow-hidden"
     >
+      {!imageSrc && (
+        <ImgEmptyState
+          loadImage={loadImage}
+          handleUpload={handleUpload}
+          handlePaste={handlePaste}
+        />
+      )}
       <div
         ref={canvasRef}
-        className="relative"
+        className="relative flex items-center justify-center"
         style={{
           width: scaledWidth,
           height: scaledHeight,
@@ -325,6 +448,8 @@ const CanvasArea = ({
         <CanvasComponent
           ref={canvasComponentRef}
           canvasBg={canvasBg.style}
+          imgSrc={imageSrc}
+          imgScale={initialScale}
           sliderScale={imgScale}
           shadow={imgShadow}
           borderRadius={borderRadius}
@@ -420,9 +545,6 @@ const CanvasArea = ({
             </>
           ) : (
             <>
-              <h6 className="text-default-700 text-sm font-medium">
-                Annotations
-              </h6>
               <Dropdown className="dark">
                 <DropdownTrigger>
                   <Button
@@ -431,7 +553,7 @@ const CanvasArea = ({
                     startContent={<PiShapesBold fontSize="1.1rem" />}
                     endContent={<PiCaretDownBold fontSize="1.1rem" />}
                   >
-                    Add shape
+                    Shapes
                   </Button>
                 </DropdownTrigger>
                 <DropdownMenu
@@ -464,7 +586,7 @@ const CanvasArea = ({
                 startContent={<PiTextTBold fontSize="1.1rem" />}
                 onClick={createLabel}
               >
-                Add text
+                Text
               </Button>
               <Popover className="dark">
                 <PopoverTrigger>

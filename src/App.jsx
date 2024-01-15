@@ -144,6 +144,22 @@ function App() {
     setStartExport(null)
   }
 
+  const [extractText, setExtractText] = useState(false)
+  const [isOCRLoading, setIsOCRLoading] = useState(false)
+  const [ocrResult, setOcrResult] = useState(null)
+
+  const handleExtractText = (val) => {
+    console.log('extracting text..', val)
+    setIsOCRLoading(true)
+    setExtractText(val)
+  }
+
+  const handleExtractedText = (lines) => {
+    setIsOCRLoading(false)
+
+    setOcrResult(lines)
+  }
+
   return (
     <div className={`flex flex-col items-start mx-auto bg-background h-dvh`}>
       <TopBar
@@ -179,6 +195,9 @@ function App() {
           setCustomWatermarkToggle={setCustomWatermarkToggle}
           setCustomWatermarkImg={setCustomWatermarkImg}
           setCustomWatermarkText={setCustomWatermarkText}
+          handleExtractText={handleExtractText}
+          isOCRLoading={isOCRLoading}
+          ocrResult={ocrResult}
         />
         <CanvasArea
           canvasRef={canvasRef}
@@ -197,6 +216,8 @@ function App() {
           customWatermarkText={customWatermarkText}
           startExport={startExport}
           onExported={handleExported}
+          extractText={extractText}
+          onExtractedText={handleExtractedText}
         />
       </div>
     </div>

@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import {
   PiBrowserBold,
   PiSelectionBackgroundBold,
@@ -6,7 +7,6 @@ import {
   PiNotchesBold,
   PiCircleDashedBold,
   PiAlignCenterVerticalSimpleBold,
-  PiFrameCorners,
   PiAlignCenterHorizontalSimpleBold,
   PiFrameCornersBold,
   PiGhostBold,
@@ -18,6 +18,8 @@ import {
   PiYoutubeLogo,
   PiTwitchLogo,
   PiImageBold,
+  PiScanBold,
+  PiCrownSimpleBold,
 } from 'react-icons/pi'
 import {
   Button,
@@ -31,6 +33,12 @@ import {
   DropdownItem,
   Tab,
   Tabs,
+  Popover,
+  PopoverContent,
+  CardHeader,
+  CardBody,
+  Badge,
+  Chip,
 } from '@nextui-org/react'
 import Slider from './Slider'
 import GradientButtons from './GradientButtons'
@@ -57,6 +65,9 @@ const ToolBar = ({
   sizeError,
   register,
   setValue,
+  handleExtractText,
+  isOCRLoading,
+  ocrResult,
 }) => {
   const handleWatermarkUpload = () => {
     const input = document.createElement('input')
@@ -132,6 +143,18 @@ const ToolBar = ({
       height: 1080,
       icon: <PiTwitchLogo fontSize="1.2rem" />,
     },
+  ]
+
+  const [ocrLanguage, setOcrLanguage] = useState('eng')
+
+  const supportedLanguages = [
+    { label: 'English', value: 'eng' },
+    { label: 'Spanish', value: 'spa' },
+    { label: 'French', value: 'fra' },
+    { label: 'German', value: 'deu' },
+    { label: 'Italian', value: 'ita' },
+    { label: 'Portuguese', value: 'por' },
+    { label: 'Dutch', value: 'nld' },
   ]
 
   return (
@@ -248,6 +271,12 @@ const ToolBar = ({
               <div className="flex items-center gap-2">
                 <PiGhostBold fontSize="1.1rem" />
                 <h5>Watermark</h5>
+                <Chip size="sm" variant="flat" color="warning">
+                  <div className="flex items-center gap-1">
+                    <PiCrownSimpleBold fontSize="1rem" />
+                    PRO
+                  </div>
+                </Chip>
               </div>
 
               <Switch
@@ -463,6 +492,66 @@ const ToolBar = ({
                 step={1}
                 defaultValue={[0]}
               />
+            </div>
+            <Divider />
+            <div className="flex flex-col items-start gap-2">
+              <div className="flex items-center gap-2">
+                <PiScanBold fontSize="1.1rem" />
+                <h5>Extract text</h5>
+                <Chip size="sm" variant="flat" color="warning">
+                  <div className="flex items-center gap-1">
+                    <PiCrownSimpleBold fontSize="1rem" />
+                    PRO
+                  </div>
+                </Chip>
+              </div>
+              <div className="flex items-center gap-2">
+                <Dropdown className="dark">
+                  <DropdownTrigger>
+                    <Button size="sm" variant="faded" disabled={isOCRLoading}>
+                      {ocrLanguage}
+                      <PiCaretDownBold fontSize="1rem" />
+                    </Button>
+                  </DropdownTrigger>
+                  <DropdownMenu aria-label="Languages">
+                    {supportedLanguages.map((language) => (
+                      <DropdownItem
+                        key={language.value}
+                        value={language.value}
+                        onClick={() => setOcrLanguage(language.value)}
+                      >
+                        {language.label}
+                      </DropdownItem>
+                    ))}
+                  </DropdownMenu>
+                </Dropdown>
+                <Button
+                  size="sm"
+                  onClick={() => handleExtractText(ocrLanguage)}
+                  isLoading={isOCRLoading}
+                >
+                  Extract
+                </Button>
+              </div>
+              {ocrResult && (
+                <Card className="w-full max-h-200">
+                  <CardHeader className="py-2">
+                    <p className="text-tiny uppercase font-bold">Result</p>
+                  </CardHeader>
+                  <CardBody className="pt-1 pb-2">
+                    <div className="flex flex-col gap-1">
+                      {ocrResult?.map((line) => (
+                        <p
+                          key={line?.text}
+                          className="text-default-600 text-sm"
+                        >
+                          {line?.text}
+                        </p>
+                      ))}
+                    </div>
+                  </CardBody>
+                </Card>
+              )}
             </div>
           </Tab>
         </Tabs>
