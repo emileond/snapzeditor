@@ -29,6 +29,7 @@ function App() {
   const [customWatermarkImg, setCustomWatermarkImg] = useState()
   const [customWatermarkText, setCustomWatermarkText] = useState()
   const [showOverlay, setShowOverlay] = useState(false)
+  const [imageLoaded, setImageLoaded] = useState(false)
 
   const canvasRef = useRef(null)
 
@@ -176,6 +177,7 @@ function App() {
           </div>
         )}
         <ToolBar
+          imageLoaded={imageLoaded}
           canvasWidth={canvasWidth}
           canvasHeight={canvasHeight}
           sizeError={sizeError}
@@ -218,6 +220,9 @@ function App() {
           onExported={handleExported}
           extractText={extractText}
           onExtractedText={handleExtractedText}
+          onImageLoaded={() => {
+            setImageLoaded(true)
+          }}
         />
       </div>
     </div>

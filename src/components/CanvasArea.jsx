@@ -3,16 +3,11 @@ import CanvasComponent from './CanvasComponent'
 import usePikaso from 'pikaso-react-hook'
 import {
   Button,
-  Card,
-  CardBody,
-  CardFooter,
-  CardHeader,
   Divider,
   Dropdown,
   DropdownItem,
   DropdownMenu,
   DropdownTrigger,
-  Image,
   Input,
   Kbd,
   Modal,
@@ -61,6 +56,7 @@ const CanvasArea = ({
   onExported,
   extractText,
   onExtractedText,
+  onImageLoaded,
 }) => {
   const [scaledWidth, setScaledWidth] = useState(0)
   const [scaledHeight, setScaledHeight] = useState(0)
@@ -303,7 +299,7 @@ const CanvasArea = ({
   // OCR
   async function doOCR(lang = 'eng') {
     const worker = await createWorker(lang)
-    const data = await (await worker.recognize(imageSrc)).data.lines
+    const data = (await worker.recognize(imageSrc)).data.lines
 
     const filteredData = data.filter((line) => line.confidence >= 85)
 
@@ -358,6 +354,7 @@ const CanvasArea = ({
 
         setInitialScale(aspectScale)
         setImageSrc(imgSrc)
+        onImageLoaded(true)
       }
     },
     [scaledWidth, scaledHeight]
@@ -447,7 +444,7 @@ const CanvasArea = ({
         />
         <CanvasComponent
           ref={canvasComponentRef}
-          canvasBg={canvasBg.style}
+          canvasBg={canvasBg}
           imgSrc={imageSrc}
           imgScale={initialScale}
           sliderScale={imgScale}

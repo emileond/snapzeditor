@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   PiBrowserBold,
   PiSelectionBackgroundBold,
@@ -44,8 +44,10 @@ import Slider from './Slider'
 import GradientButtons from './GradientButtons'
 import WallpaperPicker from './WallpaperPicker'
 import ColorPicker from './ColorPicker'
+import ChipPro from './ChipPro'
 
 const ToolBar = ({
+  imageLoaded,
   imgFrame,
   setCanvasBg,
   setImgScale,
@@ -157,11 +159,28 @@ const ToolBar = ({
     { label: 'Dutch', value: 'nld' },
   ]
 
+  const [selectedTab, setSelectedTab] = useState('canvas')
+
+  useEffect(() => {
+    if (imageLoaded) {
+      setSelectedTab('image')
+    } else {
+      setSelectedTab('canvas')
+    }
+  }, [imageLoaded])
+
   return (
-    <div id="toolbar" className="w-96 px-3">
+    <div id="toolbar" className="w-80 min-w-[340px] px-3">
       <Card className="h-full overflow-auto bg-content1 p-4">
-        <Tabs className="mb-2" color="primary" fullWidth>
+        <Tabs
+          className="mb-2"
+          color="primary"
+          fullWidth
+          selectedKey={selectedTab}
+          onSelectionChange={setSelectedTab}
+        >
           <Tab
+            key="canvas"
             title={
               <div className="flex items-center space-x-2">
                 <PiFrameCornersBold fontSize="1.3rem" />
@@ -250,7 +269,7 @@ const ToolBar = ({
                 <PiSelectionBackgroundBold fontSize="1.1rem" />
                 <h5>Background</h5>
               </div>
-              <Tabs size="sm">
+              <Tabs size="sm" fullWidth>
                 <Tab title="Gradient">
                   <GradientButtons setCanvasBg={setCanvasBg} />
                 </Tab>
@@ -271,14 +290,8 @@ const ToolBar = ({
               <div className="flex items-center gap-2">
                 <PiGhostBold fontSize="1.1rem" />
                 <h5>Watermark</h5>
-                <Chip size="sm" variant="flat" color="warning">
-                  <div className="flex items-center gap-1">
-                    <PiCrownSimpleBold fontSize="1rem" />
-                    PRO
-                  </div>
-                </Chip>
+                <ChipPro />
               </div>
-
               <Switch
                 size="sm"
                 color="secondary"
@@ -323,6 +336,7 @@ const ToolBar = ({
             <Divider />
           </Tab>
           <Tab
+            key="image"
             title={
               <div className="flex items-center space-x-2">
                 <PiImageBold fontSize="1.3rem" />
@@ -477,7 +491,7 @@ const ToolBar = ({
                 defaultValue={[0]}
               />
             </div>
-            <Divider />
+            {/* <Divider />
             <div>
               <div className="flex items-center gap-2">
                 <PiFrameCornersBold fontSize="1.1rem" />
@@ -492,18 +506,13 @@ const ToolBar = ({
                 step={1}
                 defaultValue={[0]}
               />
-            </div>
+            </div> */}
             <Divider />
             <div className="flex flex-col items-start gap-2">
               <div className="flex items-center gap-2">
                 <PiScanBold fontSize="1.1rem" />
                 <h5>Extract text</h5>
-                <Chip size="sm" variant="flat" color="warning">
-                  <div className="flex items-center gap-1">
-                    <PiCrownSimpleBold fontSize="1rem" />
-                    PRO
-                  </div>
-                </Chip>
+                <ChipPro />
               </div>
               <div className="flex items-center gap-2">
                 <Dropdown className="dark">

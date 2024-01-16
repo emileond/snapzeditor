@@ -27,8 +27,6 @@ const CanvasComponent = forwardRef(
       borderRadius,
       rotationX,
       rotationY,
-      canvasWidth,
-      canvasHeight,
       imgFrame,
       snapzWatermark,
       customWatermark,
@@ -44,7 +42,7 @@ const CanvasComponent = forwardRef(
         ref={ref}
         className={`canvas relative flex items-center justify-center w-full h-full overflow-hidden`}
         style={{
-          background: canvasBg,
+          background: canvasBg.style,
         }}
       >
         {canvasBg?.imgSrc && (

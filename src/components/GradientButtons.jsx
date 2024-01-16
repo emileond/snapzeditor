@@ -2,8 +2,8 @@ import ColorPicker from './ColorPicker'
 import { useEffect, useState } from 'react'
 
 function GradientButtons({ setCanvasBg }) {
-  const [gradientFrom, setGradientFrom] = useState('#84fab0')
-  const [gradientTo, setGradientTo] = useState('#8fd3f4')
+  const [gradientFrom, setGradientFrom] = useState()
+  const [gradientTo, setGradientTo] = useState()
 
   const gradients = [
     { from: '#84fab0', to: '#8fd3f4' },
@@ -28,10 +28,12 @@ function GradientButtons({ setCanvasBg }) {
   }
 
   useEffect(() => {
-    setCanvasBg({
-      style: `linear-gradient(135deg, ${gradientFrom} 0%, ${gradientTo} 100%)`,
-      imgSrc: null,
-    })
+    if (gradientFrom && gradientTo) {
+      setCanvasBg({
+        style: `linear-gradient(135deg, ${gradientFrom} 0%, ${gradientTo} 100%)`,
+        imgSrc: null,
+      })
+    }
   }, [gradientFrom, gradientTo])
 
   return (
@@ -39,11 +41,11 @@ function GradientButtons({ setCanvasBg }) {
       <div className="flex gap-3 pb-2">
         <ColorPicker
           onChange={(color) => setGradientFrom(color)}
-          defaultColor={gradientFrom}
+          defaultColor={'#84fab0'}
         />
         <ColorPicker
           onChange={(color) => setGradientTo(color)}
-          defaultColor={gradientTo}
+          defaultColor={'#8fd3f4'}
         />
       </div>
       <div className="flex gap-2 flex-wrap">
