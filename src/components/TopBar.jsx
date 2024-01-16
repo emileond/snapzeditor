@@ -18,7 +18,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@nextui-org/react'
-import toast from 'react-hot-toast'
 import UserMenu from './UserMenu'
 import { useState } from 'react'
 

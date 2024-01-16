@@ -18,7 +18,7 @@ export default function Layout({ children }) {
   return (
     <>
       <Navbar
-        className="dark bg-background/8"
+        className="dark bg-[rgb(15,23,42)]"
         maxWidth="2xl"
         shouldHideOnScroll
       >
@@ -74,24 +74,17 @@ export default function Layout({ children }) {
         </NavbarContent>
       </Navbar>
       {/* <header className="w-full flex justify-center bg-background py-4"></header> */}
-      <main className="dark text-foreground w-[100vw] h-[100vh]">
-        {/* Illustration */}
-        <div className="grow">
-          <div
-            className="hidden md:block absolute  left-1/2 
-
-            transform -translate-x-1/3
-          
-          pointer-events-none -z-10 w-full"
-            aria-hidden="true"
-          >
-            <Image
-              src={Illustration}
-              className="max-w-none w-full"
-              priority
-              alt="Hero Illustration"
-            />
-          </div>
+      <main className="flex flex-col items-center dark text-foreground w-[100vw] h-[100vh] bg-[rgb(15,23,42)]">
+        {/* Set Illustration as background */}
+        <div
+          className="absolute top-0 left-0 w-full h-full"
+          style={{ opacity: 0.8 }}
+        >
+          <img
+            src={Illustration}
+            className="object-cover w-full h-120 opacity-50"
+            // alt="Illustration"
+          />
         </div>
 
         {children}

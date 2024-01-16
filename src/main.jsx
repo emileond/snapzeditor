@@ -1,7 +1,7 @@
 /* eslint-disable no-undef */
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import { NextUIProvider } from '@nextui-org/react'
+import { Divider, NextUIProvider } from '@nextui-org/react'
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
 import App from './App.jsx'
 import './index.css'
@@ -13,6 +13,7 @@ import AbralyticsScript from './components/AbralyticsScript.jsx'
 import { Toaster } from 'react-hot-toast'
 import { SessionContextProvider } from '@supabase/auth-helpers-react'
 import { supabase } from './supabaseClient.js'
+import Pricing from './components/landing/Pricing.jsx'
 
 const root = ReactDOM.createRoot(document.getElementById('root'))
 root.render(
@@ -26,8 +27,27 @@ root.render(
               element={
                 <Layout>
                   <Hero />
-                  {/* <FeaturesGrid /> */}
-                  {/* <Download /> */}
+                  <Divider
+                    style={{
+                      maxWidth: '800px',
+                      opacity: 0.5,
+                    }}
+                  />
+                  <FeaturesGrid />
+                  <Divider
+                    style={{
+                      maxWidth: '800px',
+                      opacity: 0.5,
+                    }}
+                  />
+                  <Download />
+                  <Divider
+                    style={{
+                      maxWidth: '800px',
+                      opacity: 0.5,
+                    }}
+                  />
+                  <Pricing />
                 </Layout>
               }
             />
