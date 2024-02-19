@@ -52,6 +52,7 @@ const CanvasArea = ({
   canvasWidth,
   canvasHeight,
   imgFrame,
+  imgVisibility,
   snapzWatermark,
   customWatermarkToggle,
   customWatermarkImg,
@@ -61,6 +62,7 @@ const CanvasArea = ({
   extractText,
   onExtractedText,
   onImageLoaded,
+  triggerReplaceImage,
   fileName,
 }) => {
   const [scaledWidth, setScaledWidth] = useState(0)
@@ -91,7 +93,6 @@ const CanvasArea = ({
   })
 
   useHotkeys('delete', () => {
-    console.log('delete')
     if (selectedElement) {
       deleteAnnotation(selectedElement)
     }
@@ -336,7 +337,7 @@ const CanvasArea = ({
   const [initialScale, setInitialScale] = useState(1)
 
   const loadImage = useCallback(
-    (imgSrc) => {
+    (imgSrc, file) => {
       const img = new window.Image()
       img.src = imgSrc
       img.onload = () => {
@@ -362,7 +363,7 @@ const CanvasArea = ({
 
         setInitialScale(aspectScale)
         setImageSrc(imgSrc)
-        onImageLoaded(true)
+        onImageLoaded({ loaded: true, data: file })
       }
     },
     [scaledWidth, scaledHeight]
@@ -374,13 +375,20 @@ const CanvasArea = ({
     input.accept = 'image/*'
     input.onchange = () => {
       const reader = new FileReader()
-      reader.readAsDataURL(input.files[0])
+      const file = input.files[0]
+      reader.readAsDataURL(file)
       reader.onload = () => {
-        loadImage(reader.result)
+        loadImage(reader.result, file)
       }
     }
     input.click()
   }
+
+  useEffect(() => {
+    if (triggerReplaceImage) {
+      handleUpload()
+    }
+  }, [triggerReplaceImage])
 
   const handlePaste = (e) => {
     const clipboardData = e.clipboardData || window.Clipboard
@@ -597,6 +605,7 @@ const CanvasArea = ({
           rotationX={rotationX}
           rotationY={rotationY}
           imgFrame={imgFrame}
+          imgVisibility={imgVisibility}
           snapzWatermark={snapzWatermark}
           customWatermark={customWatermarkToggle}
           customWatermarkImg={customWatermarkImg}

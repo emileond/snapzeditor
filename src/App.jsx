@@ -8,6 +8,8 @@ import CanvasArea from './components/CanvasArea'
 import toast from 'react-hot-toast'
 
 function App() {
+  const [imgVisibility, setImgVisibility] = useState(true)
+  const [triggerReplaceImage, setTriggerReplaceImage] = useState(false)
   const [canvasBg, setCanvasBg] = useState({
     style: 'linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%)',
     imgSrc: null,
@@ -150,7 +152,6 @@ function App() {
   const [ocrResult, setOcrResult] = useState(null)
 
   const handleExtractText = (val) => {
-    console.log('extracting text..', val)
     setIsOCRLoading(true)
     setExtractText(val)
   }
@@ -178,6 +179,11 @@ function App() {
           </div>
         )}
         <ToolBar
+          imgVisibility={imgVisibility}
+          setImgVisibility={setImgVisibility}
+          onReplaceImage={() => {
+            setTriggerReplaceImage(true)
+          }}
           imageLoaded={imageLoaded}
           canvasWidth={canvasWidth}
           canvasHeight={canvasHeight}
@@ -213,6 +219,7 @@ function App() {
           canvasWidth={canvasWidth}
           canvasHeight={canvasHeight}
           imgFrame={imgFrame}
+          imgVisibility={imgVisibility}
           snapzWatermark={snapzWatermark}
           customWatermarkToggle={customWatermarkToggle}
           customWatermarkImg={customWatermarkImg}
@@ -221,9 +228,11 @@ function App() {
           onExported={handleExported}
           extractText={extractText}
           onExtractedText={handleExtractedText}
-          onImageLoaded={() => {
-            setImageLoaded(true)
+          onImageLoaded={(file) => {
+            setImageLoaded(file)
+            setTriggerReplaceImage(false)
           }}
+          triggerReplaceImage={triggerReplaceImage}
           fileName={fileName}
         />
       </div>

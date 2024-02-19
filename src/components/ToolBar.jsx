@@ -20,6 +20,14 @@ import {
   PiImageBold,
   PiScanBold,
   PiCrownSimpleBold,
+  PiFileImageBold,
+  PiArrowCounterClockwiseBold,
+  PiEyeClosed,
+  PiArrowCounterClockwise,
+  PiEyeSlash,
+  PiEyeSlashBold,
+  PiEyeBold,
+  PiEyeClosedBold,
 } from 'react-icons/pi'
 import {
   Button,
@@ -49,6 +57,9 @@ import ChipPro from './ChipPro'
 
 const ToolBar = ({
   imageLoaded,
+  imgVisibility,
+  setImgVisibility,
+  onReplaceImage,
   imgFrame,
   setCanvasBg,
   setImgScale,
@@ -164,6 +175,7 @@ const ToolBar = ({
 
   useEffect(() => {
     if (imageLoaded) {
+      console.log(imageLoaded)
       setSelectedTab('image')
     } else {
       setSelectedTab('canvas')
@@ -346,6 +358,43 @@ const ToolBar = ({
             }
             className="flex flex-col gap-4"
           >
+            <Divider />
+            <div className="flex flex-col items-start gap-3">
+              <div className="flex items-center gap-2">
+                <PiFileImageBold fontSize="1.1rem" />
+                <h5>File</h5>
+                <p className="text-start text-default-600 text-sm truncate w-52">
+                  {imageLoaded.loaded && imageLoaded.data
+                    ? imageLoaded.data.name
+                    : 'Screenshot'}
+                </p>
+              </div>
+              <div className="flex items-center justify-center gap-2 w-full">
+                <Button
+                  size="sm"
+                  variant="faded"
+                  startContent={<PiArrowCounterClockwiseBold fontSize="1rem" />}
+                  onClick={onReplaceImage}
+                >
+                  Replace
+                </Button>
+                <Button
+                  size="sm"
+                  variant="faded"
+                  startContent={
+                    imgVisibility ? (
+                      <PiEyeClosedBold fontSize="1rem" />
+                    ) : (
+                      <PiEyeBold fontSize="1rem" />
+                    )
+                  }
+                  onClick={() => setImgVisibility(!imgVisibility)}
+                >
+                  {imgVisibility ? 'Hide' : 'Show'}
+                </Button>
+              </div>
+            </div>
+            <Divider />
             <div className="flex flex-col items-start gap-2">
               <div className="flex items-center gap-2">
                 <PiBrowserBold fontSize="1.1rem" />
