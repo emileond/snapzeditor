@@ -479,7 +479,7 @@ const CanvasArea = ({
             <div className="flex flex-col">
               <span className="text-default text-sm">Made with </span>
               <div className="flex gap-2 items-center">
-                <Image src="/snapzeditor-icon.svg" width={18} height={18} />
+                <Image src="/snapzeditor-icon.svg" width={20} height={20} />
                 <span className="text-default text-sm font-semibold">
                   snapseditor.com
                 </span>
@@ -491,10 +491,14 @@ const CanvasArea = ({
           <div className="absolute bottom-0 right-0 m-6 bg-white/80 px-2 py-1 rounded-lg z-20">
             <div className="flex flex-col">
               <div className="flex gap-2 items-center">
-                <Image src={customWatermarkImg} width={18} height={18} />
-                <span className="text-default text-sm font-semibold">
-                  {customWatermarkText}
-                </span>
+                {customWatermarkImg && (
+                  <Image src={customWatermarkImg} width={20} height={20} />
+                )}
+                {customWatermarkText && (
+                  <span className="text-default text-sm font-semibold">
+                    {customWatermarkText}
+                  </span>
+                )}
               </div>
             </div>
           </div>
