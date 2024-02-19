@@ -97,6 +97,9 @@ const ToolBar = ({
         }
         reader.readAsDataURL(file)
       }
+      input.oncancel = () => {
+        return
+      }
     }
 
     // Simulate a click on the input element to open the file dialog
