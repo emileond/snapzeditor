@@ -27,6 +27,7 @@ const CanvasComponent = forwardRef(
       rotationX,
       rotationY,
       imgFrame,
+      imgVisibility,
       snapzWatermark,
       customWatermark,
       customWatermarkImg,
@@ -53,7 +54,7 @@ const CanvasComponent = forwardRef(
             alt="Custom watermark"
           />
         )}
-        {imgSrc && (
+        {imgSrc && imgVisibility && (
           <div
             id="snap-container"
             className={`flex flex-col overflow-hidden
