@@ -1,7 +1,12 @@
 import { useState, useEffect } from 'react'
 import { Input } from '@nextui-org/react'
 
-function ColorPicker({ onChange, defaultColor = '#FFFFFF', showInput = true }) {
+function ColorPicker({
+  onChange,
+  defaultColor = '#FFFFFF',
+  showInput = true,
+  editAnnotation = false,
+}) {
   const [color, setColor] = useState(defaultColor)
 
   useEffect(() => {
@@ -19,12 +24,14 @@ function ColorPicker({ onChange, defaultColor = '#FFFFFF', showInput = true }) {
   return (
     <div className="flex items-center gap-1">
       <label
-        className="w-8 h-8 block cursor-pointer bg-transparent border border-content4 rounded-lg"
+        className={`w-8 h-8 block cursor-pointer bg-transparent border border-content4 rounded-lg ${
+          editAnnotation && 'annotation-edit-mode'
+        }`}
         style={{ backgroundColor: color }}
       >
         <input
           type="color"
-          className="opacity-0 w-full h-full cursor-pointer hover:border-slate-300 transition-all"
+          className={`opacity-0 w-full h-full cursor-pointer hover:border-slate-300 transition-all `}
           value={color}
           onChange={handleColorChange}
         />

@@ -22,7 +22,6 @@ const CanvasComponent = forwardRef(
   (
     {
       canvasBg,
-      sliderScale,
       shadow,
       borderRadius,
       rotationX,
@@ -34,13 +33,15 @@ const CanvasComponent = forwardRef(
       customWatermarkText,
       imgSrc,
       imgScale,
+      sliderScale,
+      imgExportScale,
     },
     ref
   ) => {
     return (
       <div
         ref={ref}
-        className={`canvas relative flex items-center justify-center w-full h-full overflow-hidden`}
+        className={`canvas flex items-center justify-center w-full h-full overflow-hidden`}
         style={{
           background: canvasBg.style,
         }}
@@ -54,12 +55,13 @@ const CanvasComponent = forwardRef(
         )}
         {imgSrc && (
           <div
+            id="snap-container"
             className={`flex flex-col overflow-hidden
           `}
             style={{
               borderRadius: `${borderRadius}px`,
               transform: `scale(${
-                imgScale * sliderScale
+                imgExportScale ? imgExportScale : imgScale * sliderScale
               }) perspective(1000px) rotateX(${rotationX}deg) rotateY(${rotationY}deg) rotateZ(0deg)`,
               boxShadow: `rgba(0, 0, 0, 0.6) 0px ${shadow}px ${
                 shadow * 0.9
@@ -139,36 +141,6 @@ const CanvasComponent = forwardRef(
             )}
           </div>
         )}
-        {snapzWatermark && (
-          <div className="absolute bottom-0 right-0 m-6 bg-white/50 px-2 py-1 rounded-lg backdrop-blur-sm z-20">
-            <div className="flex flex-col">
-              <span className="text-default text-sm">Made with </span>
-              <div className="flex gap-2 items-center">
-                <Image src="/snapzeditor-icon.svg" width={18} height={18} />
-                <span className="text-default text-sm font-semibold">
-                  snapseditor.com
-                </span>
-              </div>
-            </div>
-          </div>
-        )}
-        {
-          // if customWatermark is true, then show the custom watermark using customWatermark.img and customWatermark.text
-          // else if customWatermark is false, don't show the custom watermark
-          // else show the default watermark
-          customWatermark && (
-            <div className="absolute bottom-0 right-0 m-6 bg-white/50 px-2 py-1 rounded-lg backdrop-blur-sm z-20">
-              <div className="flex flex-col">
-                <div className="flex gap-2 items-center">
-                  <Image src={customWatermarkImg} width={18} height={18} />
-                  <span className="text-default text-sm font-semibold">
-                    {customWatermarkText}
-                  </span>
-                </div>
-              </div>
-            </div>
-          )
-        }
       </div>
     )
   }

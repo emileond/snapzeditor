@@ -12,7 +12,7 @@ function App() {
     style: 'linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%)',
     imgSrc: null,
   })
-  const [imgScale, setImgScale] = useState(1.2)
+  const [imgScale, setImgScale] = useState(1)
   const [imgShadow, setImgShadow] = useState(50) // 0 means no shadow by default
   const [borderRadius, setBorderRadius] = useState(20)
   const [rotationX, setRotationX] = useState(0)
@@ -28,7 +28,7 @@ function App() {
   const [customWatermarkToggle, setCustomWatermarkToggle] = useState(false)
   const [customWatermarkImg, setCustomWatermarkImg] = useState()
   const [customWatermarkText, setCustomWatermarkText] = useState()
-  const [showOverlay, setShowOverlay] = useState(false)
+  const [isExporting, setIsExporting] = useState(false)
   const [imageLoaded, setImageLoaded] = useState(false)
 
   const canvasRef = useRef(null)
@@ -135,12 +135,12 @@ function App() {
   const [startExport, setStartExport] = useState()
 
   const handleExport = (options) => {
-    setShowOverlay(true)
+    setIsExporting(true)
     setStartExport(options)
   }
 
   const handleExported = () => {
-    setShowOverlay(false)
+    setIsExporting(false)
     displayToast('success', 'Image exported')
     setStartExport(null)
   }
@@ -169,9 +169,10 @@ function App() {
         fileName={fileName}
         register={register}
         onExport={handleExport}
+        isExporting={isExporting}
       />
       <div className="w-full flex flex-row p-2 h-full min-h-[700px] min-w-[900px]">
-        {showOverlay && (
+        {isExporting && (
           <div className="absolute w-full h-full z-50">
             <ExportOverlay isVisible />
           </div>
@@ -223,6 +224,7 @@ function App() {
           onImageLoaded={() => {
             setImageLoaded(true)
           }}
+          fileName={fileName}
         />
       </div>
     </div>

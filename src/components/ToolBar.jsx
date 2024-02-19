@@ -39,6 +39,7 @@ import {
   CardBody,
   Badge,
   Chip,
+  CardFooter,
 } from '@nextui-org/react'
 import Slider from './Slider'
 import GradientButtons from './GradientButtons'
@@ -423,7 +424,7 @@ const ToolBar = ({
                 min={0.5}
                 max={2.5}
                 step={0.01}
-                defaultValue={[1.2]}
+                defaultValue={[1]}
               />
             </div>
             <Divider />
@@ -543,7 +544,7 @@ const ToolBar = ({
                 </Button>
               </div>
               {ocrResult && (
-                <Card className="w-full max-h-200">
+                <Card className="w-full max-h-200 border border-content3">
                   <CardHeader className="py-2">
                     <p className="text-tiny uppercase font-bold">Result</p>
                   </CardHeader>
@@ -559,6 +560,19 @@ const ToolBar = ({
                       ))}
                     </div>
                   </CardBody>
+                  <CardFooter>
+                    <Button
+                      size="sm"
+                      variant="faded"
+                      onClick={() => {
+                        navigator.clipboard.writeText(
+                          ocrResult.map((line) => line.text).join('\n')
+                        )
+                      }}
+                    >
+                      Copy
+                    </Button>
+                  </CardFooter>
                 </Card>
               )}
             </div>

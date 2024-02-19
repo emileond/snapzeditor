@@ -27,8 +27,10 @@ const TopBar = ({
   fileName,
   register,
   onExport,
+  isExporting,
 }) => {
   const [exportSize, setExportSize] = useState('1x')
+  const [isOpen, setIsOpen] = useState(false)
 
   return (
     <div
@@ -54,9 +56,15 @@ const TopBar = ({
         {/* <Button endContent={<PiCaretDownBold fontSize="1.1rem" />}>
         Presets
       </Button> */}
-        <Popover placement="bottom-end" className="dark">
+        <Popover
+          placement="bottom-end"
+          className="dark"
+          isOpen={isOpen}
+          onOpenChange={(open) => setIsOpen(open)}
+        >
           <PopoverTrigger>
             <Button
+              isLoading={isExporting}
               color="primary"
               startContent={<PiExportBold fontSize="1.1rem" />}
             >
@@ -116,13 +124,14 @@ const TopBar = ({
                 <Button
                   color="primary"
                   className="w-full"
-                  onClick={() =>
+                  onClick={() => {
                     onExport({
                       type: 'download',
                       format: 'png',
                       size: exportSize,
                     })
-                  }
+                    setIsOpen(false)
+                  }}
                 >
                   <PiDownloadBold fontSize="1.1rem" />
                   Download
@@ -131,13 +140,14 @@ const TopBar = ({
                   color="primary"
                   variant="light"
                   className="w-full"
-                  onClick={() =>
+                  onClick={() => {
                     onExport({
                       type: 'clipboard',
                       format: 'png',
                       size: exportSize,
                     })
-                  }
+                    setIsOpen(false)
+                  }}
                 >
                   <PiCopy fontSize="1.1rem" />
                   Copy to clipboard

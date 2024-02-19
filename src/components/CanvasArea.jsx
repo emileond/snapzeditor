@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import CanvasComponent from './CanvasComponent'
-import usePikaso from 'pikaso-react-hook'
 import {
   Button,
   Divider,
@@ -8,7 +7,6 @@ import {
   DropdownItem,
   DropdownMenu,
   DropdownTrigger,
-  Input,
   Kbd,
   Modal,
   ModalBody,
@@ -19,15 +17,18 @@ import {
   PopoverContent,
   PopoverTrigger,
   useDisclosure,
+  Image,
 } from '@nextui-org/react'
 import {
   PiArrowCounterClockwiseBold,
+  PiArrowSquareDownBold,
+  PiArrowSquareUpBold,
   PiArrowUpRightBold,
   PiCaretDownBold,
   PiCircleBold,
-  PiCommandBold,
   PiShapesBold,
   PiStickerBold,
+  PiTextAaBold,
   PiTextTBold,
   PiTrashSimpleBold,
 } from 'react-icons/pi'
@@ -36,6 +37,9 @@ import useDebounce from '../hooks/useDebounce'
 import { toBlob, toPng } from 'html-to-image'
 import { createWorker } from 'tesseract.js'
 import ImgEmptyState from './ImgEmptyState'
+import { Rnd } from 'react-rnd'
+import EditableText from './EditableText'
+import { useHotkeys } from 'react-hotkeys-hook'
 
 const CanvasArea = ({
   canvasRef,
@@ -57,6 +61,7 @@ const CanvasArea = ({
   extractText,
   onExtractedText,
   onImageLoaded,
+  fileName,
 }) => {
   const [scaledWidth, setScaledWidth] = useState(0)
   const [scaledHeight, setScaledHeight] = useState(0)
@@ -65,121 +70,169 @@ const CanvasArea = ({
   const stickers = 28
 
   // Debounce the dimensions
-  const debouncedWidth = useDebounce(canvasWidth, 300)
-  const debouncedHeight = useDebounce(canvasHeight, 300)
+  const debouncedWidth = useDebounce(canvasWidth, 200)
+  const debouncedHeight = useDebounce(canvasHeight, 200)
 
-  const [showPopover, setShowPopover] = useState(false)
   const [selectedShape, setSelectedShape] = useState(null)
-  const [defaultColor, setDefaultColor] = useState('#FFFFFF')
 
-  const [ref, editor] = usePikaso({
-    selection: {
-      keyboard: {
-        map: {
-          delete: 'Delete',
-        },
-      },
-      transformer: {
-        borderStroke: '#338ef7',
-        borderStrokeWidth: 2,
-        anchorSize: 10,
-        anchorFill: '#fff',
-        anchorStrokeWidth: 2,
-        anchorStroke: '#338ef7',
-      },
-    },
-    snapToGrid: {
-      strokeWidth: 1,
-      stroke: '#9353d3',
-      dash: [4, 4],
-    },
-    measurement: {
-      enabled: true,
-      background: {
-        fill: '#006FEE',
-      },
-      text: {
-        padding: 5,
-        fill: '#fff',
-        fontSize: 14,
-      },
-    },
+  const [selectedElement, setSelectedElement] = useState(null)
+  const [hideHandles, setHideHandles] = useState(false)
+  const handleStyles = {
+    border: '2px solid #5c7cfa',
+    backgroundColor: '#fff',
+    width: '16px',
+    height: '16px',
+    borderRadius: '30%',
+  }
+
+  // Shortcuts
+  useHotkeys('esc', () => {
+    setSelectedElement(null)
   })
 
-  const setupEditorListeners = () => {
-    if (!editor) return
+  useHotkeys('delete', () => {
+    console.log('delete')
+    if (selectedElement) {
+      deleteAnnotation(selectedElement)
+    }
+  })
 
-    editor.on('selection:change', (event) => {
-      if (event.shapes.length === 1) {
-        const type = event.shapes[0].type
-        setSelectedShape(type)
-        switch (type) {
-          case 'circle':
-            setDefaultColor(event.shapes[0].node.getAttrs().fill)
-            break
-          case 'arrow':
-            setDefaultColor(event.shapes[0].node.getAttrs().stroke)
-            break
-          case 'label':
-            setDefaultColor(event.shapes[0].node.children[1].getAttrs().fill)
-            break
-          default:
-            break
-        }
-        setShowPopover(true)
-      } else {
-        setShowPopover(false)
+  // hot key for duplicating the selected element
+  useHotkeys('meta+d', () => {
+    if (selectedElement) {
+      const duplicatedElement = {
+        ...selectedElement,
+        id: `${selectedElement.id}-${Date.now()}`,
+        text: `${selectedElement.text} (copy)`,
       }
-    })
-  }
+      setRenderedAnnotations([...renderedAnnotations, duplicatedElement])
+    }
+  })
+
   const createCircle = () => {
-    editor.shapes.circle.insert({
-      x: 200,
-      y: 200,
-      radius: 50,
-      fill: '#180828',
-    })
+    const newAnnotations = [
+      ...renderedAnnotations,
+      {
+        id: `circle-${Date.now()}`,
+        type: 'circle',
+        fill: '#000',
+      },
+    ]
+    setRenderedAnnotations(newAnnotations)
+
+    setSelectedElement(
+      newAnnotations.length > 0
+        ? {
+            id: newAnnotations[newAnnotations.length - 1].id,
+            index: newAnnotations.length - 1,
+            type: 'circle',
+          }
+        : null
+    )
+  }
+
+  const createRectangle = () => {
+    const newAnnotations = [
+      ...renderedAnnotations,
+      {
+        id: `rectangle-${Date.now()}`,
+        type: 'rectangle',
+        fill: '#000',
+      },
+    ]
+    setRenderedAnnotations(newAnnotations)
+
+    setSelectedElement(
+      newAnnotations.length > 0
+        ? {
+            id: newAnnotations[newAnnotations.length - 1].id,
+            index: newAnnotations.length - 1,
+            type: 'rectangle',
+          }
+        : null
+    )
   }
 
   const createArrow = () => {
-    editor.shapes.arrow.insert({
-      points: [50, 50, 300, 50],
-      stroke: '#180828',
-      strokeWidth: 10,
-    })
+    return
   }
 
   const createLabel = () => {
-    editor.shapes.label.insert({
-      container: { x: 200, y: 200 },
-      tag: { fill: 'transparent' },
-      text: { text: 'New text', fontSize: 32, fill: '#180828' },
-    })
+    const newAnnotations = [
+      ...renderedAnnotations,
+      {
+        id: `label-${Date.now()}`,
+        type: 'label',
+        text: 'Double click to edit',
+        size: 'lg',
+        color: '#000',
+        weight: '500',
+      },
+    ]
+
+    setRenderedAnnotations(newAnnotations)
+
+    setSelectedElement(
+      newAnnotations.length > 0
+        ? {
+            id: newAnnotations[newAnnotations.length - 1].id,
+            index: newAnnotations.length - 1,
+            type: 'label',
+          }
+        : null
+    )
   }
 
+  const [renderedAnnotations, setRenderedAnnotations] = useState([])
+
   const createSticker = (n) => {
-    editor.shapes.image.insert(`/stickers/${n}.svg`, {
-      scaleX: 0.25,
-      scaleY: 0.25,
-    })
+    const newAnnotations = [
+      ...renderedAnnotations,
+      {
+        id: `sticker-${n}-${Date.now()}`,
+        type: 'sticker',
+        src: `/stickers/${n}.svg`,
+      },
+    ]
+    setRenderedAnnotations(newAnnotations)
+
+    setSelectedElement(
+      newAnnotations.length > 0
+        ? {
+            id: newAnnotations[newAnnotations.length - 1].id,
+            index: newAnnotations.length - 1,
+            type: 'sticker',
+          }
+        : null
+    )
+  }
+
+  const deleteAnnotation = (element) => {
+    const newAnnotations = renderedAnnotations.filter(
+      (el) => el.id !== element.id
+    )
+    setRenderedAnnotations(newAnnotations)
+    setSelectedElement(null)
   }
 
   const updateShape = (attr, val) => {
-    editor.board.selection.shapes[0].update({ [attr]: val })
+    return
   }
 
-  const updateText = (section, attr, val) => {
-    if (section === 'tag') {
-      editor.board.selection.shapes[0].node.children[0].setAttr(attr, val)
-    }
-    if (section === 'text') {
-      editor.board.selection.shapes[0].node.children[1].setAttr(attr, val)
-    }
-  }
+  const updateText = (element, attr, val) => {
+    // update the element in the array
+    const newAnnotations = renderedAnnotations.map((el) =>
+      el.id === element.id ? { ...el, [attr]: val } : el
+    )
 
-  const resetEditor = () => {
-    editor.reset()
-    setupEditorListeners()
+    // update the state
+    setRenderedAnnotations(newAnnotations)
+
+    // update the selected element
+    setSelectedElement({
+      ...element,
+      [attr]: val,
+    })
   }
 
   const resizeCanvas = () => {
@@ -206,6 +259,7 @@ const CanvasArea = ({
     }
   }
 
+  // Resize the canvas when the window is resized, or when user changes the canvas dimensions
   useEffect(() => {
     window.addEventListener('resize', resizeCanvas)
     resizeCanvas() // Initial setup
@@ -215,53 +269,23 @@ const CanvasArea = ({
     }
   }, [debouncedWidth, debouncedHeight])
 
-  useEffect(() => {
-    if (editor) {
-      editor?.board?.stage?.size({
-        width: scaledWidth,
-        height: scaledHeight,
-      })
-      editor.board.stage.draw()
-    }
-  }, [scaledWidth, scaledHeight])
-
-  useEffect(() => {
-    if (editor) {
-      editor.snapGrid.enable()
-      setupEditorListeners()
-    }
-  }, [editor])
-
   // shortcuts modal
   const { isOpen, onOpen, onOpenChange } = useDisclosure()
 
+  const [imgExportScale, setImgExportScale] = useState(0)
+
   const handleExport = async (options) => {
     if (canvasRef.current) {
-      canvasComponentRef.current.style.width = `${canvasWidth}px`
-      canvasComponentRef.current.style.height = `${canvasHeight}px`
-
-      canvasRef.current.style.width = `${canvasWidth}px`
-      canvasRef.current.style.height = `${canvasHeight}px`
-
-      // calculate the scale factor
-      const scale = canvasWidth / scaledWidth
-      editor.board.stage.scale({ x: scale, y: scale })
-      editor.board.stage.size({
-        width: canvasWidth,
-        height: canvasHeight,
-      })
-
       if (options.type === 'download') {
         try {
-          // Use the original aspect ratio for scaling
           const dataUrl = await toPng(canvasRef.current, {
-            width: canvasWidth,
-            height: canvasHeight,
+            canvasWidth: canvasWidth,
+            canvasHeight: canvasHeight,
           })
 
           // Trigger download
           const link = document.createElement('a')
-          link.download = 'exported-image.png'
+          link.download = `${fileName}.png`
           link.href = dataUrl
           link.click()
         } catch (err) {
@@ -270,8 +294,8 @@ const CanvasArea = ({
       } else if (options.type === 'clipboard') {
         try {
           const blob = await toBlob(canvasRef.current, {
-            width: canvasWidth,
-            height: canvasHeight,
+            canvasWidth: canvasWidth,
+            canvasHeight: canvasHeight,
           })
 
           const clipboardItem = new ClipboardItem({ [blob.type]: blob })
@@ -281,18 +305,6 @@ const CanvasArea = ({
         }
       }
     }
-    // Revert scaling after capturing to ensure the display remains unchanged
-    editor.board.stage.scale({ x: 1, y: 1 })
-    editor.board.stage.size({
-      width: scaledWidth,
-      height: scaledHeight,
-    })
-    editor.board.stage.draw()
-    canvasComponentRef.current.style.width = `${scaledWidth}px`
-    canvasComponentRef.current.style.height = `${scaledHeight}px`
-
-    canvasRef.current.style.width = `${scaledWidth}px`
-    canvasRef.current.style.height = `${scaledHeight}px`
     onExported(true)
   }
 
@@ -332,24 +344,20 @@ const CanvasArea = ({
 
         const MARGIN = 16
 
+        // Compute the available width and height for the image within the canvas
+        const availableWidth = scaledWidth - MARGIN * 2
+        const availableHeight = scaledHeight - MARGIN * 2
+
         // Compute the width and height scale factors
-        const widthScale = scaledWidth / (img.width + MARGIN)
+        const widthScale = availableWidth / img.width
+        const heightScale = availableHeight / img.height
 
-        const heightScale = scaledHeight / (img.height + MARGIN)
+        // Determine the scale factor based on the smaller of the two to ensure the image fits within the canvas
+        aspectScale = Math.min(widthScale, heightScale)
 
-        // Check if image dimensions are smaller than canvas
-        if (
-          img.width < scaledWidth - MARGIN &&
-          img.height < scaledHeight - MARGIN
-        ) {
-          aspectScale = 1 // Use the original image size
-        } else {
-          // Use the smaller scale factor to ensure the image fits within the canvas
-          if (scaledWidth > scaledHeight) {
-            aspectScale = widthScale
-          } else {
-            aspectScale = heightScale
-          }
+        // If the image is smaller than the canvas minus margins, don't scale it up
+        if (aspectScale > 1) {
+          aspectScale = 1
         }
 
         setInitialScale(aspectScale)
@@ -412,10 +420,34 @@ const CanvasArea = ({
     }
   }
 
+  useEffect(() => {
+    const handleClickOnCanvas = (e) => {
+      if (wrapperRef.current) {
+        // check if the selected element contains class dnd-element or annotation-edit-mode
+        if (
+          e.target.closest('.dnd-element') ||
+          e.target.closest('.annotation-edit-mode')
+        ) {
+          setHideHandles(false)
+          return
+        } else {
+          setSelectedElement(null)
+          setHideHandles(false)
+        }
+      }
+    }
+    document.addEventListener('click', handleClickOnCanvas)
+    document.addEventListener('contextmenu', handleClickOnCanvas)
+    return () => {
+      document.removeEventListener('click', handleClickOnCanvas)
+    }
+  }, [])
+
   return (
     <div
       ref={wrapperRef}
-      className="w-full flex flex-col items-center justify-center overflow-hidden"
+      // className="w-full flex flex-col items-center justify-center overflow-hidden"
+      className="w-full flex flex-col items-center justify-center"
     >
       {!imageSrc && (
         <ImgEmptyState
@@ -430,30 +462,140 @@ const CanvasArea = ({
         style={{
           width: scaledWidth,
           height: scaledHeight,
-          // background: canvasBg.style,
         }}
       >
-        <div
-          ref={ref}
-          style={{
-            position: 'absolute',
-            width: '100%',
-            height: '100%',
-            zIndex: 1,
-          }}
-        />
+        {snapzWatermark && (
+          <div className="absolute bottom-0 right-0 m-6 bg-white/80 px-2 py-1 rounded-lg z-20">
+            <div className="flex flex-col">
+              <span className="text-default text-sm">Made with </span>
+              <div className="flex gap-2 items-center">
+                <Image src="/snapzeditor-icon.svg" width={18} height={18} />
+                <span className="text-default text-sm font-semibold">
+                  snapseditor.com
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+        {customWatermarkToggle && (
+          <div className="absolute bottom-0 right-0 m-6 bg-white/80 px-2 py-1 rounded-lg z-20">
+            <div className="flex flex-col">
+              <div className="flex gap-2 items-center">
+                <Image src={customWatermarkImg} width={18} height={18} />
+                <span className="text-default text-sm font-semibold">
+                  {customWatermarkText}
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+        {renderedAnnotations.map((element, i) => {
+          return (
+            <Rnd
+              key={element.id}
+              className="dnd-element"
+              default={{
+                x: 0,
+                y: 0,
+              }}
+              style={{
+                zIndex: 1,
+                border:
+                  selectedElement?.id === element.id
+                    ? '2px solid #5c7cfa'
+                    : 'none',
+              }}
+              bounds="parent"
+              lockAspectRatio={element?.type === 'sticker' ? true : false}
+              resizeHandleStyles={
+                selectedElement?.id === element.id && !hideHandles
+                  ? {
+                      topRight: {
+                        ...handleStyles,
+                      },
+                      topLeft: {
+                        ...handleStyles,
+                      },
+                      bottomRight: {
+                        ...handleStyles,
+                      },
+                      bottomLeft: {
+                        ...handleStyles,
+                      },
+                    }
+                  : {}
+              }
+              onMouseDown={() => setSelectedElement(element)}
+            >
+              {element?.type === 'sticker' && (
+                <div
+                  style={{
+                    backgroundImage: `url(${element?.src})`,
+                    backgroundSize: 'contain',
+                    backgroundRepeat: 'no-repeat',
+                    objectFit: 'cover',
+                    width: '100%',
+                    height: '100%',
+                    padding: '50px',
+                  }}
+                />
+              )}
+              {element?.type === 'label' && (
+                <div
+                  style={{
+                    padding: '8px',
+                  }}
+                >
+                  <EditableText
+                    color={element?.color}
+                    size={element?.size}
+                    weight={element?.weight}
+                    initialText={element?.text}
+                    onEdit={(isEditing) => {
+                      if (isEditing) {
+                        setHideHandles(true)
+                      }
+                    }}
+                    onChange={(text) => {
+                      updateText(element, 'text', text)
+                    }}
+                  />
+                </div>
+              )}
+              {element?.type === 'circle' && (
+                <div
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    padding: '50px',
+                    borderRadius: '50%',
+                    backgroundColor: element?.fill,
+                  }}
+                />
+              )}
+              {element?.type === 'rectangle' && (
+                <div
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    backgroundColor: element?.fill,
+                  }}
+                />
+              )}
+            </Rnd>
+          )
+        })}
         <CanvasComponent
           ref={canvasComponentRef}
           canvasBg={canvasBg}
           imgSrc={imageSrc}
           imgScale={initialScale}
+          imgExportScale={imgExportScale}
           sliderScale={imgScale}
           shadow={imgShadow}
           borderRadius={borderRadius}
           rotationX={rotationX}
           rotationY={rotationY}
-          canvasWidth={scaledWidth}
-          canvasHeight={scaledHeight}
           imgFrame={imgFrame}
           snapzWatermark={snapzWatermark}
           customWatermark={customWatermarkToggle}
@@ -463,18 +605,19 @@ const CanvasArea = ({
       </div>
       <div className="w-fit flex min-h-14 mt-4">
         <div className="w-full h-full flex gap-4 items-center bg-content2 rounded-lg px-4">
-          {showPopover ? (
-            <>
-              <h6 className="text-default-700 text-sm font-medium">
-                Edit {editor?.board?.selection?.shapes[0]?.type}
+          {selectedElement ? (
+            <div className="annotation-edit-mode flex gap-4 items-center">
+              <h6 className="text-default-600 text-sm font-medium">
+                Edit {selectedElement.type}
               </h6>
               <Divider orientation="vertical" className="h-6" />
               <div className="flex gap-2 items-center">
-                <span className="text-default-500 text-sm">Color:</span>
+                <span className="text-sm text-white">Color:</span>
                 <ColorPicker
+                  editAnnotation
                   onChange={(color) => {
-                    const shape = editor.board.selection.shapes[0].type
-                    switch (shape) {
+                    const type = selectedElement.type
+                    switch (type) {
                       case 'circle':
                         updateShape('fill', color)
                         break
@@ -482,64 +625,197 @@ const CanvasArea = ({
                         updateShape('stroke', color)
                         break
                       case 'label':
-                        updateText('text', 'fill', color)
+                        updateText(selectedElement, 'color', color)
 
                         break
                       default:
                         break
                     }
                   }}
-                  defaultColor={defaultColor}
+                  defaultColor={selectedElement?.color}
                   showInput={false}
                 />
               </div>
-              {selectedShape === 'circle' && (
-                <div className="flex gap-2 items-center">
-                  <span className="text-default-500 text-sm">Stroke:</span>
-                  <ColorPicker
-                    onChange={(color) => {
-                      updateShape('stroke', color)
-                    }}
-                    defaultColor={defaultColor}
-                    showInput={false}
-                  />
-                </div>
+              {selectedElement?.type === 'label' && (
+                <>
+                  <Dropdown className="dark">
+                    <DropdownTrigger>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        startContent={<PiTextAaBold fontSize="1.1rem" />}
+                        endContent={<PiCaretDownBold fontSize="1.1rem" />}
+                      >
+                        Size
+                      </Button>
+                    </DropdownTrigger>
+                    <DropdownMenu
+                      aria-label="Size"
+                      disallowEmptySelection
+                      selectionMode="single"
+                      selectedKeys={[selectedElement?.size]}
+                      onSelectionChange={(selectedKeys) => {
+                        updateText(selectedElement, 'size', selectedKeys[0])
+                      }}
+                    >
+                      <DropdownItem
+                        key="xs"
+                        onClick={() =>
+                          updateText(selectedElement, 'size', 'xs')
+                        }
+                      >
+                        Extra small
+                      </DropdownItem>
+                      <DropdownItem
+                        key="sm"
+                        onClick={() =>
+                          updateText(selectedElement, 'size', 'sm')
+                        }
+                      >
+                        Small
+                      </DropdownItem>
+                      <DropdownItem
+                        key="md"
+                        onClick={() =>
+                          updateText(selectedElement, 'size', 'md')
+                        }
+                      >
+                        Medium
+                      </DropdownItem>
+                      <DropdownItem
+                        key="lg"
+                        onClick={() =>
+                          updateText(selectedElement, 'size', 'lg')
+                        }
+                      >
+                        Large
+                      </DropdownItem>
+                      <DropdownItem
+                        key="xl"
+                        onClick={() =>
+                          updateText(selectedElement, 'size', 'xl')
+                        }
+                      >
+                        Extra large
+                      </DropdownItem>
+                    </DropdownMenu>
+                  </Dropdown>
+                  <Dropdown className="dark">
+                    <DropdownTrigger>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        startContent={<PiTextTBold fontSize="1.1rem" />}
+                        endContent={<PiCaretDownBold fontSize="1.1rem" />}
+                      >
+                        Weight
+                      </Button>
+                    </DropdownTrigger>
+                    <DropdownMenu
+                      aria-label="Weight"
+                      selectionMode="single"
+                      selectedKeys={[selectedElement?.weight]}
+                      onSelectionChange={(selectedKeys) => {
+                        updateText(selectedElement, 'weight', selectedKeys[0])
+                      }}
+                    >
+                      <DropdownItem
+                        key="200"
+                        onClick={() =>
+                          updateText(selectedElement, 'weight', '200')
+                        }
+                      >
+                        Thin
+                      </DropdownItem>
+                      <DropdownItem
+                        key="300"
+                        onClick={() =>
+                          updateText(selectedElement, 'weight', '300')
+                        }
+                      >
+                        Light
+                      </DropdownItem>
+                      <DropdownItem
+                        key="400"
+                        onClick={() =>
+                          updateText(selectedElement, 'weight', '400')
+                        }
+                      >
+                        Regular
+                      </DropdownItem>
+                      <DropdownItem
+                        key="500"
+                        onClick={() =>
+                          updateText(selectedElement, 'weight', '500')
+                        }
+                      >
+                        Medium
+                      </DropdownItem>
+                      <DropdownItem
+                        key="700"
+                        onClick={() =>
+                          updateText(selectedElement, 'weight', '700')
+                        }
+                      >
+                        Bold
+                      </DropdownItem>
+                      <DropdownItem
+                        key="900"
+                        onClick={() =>
+                          updateText(selectedElement, 'weight', '800')
+                        }
+                      >
+                        Black
+                      </DropdownItem>
+                    </DropdownMenu>
+                  </Dropdown>
+                </>
               )}
-              {selectedShape === 'label' && (
-                <div className="flex gap-2 items-center">
-                  <span className="text-default-500 text-sm">Size:</span>
-                  <Input
-                    type="number"
-                    size="xs"
-                    variant="bordered"
-                    placeholder="Font size"
-                    classNames={{
-                      input: 'w-12',
-                      inputWrapper: ['min-h-9', 'h-9'],
-                    }}
-                    defaultValue={
-                      editor.board.selection.shapes[0].node.children[1].getAttrs()
-                        .fontSize
-                    }
-                    onChange={(e) =>
-                      updateText(
-                        'text',
-                        'fontSize',
-                        parseInt(e.target.value) || 32
-                      )
-                    }
-                  />
-                </div>
-              )}
+              <Button
+                variant="light"
+                onClick={() => {
+                  const index = renderedAnnotations.findIndex(
+                    (el) => el.id === selectedElement.id
+                  )
+                  const newAnnotations = [
+                    ...renderedAnnotations.slice(0, index),
+                    ...renderedAnnotations.slice(index + 1),
+                    selectedElement,
+                  ]
+                  setRenderedAnnotations(newAnnotations)
+                }}
+                startContent={<PiArrowSquareUpBold fontSize="1.1rem" />}
+              >
+                Move up
+              </Button>
+              <Button
+                variant="light"
+                onClick={() => {
+                  const index = renderedAnnotations.findIndex(
+                    (el) => el.id === selectedElement.id
+                  )
+                  const newAnnotations = [
+                    selectedElement,
+                    ...renderedAnnotations.slice(0, index),
+                    ...renderedAnnotations.slice(index + 1),
+                  ]
+                  setRenderedAnnotations(newAnnotations)
+                }}
+                startContent={<PiArrowSquareDownBold fontSize="1.1rem" />}
+              >
+                Move down
+              </Button>
               <Button
                 color="danger"
                 variant="light"
-                onClick={() => editor.board.selection.shapes[0].delete()}
+                onClick={() => {
+                  deleteAnnotation(selectedElement)
+                }}
+                startContent={<PiTrashSimpleBold fontSize="1.1rem" />}
               >
-                <PiTrashSimpleBold fontSize="1rem" />
                 Delete
               </Button>
-            </>
+            </div>
           ) : (
             <>
               <Dropdown className="dark">
@@ -619,17 +895,11 @@ const CanvasArea = ({
                 size="sm"
                 variant="ghost"
                 startContent={<PiArrowCounterClockwiseBold fontSize="1.1rem" />}
-                onClick={resetEditor}
+                onClick={() => {
+                  setRenderedAnnotations([])
+                }}
               >
                 Reset
-              </Button>
-              <Button
-                size="sm"
-                variant="flat"
-                startContent={<PiCommandBold fontSize="1.1rem" />}
-                onPress={onOpen}
-              >
-                Shortcuts
               </Button>
               <Modal
                 isOpen={isOpen}
