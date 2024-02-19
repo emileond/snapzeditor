@@ -1,6 +1,6 @@
 import { Button } from '@nextui-org/react'
 import { useState } from 'react'
-import { PiMagicWandBold } from 'react-icons/pi'
+import { PiMagicWandBold, PiUploadBold } from 'react-icons/pi'
 import { createApi } from 'unsplash-js'
 import ChipPro from './ChipPro'
 
@@ -22,16 +22,18 @@ const thumbnails = Array.from(
 
 function WallpaperPicker({ setCanvasBg }) {
   const [selectedWallpaperIndex, setSelectedWallpaperIndex] = useState(null)
-  const [isLoading, setIsLoading] = useState(false)
+  const [isUnsplashLoading, setIsUnsplashLoading] = useState(false)
+  const [isUploadLoading, setIsUploadLoading] = useState(false)
   const [unsplashCredits, setUnsplashCredits] = useState(null)
 
   const handleWallpaperClick = (index) => {
     setSelectedWallpaperIndex(index)
     setCanvasBg({ style: null, imgSrc: wallpapers[index] })
+    setUnsplashCredits(null)
   }
 
   const handleRandomWallpaperClick = async () => {
-    setIsLoading(true)
+    setIsUnsplashLoading(true)
     try {
       await unsplash.photos
         .getRandom({
@@ -53,7 +55,30 @@ function WallpaperPicker({ setCanvasBg }) {
     } catch (error) {
       console.error(error)
     }
-    setIsLoading(false)
+    setIsUnsplashLoading(false)
+  }
+
+  const handleUploadWallpaperClick = () => {
+    setIsUploadLoading(true)
+    // handle upload logic here
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = 'image/jpeg, image/png, image/jpg'
+    input.onchange = () => {
+      const reader = new FileReader()
+      const file = input.files[0]
+      reader.readAsDataURL(file)
+      reader.onload = () => {
+        setCanvasBg({ style: null, imgSrc: reader.result })
+        setIsUploadLoading(false)
+        setUnsplashCredits(null)
+      }
+    }
+    // handle cancel
+    input.oncancel = () => {
+      return setIsUploadLoading(false)
+    }
+    input.click()
   }
 
   return (
@@ -77,17 +102,35 @@ function WallpaperPicker({ setCanvasBg }) {
           ></button>
         ))}
       </div>
-      <div className="pt-4 flex flex-col items-center gap-2">
-        <Button
-          size="sm"
-          isLoading={isLoading}
-          variant="flat"
-          onClick={handleRandomWallpaperClick}
-          startContent={<PiMagicWandBold fontSize="1.1rem" />}
-          endContent={<ChipPro />}
-        >
-          Random wallpaper
-        </Button>
+      <div className="pt-4 flex flex-col items-center gap-4">
+        <div className="flex items-center justify-start gap-2 w-full">
+          <h6 className="font-medium text-sm text-default-600">
+            Custom wallpaper
+          </h6>
+          <ChipPro />
+        </div>
+        <div className="flex gap-2">
+          <Button
+            size="sm"
+            isLoading={isUnsplashLoading}
+            variant="ghost"
+            onClick={handleRandomWallpaperClick}
+            startContent={<PiMagicWandBold fontSize="1.1rem" />}
+            // endContent={<ChipPro />}
+          >
+            Pick random
+          </Button>
+          <Button
+            size="sm"
+            isLoading={isUploadLoading}
+            variant="ghost"
+            onClick={handleUploadWallpaperClick}
+            startContent={<PiUploadBold fontSize="1.1rem" />}
+            // endContent={<ChipPro />}
+          >
+            Upload
+          </Button>
+        </div>
         {unsplashCredits && (
           <span className="text-default-500 text-xs">
             Photo by{' '}

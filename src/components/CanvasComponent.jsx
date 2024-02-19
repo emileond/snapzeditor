@@ -28,14 +28,9 @@ const CanvasComponent = forwardRef(
       rotationY,
       imgFrame,
       imgVisibility,
-      snapzWatermark,
-      customWatermark,
-      customWatermarkImg,
-      customWatermarkText,
       imgSrc,
       imgScale,
       sliderScale,
-      imgExportScale,
     },
     ref
   ) => {
@@ -62,7 +57,7 @@ const CanvasComponent = forwardRef(
             style={{
               borderRadius: `${borderRadius}px`,
               transform: `scale(${
-                imgExportScale ? imgExportScale : imgScale * sliderScale
+                imgScale * sliderScale
               }) perspective(1000px) rotateX(${rotationX}deg) rotateY(${rotationY}deg) rotateZ(0deg)`,
               boxShadow: `rgba(0, 0, 0, 0.6) 0px ${shadow}px ${
                 shadow * 0.9

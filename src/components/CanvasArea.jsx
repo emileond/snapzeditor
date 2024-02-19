@@ -273,8 +273,6 @@ const CanvasArea = ({
   // shortcuts modal
   const { isOpen, onOpen, onOpenChange } = useDisclosure()
 
-  const [imgExportScale, setImgExportScale] = useState(0)
-
   const handleExport = async (options) => {
     if (canvasRef.current) {
       if (options.type === 'download') {
@@ -372,7 +370,7 @@ const CanvasArea = ({
   const handleUpload = () => {
     const input = document.createElement('input')
     input.type = 'file'
-    input.accept = 'image/*'
+    input.accept = 'image/jpeg, image/png, image/jpg'
     input.onchange = () => {
       const reader = new FileReader()
       const file = input.files[0]
@@ -380,6 +378,10 @@ const CanvasArea = ({
       reader.onload = () => {
         loadImage(reader.result, file)
       }
+    }
+    // handle cancel
+    input.oncancel = () => {
+      return
     }
     input.click()
   }
@@ -598,7 +600,6 @@ const CanvasArea = ({
           canvasBg={canvasBg}
           imgSrc={imageSrc}
           imgScale={initialScale}
-          imgExportScale={imgExportScale}
           sliderScale={imgScale}
           shadow={imgShadow}
           borderRadius={borderRadius}
