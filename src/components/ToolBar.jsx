@@ -54,6 +54,7 @@ import GradientButtons from './GradientButtons'
 import WallpaperPicker from './WallpaperPicker'
 import ColorPicker from './ColorPicker'
 import ChipPro from './ChipPro'
+import PositionSelector from './PositionSelector'
 
 const ToolBar = ({
   imageLoaded,
@@ -63,6 +64,8 @@ const ToolBar = ({
   imgFrame,
   setCanvasBg,
   setImgScale,
+  setImgPosition,
+  imgPosition,
   setImgShadow,
   setBorderRadius,
   setRotationX,
@@ -178,7 +181,6 @@ const ToolBar = ({
 
   useEffect(() => {
     if (imageLoaded) {
-      console.log(imageLoaded)
       setSelectedTab('image')
     } else {
       setSelectedTab('canvas')
@@ -544,6 +546,18 @@ const ToolBar = ({
                 defaultValue={[0]}
               />
             </div>
+            <Divider />
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <PiAlignCenterHorizontalSimpleBold fontSize="1.1rem" />
+                <h5>Position</h5>
+              </div>
+              <PositionSelector
+                onChange={(pos) => setImgPosition(pos)}
+                position={imgPosition}
+              />
+            </div>
+
             {/* <Divider />
             <div>
               <div className="flex items-center gap-2">
