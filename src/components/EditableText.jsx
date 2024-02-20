@@ -4,6 +4,7 @@ const EditableText = ({
   color,
   size,
   weight,
+  background,
   initialText,
   onEdit,
   onChange,
@@ -56,6 +57,8 @@ const EditableText = ({
     color: color,
     fontSize: fontSizes[size],
     fontWeight: weight,
+    backgroundColor: isEditMode ? 'rgba(0, 0, 0, 0.32)' : background,
+    borderRadius: '0.5rem',
   }
 
   return (
@@ -68,7 +71,6 @@ const EditableText = ({
           onBlur={handleBlur}
           style={{
             ...textStyle,
-            backgroundColor: 'rgba(0, 0, 0, 0.32)',
             cursor: 'text',
             border: 'none',
             outline: 'none',

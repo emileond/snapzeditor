@@ -7,7 +7,6 @@ import {
   DropdownItem,
   DropdownMenu,
   DropdownTrigger,
-  Kbd,
   Modal,
   ModalBody,
   ModalContent,
@@ -20,12 +19,13 @@ import {
   Image,
 } from '@nextui-org/react'
 import {
-  PiArrowCounterClockwiseBold,
   PiArrowSquareDownBold,
   PiArrowSquareUpBold,
-  PiArrowUpRightBold,
+  PiArticleBold,
   PiCaretDownBold,
   PiCircleBold,
+  PiEraserBold,
+  PiRectangleBold,
   PiShapesBold,
   PiStickerBold,
   PiTextAaBold,
@@ -76,10 +76,9 @@ const CanvasArea = ({
   const debouncedWidth = useDebounce(canvasWidth, 200)
   const debouncedHeight = useDebounce(canvasHeight, 200)
 
-  const [selectedShape, setSelectedShape] = useState(null)
-
   const [selectedElement, setSelectedElement] = useState(null)
   const [hideHandles, setHideHandles] = useState(false)
+  const [lockElementAspectRatio, setLockElementAspectRatio] = useState(false)
   const handleStyles = {
     border: '2px solid #5c7cfa',
     backgroundColor: '#fff',
@@ -89,11 +88,20 @@ const CanvasArea = ({
   }
 
   // Shortcuts
+  // hot key for deselecting the selected element
   useHotkeys('esc', () => {
     setSelectedElement(null)
   })
 
+  // hot keys for deleting the selected element
   useHotkeys('delete', () => {
+    if (selectedElement) {
+      deleteAnnotation(selectedElement)
+    }
+  })
+
+  // delete with backspace
+  useHotkeys('backspace', () => {
     if (selectedElement) {
       deleteAnnotation(selectedElement)
     }
@@ -111,13 +119,56 @@ const CanvasArea = ({
     }
   })
 
-  const createCircle = () => {
+  // hot key for moving the selected element up
+  useHotkeys('meta+shift+up', () => {
+    if (selectedElement) {
+      const index = renderedAnnotations.findIndex(
+        (el) => el.id === selectedElement.id
+      )
+      const newAnnotations = [
+        ...renderedAnnotations.slice(0, index),
+        ...renderedAnnotations.slice(index + 1),
+        selectedElement,
+      ]
+      setRenderedAnnotations(newAnnotations)
+    }
+  })
+
+  // hot key for moving the selected element down
+  useHotkeys('meta+shift+down', () => {
+    if (selectedElement) {
+      const index = renderedAnnotations.findIndex(
+        (el) => el.id === selectedElement.id
+      )
+      const newAnnotations = [
+        selectedElement,
+        ...renderedAnnotations.slice(0, index),
+        ...renderedAnnotations.slice(index + 1),
+      ]
+      setRenderedAnnotations(newAnnotations)
+    }
+  })
+
+  // hot key for locking the aspect ratio of the selected element while shift is pressed
+  useHotkeys(
+    'shift',
+    (event) => {
+      if (selectedElement) {
+        setLockElementAspectRatio(event.type === 'keydown')
+      } else {
+        setLockElementAspectRatio(false)
+      }
+    },
+    { keydown: true, keyup: true }
+  )
+
+  const createEllipse = () => {
     const newAnnotations = [
       ...renderedAnnotations,
       {
-        id: `circle-${Date.now()}`,
-        type: 'circle',
-        fill: '#000',
+        id: `ellipse-${Date.now()}`,
+        type: 'ellipse',
+        fill: '#000000',
       },
     ]
     setRenderedAnnotations(newAnnotations)
@@ -127,7 +178,7 @@ const CanvasArea = ({
         ? {
             id: newAnnotations[newAnnotations.length - 1].id,
             index: newAnnotations.length - 1,
-            type: 'circle',
+            type: 'ellipse',
           }
         : null
     )
@@ -139,7 +190,7 @@ const CanvasArea = ({
       {
         id: `rectangle-${Date.now()}`,
         type: 'rectangle',
-        fill: '#000',
+        fill: '#000000',
       },
     ]
     setRenderedAnnotations(newAnnotations)
@@ -153,10 +204,6 @@ const CanvasArea = ({
           }
         : null
     )
-  }
-
-  const createArrow = () => {
-    return
   }
 
   const createLabel = () => {
@@ -221,7 +268,7 @@ const CanvasArea = ({
     return
   }
 
-  const updateText = (element, attr, val) => {
+  const updateElement = (element, attr, val) => {
     // update the element in the array
     const newAnnotations = renderedAnnotations.map((el) =>
       el.id === element.id ? { ...el, [attr]: val } : el
@@ -431,6 +478,11 @@ const CanvasArea = ({
     }
   }
 
+  const handleEraseAnnotations = () => {
+    setRenderedAnnotations([])
+    onOpenChange()
+  }
+
   useEffect(() => {
     const handleClickOnCanvas = (e) => {
       if (wrapperRef.current) {
@@ -512,6 +564,8 @@ const CanvasArea = ({
               default={{
                 x: 0,
                 y: 0,
+                width: element?.type !== 'label' && 100,
+                height: element?.type !== 'label' && 100,
               }}
               style={{
                 zIndex: 1,
@@ -521,7 +575,9 @@ const CanvasArea = ({
                     : 'none',
               }}
               bounds="parent"
-              lockAspectRatio={element?.type === 'sticker' ? true : false}
+              lockAspectRatio={
+                element?.type === 'sticker' ? true : lockElementAspectRatio
+              }
               resizeHandleStyles={
                 selectedElement?.id === element.id && !hideHandles
                   ? {
@@ -551,7 +607,8 @@ const CanvasArea = ({
                     objectFit: 'cover',
                     width: '100%',
                     height: '100%',
-                    padding: '50px',
+                    minWidth: '50px',
+                    minHeight: '50px',
                   }}
                 />
               )}
@@ -565,6 +622,7 @@ const CanvasArea = ({
                     color={element?.color}
                     size={element?.size}
                     weight={element?.weight}
+                    background={element?.bg}
                     initialText={element?.text}
                     onEdit={(isEditing) => {
                       if (isEditing) {
@@ -572,17 +630,18 @@ const CanvasArea = ({
                       }
                     }}
                     onChange={(text) => {
-                      updateText(element, 'text', text)
+                      updateElement(element, 'text', text)
                     }}
                   />
                 </div>
               )}
-              {element?.type === 'circle' && (
+              {element?.type === 'ellipse' && (
                 <div
                   style={{
                     width: '100%',
                     height: '100%',
-                    padding: '50px',
+                    minWidth: '50px',
+                    minHeight: '50px',
                     borderRadius: '50%',
                     backgroundColor: element?.fill,
                   }}
@@ -593,6 +652,8 @@ const CanvasArea = ({
                   style={{
                     width: '100%',
                     height: '100%',
+                    minWidth: '50px',
+                    minHeight: '50px',
                     backgroundColor: element?.fill,
                   }}
                 />
@@ -627,31 +688,33 @@ const CanvasArea = ({
                 Edit {selectedElement.type}
               </h6>
               <Divider orientation="vertical" className="h-6" />
-              <div className="flex gap-2 items-center">
-                <span className="text-sm text-white">Color:</span>
-                <ColorPicker
-                  editAnnotation
-                  onChange={(color) => {
-                    const type = selectedElement.type
-                    switch (type) {
-                      case 'circle':
-                        updateShape('fill', color)
-                        break
-                      case 'arrow':
-                        updateShape('stroke', color)
-                        break
-                      case 'label':
-                        updateText(selectedElement, 'color', color)
+              {selectedElement?.type !== 'sticker' && (
+                <div className="flex gap-2 items-center">
+                  <span className="text-sm text-white font-medium">Color</span>
+                  <ColorPicker
+                    editAnnotation
+                    onChange={(color) => {
+                      const type = selectedElement.type
+                      switch (type) {
+                        case 'ellipse':
+                        case 'rectangle':
+                          updateElement(selectedElement, 'fill', color)
+                          break
+                        case 'label':
+                          updateElement(selectedElement, 'color', color)
 
-                        break
-                      default:
-                        break
+                          break
+                        default:
+                          break
+                      }
+                    }}
+                    defaultColor={
+                      selectedElement?.color || selectedElement?.fill
                     }
-                  }}
-                  defaultColor={selectedElement?.color}
-                  showInput={false}
-                />
-              </div>
+                    showInput={false}
+                  />
+                </div>
+              )}
               {selectedElement?.type === 'label' && (
                 <>
                   <Dropdown className="dark">
@@ -671,13 +734,13 @@ const CanvasArea = ({
                       selectionMode="single"
                       selectedKeys={[selectedElement?.size]}
                       onSelectionChange={(selectedKeys) => {
-                        updateText(selectedElement, 'size', selectedKeys[0])
+                        updateElement(selectedElement, 'size', selectedKeys[0])
                       }}
                     >
                       <DropdownItem
                         key="xs"
                         onClick={() =>
-                          updateText(selectedElement, 'size', 'xs')
+                          updateElement(selectedElement, 'size', 'xs')
                         }
                       >
                         Extra small
@@ -685,7 +748,7 @@ const CanvasArea = ({
                       <DropdownItem
                         key="sm"
                         onClick={() =>
-                          updateText(selectedElement, 'size', 'sm')
+                          updateElement(selectedElement, 'size', 'sm')
                         }
                       >
                         Small
@@ -693,7 +756,7 @@ const CanvasArea = ({
                       <DropdownItem
                         key="md"
                         onClick={() =>
-                          updateText(selectedElement, 'size', 'md')
+                          updateElement(selectedElement, 'size', 'md')
                         }
                       >
                         Medium
@@ -701,7 +764,7 @@ const CanvasArea = ({
                       <DropdownItem
                         key="lg"
                         onClick={() =>
-                          updateText(selectedElement, 'size', 'lg')
+                          updateElement(selectedElement, 'size', 'lg')
                         }
                       >
                         Large
@@ -709,7 +772,7 @@ const CanvasArea = ({
                       <DropdownItem
                         key="xl"
                         onClick={() =>
-                          updateText(selectedElement, 'size', 'xl')
+                          updateElement(selectedElement, 'size', 'xl')
                         }
                       >
                         Extra large
@@ -732,13 +795,17 @@ const CanvasArea = ({
                       selectionMode="single"
                       selectedKeys={[selectedElement?.weight]}
                       onSelectionChange={(selectedKeys) => {
-                        updateText(selectedElement, 'weight', selectedKeys[0])
+                        updateElement(
+                          selectedElement,
+                          'weight',
+                          selectedKeys[0]
+                        )
                       }}
                     >
                       <DropdownItem
                         key="200"
                         onClick={() =>
-                          updateText(selectedElement, 'weight', '200')
+                          updateElement(selectedElement, 'weight', '200')
                         }
                       >
                         Thin
@@ -746,7 +813,7 @@ const CanvasArea = ({
                       <DropdownItem
                         key="300"
                         onClick={() =>
-                          updateText(selectedElement, 'weight', '300')
+                          updateElement(selectedElement, 'weight', '300')
                         }
                       >
                         Light
@@ -754,7 +821,7 @@ const CanvasArea = ({
                       <DropdownItem
                         key="400"
                         onClick={() =>
-                          updateText(selectedElement, 'weight', '400')
+                          updateElement(selectedElement, 'weight', '400')
                         }
                       >
                         Regular
@@ -762,7 +829,7 @@ const CanvasArea = ({
                       <DropdownItem
                         key="500"
                         onClick={() =>
-                          updateText(selectedElement, 'weight', '500')
+                          updateElement(selectedElement, 'weight', '500')
                         }
                       >
                         Medium
@@ -770,7 +837,7 @@ const CanvasArea = ({
                       <DropdownItem
                         key="700"
                         onClick={() =>
-                          updateText(selectedElement, 'weight', '700')
+                          updateElement(selectedElement, 'weight', '700')
                         }
                       >
                         Bold
@@ -778,11 +845,39 @@ const CanvasArea = ({
                       <DropdownItem
                         key="900"
                         onClick={() =>
-                          updateText(selectedElement, 'weight', '800')
+                          updateElement(selectedElement, 'weight', '800')
                         }
                       >
                         Black
                       </DropdownItem>
+                    </DropdownMenu>
+                  </Dropdown>
+                  <Dropdown className="dark">
+                    <DropdownTrigger>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        startContent={<PiArticleBold fontSize="1.1rem" />}
+                        endContent={<PiCaretDownBold fontSize="1.1rem" />}
+                      >
+                        Bg
+                      </Button>
+                    </DropdownTrigger>
+                    <DropdownMenu
+                      aria-label="Weight"
+                      selectionMode="single"
+                      selectedKeys={[selectedElement?.bg]}
+                      onSelectionChange={(selectedKeys) => {
+                        updateElement(
+                          selectedElement,
+                          'bg',
+                          selectedKeys.currentKey
+                        )
+                      }}
+                    >
+                      <DropdownItem key="transparent">None</DropdownItem>
+                      <DropdownItem key="black">Black</DropdownItem>
+                      <DropdownItem key="white">White</DropdownItem>
                     </DropdownMenu>
                   </Dropdown>
                 </>
@@ -845,27 +940,20 @@ const CanvasArea = ({
                     Shapes
                   </Button>
                 </DropdownTrigger>
-                <DropdownMenu
-                  aria-label="Add shape"
-                  selectionMode="single"
-                  selectedKeys={selectedShape}
-                  onSelectionChange={(selectedKeys) =>
-                    setSelectedShape(selectedKeys)
-                  }
-                >
+                <DropdownMenu aria-label="Add shape" selectionMode="single">
                   <DropdownItem
-                    key="circle"
-                    onClick={createCircle}
+                    key="ellipse"
+                    onClick={createEllipse}
                     startContent={<PiCircleBold fontSize="1.1rem" />}
                   >
-                    Circle
+                    Ellipse
                   </DropdownItem>
                   <DropdownItem
-                    key="arrow"
-                    onClick={createArrow}
-                    startContent={<PiArrowUpRightBold fontSize="1.1rem" />}
+                    key="rectangle"
+                    onClick={createRectangle}
+                    startContent={<PiRectangleBold fontSize="1.1rem" />}
                   >
-                    Arrow
+                    Rectangle
                   </DropdownItem>
                 </DropdownMenu>
               </Dropdown>
@@ -910,12 +998,11 @@ const CanvasArea = ({
               <Button
                 size="sm"
                 variant="ghost"
-                startContent={<PiArrowCounterClockwiseBold fontSize="1.1rem" />}
-                onClick={() => {
-                  setRenderedAnnotations([])
-                }}
+                isDisabled={!renderedAnnotations.length}
+                startContent={<PiEraserBold fontSize="1.1rem" />}
+                onClick={onOpen}
               >
-                Reset
+                Erase all
               </Button>
               <Modal
                 isOpen={isOpen}
@@ -923,28 +1010,23 @@ const CanvasArea = ({
                 className="dark"
               >
                 <ModalContent>
-                  <ModalHeader>Shortcuts</ModalHeader>
+                  <ModalHeader>Erase annotations?</ModalHeader>
                   <ModalBody className="flex flex-col gap-4">
-                    <div className="flex gap-2">
-                      <Kbd>del</Kbd>
-                      <span className="text-default-500">
-                        Delete selected shape
-                      </span>
-                    </div>
-                    <div className="flex gap-2">
-                      <Kbd> esc</Kbd>
-                      <span className="text-default-500">
-                        Deselect all shapes
-                      </span>
-                    </div>
-                    <div className="flex gap-2">
-                      <Kbd>shift</Kbd>
-                      <span className="text-default-500">
-                        Hold to scale proportionally
-                      </span>
-                    </div>
+                    <p>
+                      Are you sure you want to erase all annotations? This
+                      action cannot be undone.
+                    </p>
                   </ModalBody>
-                  <ModalFooter />
+                  <ModalFooter>
+                    <Button onClick={onOpenChange}>Cancel</Button>
+                    <Button
+                      variant="solid"
+                      color="danger"
+                      onClick={handleEraseAnnotations}
+                    >
+                      Erase
+                    </Button>
+                  </ModalFooter>
                 </ModalContent>
               </Modal>
             </>
