@@ -28,6 +28,7 @@ import {
   PiEyeSlashBold,
   PiEyeBold,
   PiEyeClosedBold,
+  PiDotsNineBold,
 } from 'react-icons/pi'
 import {
   Button,
@@ -549,7 +550,7 @@ const ToolBar = ({
             <Divider />
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
-                <PiAlignCenterHorizontalSimpleBold fontSize="1.1rem" />
+                <PiDotsNineBold fontSize="1.1rem" />
                 <h5>Position</h5>
               </div>
               <PositionSelector
