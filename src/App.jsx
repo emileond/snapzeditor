@@ -6,6 +6,7 @@ import TopBar from './components/TopBar'
 import ToolBar from './components/ToolBar'
 import CanvasArea from './components/CanvasArea'
 import toast from 'react-hot-toast'
+import browserSignature from 'browser-signature'
 
 function App() {
   const [imgVisibility, setImgVisibility] = useState(true)
@@ -33,6 +34,8 @@ function App() {
   const [customWatermarkText, setCustomWatermarkText] = useState()
   const [isExporting, setIsExporting] = useState(false)
   const [imageLoaded, setImageLoaded] = useState(false)
+
+  const signature = browserSignature()
 
   const canvasRef = useRef(null)
 
@@ -165,6 +168,7 @@ function App() {
 
   return (
     <div className={`flex flex-col items-start mx-auto bg-background h-dvh`}>
+      <p>{signature}</p>
       <TopBar
         canvasWidth={canvasWidth}
         canvasHeight={canvasHeight}
