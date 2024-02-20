@@ -6,7 +6,7 @@ import TopBar from './components/TopBar'
 import ToolBar from './components/ToolBar'
 import CanvasArea from './components/CanvasArea'
 import toast from 'react-hot-toast'
-import browserSignature from 'browser-signature'
+import { getFingerprint } from '@thumbmarkjs/thumbmarkjs'
 
 function App() {
   const [imgVisibility, setImgVisibility] = useState(true)
@@ -35,7 +35,17 @@ function App() {
   const [isExporting, setIsExporting] = useState(false)
   const [imageLoaded, setImageLoaded] = useState(false)
 
-  const signature = browserSignature()
+  const [fingerPrint, setFingerPrint] = useState()
+
+  function generateFP() {
+    getFingerprint().then((fp) => {
+      setFingerPrint(fp)
+    })
+  }
+
+  useEffect(() => {
+    generateFP()
+  }, [])
 
   const canvasRef = useRef(null)
 
@@ -168,7 +178,7 @@ function App() {
 
   return (
     <div className={`flex flex-col items-start mx-auto bg-background h-dvh`}>
-      <p>{signature}</p>
+      <p>{fingerPrint}</p>
       <TopBar
         canvasWidth={canvasWidth}
         canvasHeight={canvasHeight}
