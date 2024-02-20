@@ -45,6 +45,7 @@ const CanvasArea = ({
   canvasRef,
   canvasBg,
   imgScale,
+  imgPosition,
   imgShadow,
   borderRadius,
   rotationX,
@@ -604,6 +605,7 @@ const CanvasArea = ({
           canvasBg={canvasBg}
           imgSrc={imageSrc}
           imgScale={initialScale}
+          imgPosition={imgPosition}
           sliderScale={imgScale}
           shadow={imgShadow}
           borderRadius={borderRadius}

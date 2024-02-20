@@ -30,14 +30,28 @@ const CanvasComponent = forwardRef(
       imgVisibility,
       imgSrc,
       imgScale,
+      imgPosition,
       sliderScale,
     },
     ref
   ) => {
+    const positionsMap = {
+      'top-left': 'items-start justify-start',
+      'top-center': 'items-start justify-center',
+      'top-right': 'items-start justify-end',
+      'left-center': 'items-center justify-start',
+      center: 'items-center justify-center',
+      'right-center': 'items-center justify-end',
+      'bottom-left': 'items-end justify-start',
+      'bottom-center': 'items-end justify-center',
+      'bottom-right': 'items-end justify-end',
+    }
+
+    const position = positionsMap[imgPosition]
     return (
       <div
         ref={ref}
-        className={`canvas flex items-center justify-center w-full h-full overflow-hidden`}
+        className={`canvas flex ${position} w-full h-full overflow-hidden`}
         style={{
           background: canvasBg.style,
         }}

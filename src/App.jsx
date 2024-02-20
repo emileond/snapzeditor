@@ -15,6 +15,7 @@ function App() {
     imgSrc: null,
   })
   const [imgScale, setImgScale] = useState(1)
+  const [imgPosition, setImgPosition] = useState('center')
   const [imgShadow, setImgShadow] = useState(50) // 0 means no shadow by default
   const [borderRadius, setBorderRadius] = useState(20)
   const [rotationX, setRotationX] = useState(0)
@@ -193,6 +194,8 @@ function App() {
           imgFrame={imgFrame}
           setCanvasBg={setCanvasBg}
           setImgScale={setImgScale}
+          setImgPosition={setImgPosition}
+          imgPosition={imgPosition}
           setImgShadow={setImgShadow}
           setBorderRadius={setBorderRadius}
           setRotationX={setRotationX}
@@ -212,6 +215,7 @@ function App() {
           canvasRef={canvasRef}
           canvasBg={canvasBg}
           imgScale={imgScale}
+          imgPosition={imgPosition}
           imgShadow={imgShadow}
           borderRadius={borderRadius}
           rotationX={rotationX}
