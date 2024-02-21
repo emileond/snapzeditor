@@ -22,6 +22,7 @@ function ActivateLicenseModal({ isOpen, onOpenChange }) {
   } = useForm()
 
   const activateUrl = 'https://api.lemonsqueezy.com/v1/licenses/activate'
+  const API_URL = import.meta.env.VITE_API_URL
 
   const [activationError, setActivationError] = useState()
   const [isLoading, setIsLoading] = useState(false)
@@ -29,15 +30,15 @@ function ActivateLicenseModal({ isOpen, onOpenChange }) {
   const onSubmit = async (data) => {
     setIsLoading(true)
     try {
-      const response = await axios.post(
-        activateUrl,
-        { license_key: data.licenseKey, instance_name: 'snapseditor' },
-        {
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-          },
-        }
+      const response = await axios.get(
+        `${API_URL}/hello`
+        // { license_key: data.licenseKey, instance_name: 'snapseditor' },
+        // {
+        //   headers: {
+        //     Accept: 'application/json',
+        //     'Content-Type': 'application/json',
+        //   },
+        // }
       )
       console.log(response)
       if (response.status === 200) {
@@ -47,7 +48,7 @@ function ActivateLicenseModal({ isOpen, onOpenChange }) {
       }
     } catch (error) {
       setIsLoading(false)
-      console.error('Error:', error.response)
+      console.error('Error:', error)
       setActivationError({ error: error.response.data.error })
       toast.error(error.response.data.error)
     }
