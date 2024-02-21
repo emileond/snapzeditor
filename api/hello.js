@@ -1,4 +1,4 @@
-import { getServiceSupabase } from "../src/supabaseClient"}
+import { getServiceSupabase } from '../src/supabaseClient'
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*') // Adjust as needed for security
