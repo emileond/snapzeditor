@@ -6,9 +6,14 @@ import TopBar from './components/TopBar'
 import ToolBar from './components/ToolBar'
 import CanvasArea from './components/CanvasArea'
 import toast from 'react-hot-toast'
-import { getFingerprint } from '@thumbmarkjs/thumbmarkjs'
+import { useUser } from '@supabase/auth-helpers-react'
+import { useCheckLicense } from './hooks/useLicenseCheck'
+import { useFingerprint } from './context/FingerprintContext'
 
 function App() {
+  const user = useUser()
+  const fingerprint = useFingerprint()
+  const { checkLicense } = useCheckLicense()
   const [imgVisibility, setImgVisibility] = useState(true)
   const [triggerReplaceImage, setTriggerReplaceImage] = useState(false)
   const [canvasBg, setCanvasBg] = useState({
@@ -34,18 +39,6 @@ function App() {
   const [customWatermarkText, setCustomWatermarkText] = useState()
   const [isExporting, setIsExporting] = useState(false)
   const [imageLoaded, setImageLoaded] = useState(false)
-
-  const [fingerPrint, setFingerPrint] = useState()
-
-  function generateFP() {
-    getFingerprint().then((fp) => {
-      setFingerPrint(fp)
-    })
-  }
-
-  useEffect(() => {
-    generateFP()
-  }, [])
 
   const canvasRef = useRef(null)
 
@@ -176,9 +169,14 @@ function App() {
     setOcrResult(lines)
   }
 
+  useEffect(() => {
+    if (user?.id && fingerprint) {
+      checkLicense(user.id, fingerprint)
+    }
+  }, [user, fingerprint])
+
   return (
     <div className={`flex flex-col items-start mx-auto bg-background h-dvh`}>
-      <p>{fingerPrint}</p>
       <TopBar
         canvasWidth={canvasWidth}
         canvasHeight={canvasHeight}

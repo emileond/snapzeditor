@@ -14,56 +14,65 @@ import { Toaster } from 'react-hot-toast'
 import { SessionContextProvider } from '@supabase/auth-helpers-react'
 import { supabase } from './supabaseClient.js'
 import Pricing from './components/landing/Pricing.jsx'
+import { FingerprintProvider } from './context/FingerprintContext.jsx'
+import { LicenseProvider } from './context/LicenseContext.jsx'
 
 const root = ReactDOM.createRoot(document.getElementById('root'))
 root.render(
   <React.StrictMode>
     <SessionContextProvider supabaseClient={supabase}>
-      <NextUIProvider>
-        <Router>
-          <Routes>
-            <Route
-              path="/"
-              element={
-                <Layout>
-                  <Hero />
-                  <Divider
-                    style={{
-                      maxWidth: '800px',
-                      opacity: 0.5,
-                    }}
-                  />
-                  <FeaturesGrid />
-                  <Divider
-                    style={{
-                      maxWidth: '800px',
-                      opacity: 0.5,
-                    }}
-                  />
-                  <Download />
-                  <Divider
-                    style={{
-                      maxWidth: '800px',
-                      opacity: 0.5,
-                    }}
-                  />
-                  <Pricing />
-                </Layout>
-              }
-            />
-            <Route
-              path="/app"
-              element={
-                <section id="app" className="dark bg-background/8 w-dvw h-dvh">
-                  <App />
-                </section>
-              }
-            />
-          </Routes>
-        </Router>
-        <AbralyticsScript />
-        <Toaster position="bottom-center" />
-      </NextUIProvider>
+      <FingerprintProvider>
+        <LicenseProvider>
+          <NextUIProvider>
+            <Router>
+              <Routes>
+                <Route
+                  path="/"
+                  element={
+                    <Layout>
+                      <Hero />
+                      <Divider
+                        style={{
+                          maxWidth: '800px',
+                          opacity: 0.5,
+                        }}
+                      />
+                      <FeaturesGrid />
+                      <Divider
+                        style={{
+                          maxWidth: '800px',
+                          opacity: 0.5,
+                        }}
+                      />
+                      <Download />
+                      <Divider
+                        style={{
+                          maxWidth: '800px',
+                          opacity: 0.5,
+                        }}
+                      />
+                      <Pricing />
+                    </Layout>
+                  }
+                />
+                <Route
+                  path="/app"
+                  element={
+                    <section
+                      id="app"
+                      className="dark bg-background/8 w-dvw h-dvh"
+                    >
+                      <App />
+                    </section>
+                  }
+                />
+              </Routes>
+            </Router>
+            <AbralyticsScript />
+            <Toaster position="bottom-center" />
+          </NextUIProvider>
+        </LicenseProvider>
+      </FingerprintProvider>
     </SessionContextProvider>
   </React.StrictMode>
 )

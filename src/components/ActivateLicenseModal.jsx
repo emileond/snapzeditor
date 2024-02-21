@@ -11,8 +11,13 @@ import axios from 'axios'
 import { useForm } from 'react-hook-form'
 import { useState, useEffect } from 'react'
 import toast from 'react-hot-toast'
+import useDeviceName from '../hooks/useDeviceName'
+import { useFingerprint } from '../context/FingerprintContext'
+import { useUser } from '@supabase/auth-helpers-react'
+import { useLicense } from '../context/LicenseContext'
 
 function ActivateLicenseModal({ isOpen, onOpenChange }) {
+  const { isLicensed } = useLicense()
   const {
     register,
     reset,
@@ -21,36 +26,53 @@ function ActivateLicenseModal({ isOpen, onOpenChange }) {
     formState: { errors },
   } = useForm()
 
-  const activateUrl = 'https://api.lemonsqueezy.com/v1/licenses/activate'
-  const API_URL = import.meta.env.VITE_API_URL
+  const url = 'https://snapseditor-main-e4a52d7.d2.zuplo.dev/licenses'
 
   const [activationError, setActivationError] = useState()
   const [isLoading, setIsLoading] = useState(false)
 
+  const deviceName = useDeviceName()
+  const fingerprint = useFingerprint()
+  const user = useUser()
+
+  useEffect(() => {
+    if (isOpen) {
+      console.log('isLicensed', isLicensed)
+    }
+  }, [isOpen])
+
   const onSubmit = async (data) => {
     setIsLoading(true)
+
     try {
-      const response = await axios.get(
-        `${API_URL}/hello`
-        // { license_key: data.licenseKey, instance_name: 'snapseditor' },
-        // {
-        //   headers: {
-        //     Accept: 'application/json',
-        //     'Content-Type': 'application/json',
-        //   },
-        // }
+      const response = await axios.post(
+        url,
+        {
+          license_key: data.licenseKey,
+          instance_name: deviceName,
+          device_id: fingerprint,
+          user_id: user.id,
+        },
+        {
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+          },
+        }
       )
-      console.log(response)
-      if (response.status === 200) {
+      if (response?.data?.error) {
+        console.log(response)
+        setIsLoading(false)
+        setActivationError(response.data)
+      }
+      if (response?.data?.activated) {
         setIsLoading(false)
         toast.success('License activated successfully')
         onOpenChange(true)
       }
     } catch (error) {
       setIsLoading(false)
-      console.error('Error:', error)
-      setActivationError({ error: error.response.data.error })
-      toast.error(error.response.data.error)
+      setActivationError(error.message)
     }
   }
 
