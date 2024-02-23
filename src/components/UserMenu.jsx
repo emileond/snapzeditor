@@ -48,7 +48,7 @@ function UserMenu() {
               </DropdownItem>
             </DropdownSection>
             <DropdownItem
-              href="https://emilio.lemonsqueezy.com/checkout/buy/43989818-785a-45e2-a7bf-652e13d71bd4?checkout[custom][user_id]=123"
+              href="https://snapseditor.lemonsqueezy.com/checkout"
               target="_blank"
               rel="noopener noreferrer"
               variant="shadow"
