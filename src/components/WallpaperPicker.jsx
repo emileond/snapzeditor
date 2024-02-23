@@ -1,8 +1,10 @@
-import { Button } from '@nextui-org/react'
+import { Button, useDisclosure } from '@nextui-org/react'
 import { useState } from 'react'
 import { PiMagicWandBold, PiUploadBold } from 'react-icons/pi'
 import { createApi } from 'unsplash-js'
 import ChipPro from './ChipPro'
+import { useLicense } from '../context/LicenseContext'
+import Paywall from './Paywall'
 
 const unsplash = createApi({
   accessKey: import.meta.env.VITE_UNSPLASH_ACCESS_KEY,
@@ -25,6 +27,8 @@ function WallpaperPicker({ setCanvasBg }) {
   const [isUnsplashLoading, setIsUnsplashLoading] = useState(false)
   const [isUploadLoading, setIsUploadLoading] = useState(false)
   const [unsplashCredits, setUnsplashCredits] = useState(null)
+  const { isLicensed } = useLicense()
+  const { isOpen, onOpen, onClose } = useDisclosure()
 
   const handleWallpaperClick = (index) => {
     setSelectedWallpaperIndex(index)
@@ -114,7 +118,7 @@ function WallpaperPicker({ setCanvasBg }) {
             size="sm"
             isLoading={isUnsplashLoading}
             variant="ghost"
-            onClick={handleRandomWallpaperClick}
+            onClick={isLicensed ? handleRandomWallpaperClick : onOpen}
             startContent={<PiMagicWandBold fontSize="1.1rem" />}
             // endContent={<ChipPro />}
           >
@@ -124,7 +128,7 @@ function WallpaperPicker({ setCanvasBg }) {
             size="sm"
             isLoading={isUploadLoading}
             variant="ghost"
-            onClick={handleUploadWallpaperClick}
+            onClick={isLicensed ? handleUploadWallpaperClick : onOpen}
             startContent={<PiUploadBold fontSize="1.1rem" />}
             // endContent={<ChipPro />}
           >
@@ -154,6 +158,7 @@ function WallpaperPicker({ setCanvasBg }) {
           </span>
         )}
       </div>
+      <Paywall isOpen={isOpen} onOpenChange={onClose} />
     </>
   )
 }

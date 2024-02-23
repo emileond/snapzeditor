@@ -19,13 +19,8 @@ import {
   PiTwitchLogo,
   PiImageBold,
   PiScanBold,
-  PiCrownSimpleBold,
   PiFileImageBold,
   PiArrowCounterClockwiseBold,
-  PiEyeClosed,
-  PiArrowCounterClockwise,
-  PiEyeSlash,
-  PiEyeSlashBold,
   PiEyeBold,
   PiEyeClosedBold,
   PiDotsNineBold,
@@ -42,13 +37,10 @@ import {
   DropdownItem,
   Tab,
   Tabs,
-  Popover,
-  PopoverContent,
   CardHeader,
   CardBody,
-  Badge,
-  Chip,
   CardFooter,
+  useDisclosure,
 } from '@nextui-org/react'
 import Slider from './Slider'
 import GradientButtons from './GradientButtons'
@@ -56,6 +48,8 @@ import WallpaperPicker from './WallpaperPicker'
 import ColorPicker from './ColorPicker'
 import ChipPro from './ChipPro'
 import PositionSelector from './PositionSelector'
+import { useLicense } from '../context/LicenseContext'
+import Paywall from './Paywall'
 
 const ToolBar = ({
   imageLoaded,
@@ -87,6 +81,9 @@ const ToolBar = ({
   isOCRLoading,
   ocrResult,
 }) => {
+  const { isLicensed } = useLicense()
+  const { isOpen, onOpen, onOpenChange } = useDisclosure()
+
   const handleWatermarkUpload = () => {
     const input = document.createElement('input')
     input.type = 'file'
@@ -188,378 +185,400 @@ const ToolBar = ({
     }
   }, [imageLoaded])
 
+  const handleDefaultWatermarkToggle = (e) => {
+    if (isLicensed) {
+      setSnapzWatermark(!snapzWatermark)
+    } else {
+      onOpen()
+    }
+  }
+
+  const handleCustomWatermarkToggle = () => {
+    if (isLicensed) {
+      setCustomWatermarkToggle(!customWatermarkToggle)
+    } else {
+      onOpen()
+    }
+  }
+
   return (
-    <div id="toolbar" className="w-80 min-w-[340px] px-3">
-      <Card className="h-full overflow-auto bg-content1 p-4">
-        <Tabs
-          className="mb-2"
-          color="primary"
-          fullWidth
-          selectedKey={selectedTab}
-          onSelectionChange={setSelectedTab}
-        >
-          <Tab
-            key="canvas"
-            title={
-              <div className="flex items-center space-x-2">
-                <PiFrameCornersBold fontSize="1.3rem" />
-                <span>Canvas</span>
-              </div>
-            }
-            className="flex flex-col gap-4"
+    <>
+      <Paywall isOpen={isOpen} onOpenChange={onOpenChange} />
+
+      <div id="toolbar" className="w-80 min-w-[340px] px-3">
+        <Card className="h-full overflow-auto bg-content1 p-4">
+          <Tabs
+            className="mb-2"
+            color="primary"
+            fullWidth
+            selectedKey={selectedTab}
+            onSelectionChange={setSelectedTab}
           >
-            <div className="flex flex-col items-start gap-2">
-              <div className="flex items-center gap-2">
-                <PiArrowsOutSimpleBold fontSize="1.1rem" />
-                <h5>Size</h5>
+            <Tab
+              key="canvas"
+              title={
+                <div className="flex items-center space-x-2">
+                  <PiFrameCornersBold fontSize="1.3rem" />
+                  <span>Canvas</span>
+                </div>
+              }
+              className="flex flex-col gap-4"
+            >
+              <div className="flex flex-col items-start gap-2">
+                <div className="flex items-center gap-2">
+                  <PiArrowsOutSimpleBold fontSize="1.1rem" />
+                  <h5>Size</h5>
+                </div>
+                <div className="flex gap-2 items-center">
+                  <Input
+                    {...register('inputWidth', {
+                      min: 10,
+                      max: 4096,
+                      valueAsNumber: true,
+                      validate: (value) => value >= 10 && value <= 4096,
+                    })}
+                    isInvalid={sizeError && true}
+                    type="number"
+                    size="xs"
+                    variant="bordered"
+                    placeholder="Width"
+                    endContent="px"
+                    classNames={{
+                      input: 'w-full',
+                      inputWrapper: ['min-h-9', 'h-9'],
+                    }}
+                    value={canvasWidth}
+                  />
+                  <p className="text-default-500">x</p>
+                  <Input
+                    {...register('inputHeight', {
+                      min: 10,
+                      max: 4096,
+                      valueAsNumber: true,
+                      validate: (value) => value >= 10 && value <= 4096,
+                    })}
+                    isInvalid={sizeError && true}
+                    type="number"
+                    size="xs"
+                    variant="bordered"
+                    placeholder="Height"
+                    endContent="px"
+                    classNames={{
+                      input: 'w-full',
+                      inputWrapper: ['min-h-9', 'h-9'],
+                    }}
+                    value={canvasHeight}
+                  />
+                  {sizeError && (
+                    <p className="text-danger text-sm">{sizeError}</p>
+                  )}
+                  <Dropdown className="dark">
+                    <DropdownTrigger>
+                      <Button isIconOnly size="sm" variant="faded">
+                        <PiCaretDownBold fontSize="1rem" />
+                      </Button>
+                    </DropdownTrigger>
+                    <DropdownMenu aria-label="Templates">
+                      {canvasTemplates.map((template) => (
+                        <DropdownItem
+                          key={template.name}
+                          startContent={template.icon && template.icon}
+                          endContent={
+                            <p className="text-default-400 text-xs">{`${template.width} x ${template.height}`}</p>
+                          }
+                          onClick={() => {
+                            setValue('inputWidth', template.width)
+                            setValue('inputHeight', template.height)
+                          }}
+                        >
+                          {template.name}
+                        </DropdownItem>
+                      ))}
+                    </DropdownMenu>
+                  </Dropdown>
+                </div>
               </div>
-              <div className="flex gap-2 items-center">
-                <Input
-                  {...register('inputWidth', {
-                    min: 10,
-                    max: 4096,
-                    valueAsNumber: true,
-                    validate: (value) => value >= 10 && value <= 4096,
-                  })}
-                  isInvalid={sizeError && true}
-                  type="number"
-                  size="xs"
-                  variant="bordered"
-                  placeholder="Width"
-                  endContent="px"
-                  classNames={{
-                    input: 'w-full',
-                    inputWrapper: ['min-h-9', 'h-9'],
-                  }}
-                  value={canvasWidth}
-                />
-                <p className="text-default-500">x</p>
-                <Input
-                  {...register('inputHeight', {
-                    min: 10,
-                    max: 4096,
-                    valueAsNumber: true,
-                    validate: (value) => value >= 10 && value <= 4096,
-                  })}
-                  isInvalid={sizeError && true}
-                  type="number"
-                  size="xs"
-                  variant="bordered"
-                  placeholder="Height"
-                  endContent="px"
-                  classNames={{
-                    input: 'w-full',
-                    inputWrapper: ['min-h-9', 'h-9'],
-                  }}
-                  value={canvasHeight}
-                />
-                {sizeError && (
-                  <p className="text-danger text-sm">{sizeError}</p>
+              <Divider />
+              <div className="flex flex-col items-start gap-2">
+                <div className="flex items-center gap-2">
+                  <PiSelectionBackgroundBold fontSize="1.1rem" />
+                  <h5>Background</h5>
+                </div>
+                <Tabs size="sm" fullWidth>
+                  <Tab title="Gradient">
+                    <GradientButtons setCanvasBg={setCanvasBg} />
+                  </Tab>
+                  <Tab title="Wallpaper">
+                    <WallpaperPicker setCanvasBg={setCanvasBg} />
+                  </Tab>
+                  <Tab title="Color">
+                    <ColorPicker
+                      onChange={(color) => {
+                        setCanvasBg({ style: color, imgSrc: null })
+                      }}
+                    />
+                  </Tab>
+                </Tabs>
+              </div>
+              <Divider />
+              <div className="flex flex-col gap-2 items-start">
+                <div className="flex items-center gap-2">
+                  <PiGhostBold fontSize="1.1rem" />
+                  <h5>Watermark</h5>
+                  <ChipPro />
+                </div>
+                <Switch
+                  size="sm"
+                  color="secondary"
+                  isSelected={snapzWatermark}
+                  onChange={handleDefaultWatermarkToggle}
+                >
+                  SnapzEditor watermark
+                </Switch>
+
+                <Switch
+                  size="sm"
+                  color="secondary"
+                  isSelected={customWatermarkToggle}
+                  onChange={handleCustomWatermarkToggle}
+                >
+                  Custom watermark
+                </Switch>
+                {customWatermarkToggle && (
+                  // add custom image upload
+                  <div className="flex flex-col gap-2 items-start w-full">
+                    <span className="text-sm">Watermark icon</span>
+                    <Button
+                      size="sm"
+                      variant="shadow"
+                      onClick={handleWatermarkUpload}
+                    >
+                      Upload
+                    </Button>
+                    <span className="text-sm">Watermark text</span>
+                    <Input
+                      className="w-full"
+                      variant="faded"
+                      size="sm"
+                      placeholder="Add your text"
+                      onChange={(e) => setCustomWatermarkText(e.target.value)}
+                    />
+                  </div>
                 )}
+              </div>
+              <Divider />
+            </Tab>
+            <Tab
+              key="image"
+              title={
+                <div className="flex items-center space-x-2">
+                  <PiImageBold fontSize="1.3rem" />
+                  <span>Image</span>
+                </div>
+              }
+              className="flex flex-col gap-4"
+            >
+              <Divider />
+              <div className="flex flex-col items-start gap-3">
+                <div className="flex items-center gap-2">
+                  <PiFileImageBold fontSize="1.1rem" />
+                  <h5>File</h5>
+                  <p className="text-start text-default-600 text-sm truncate w-52">
+                    {imageLoaded.loaded && imageLoaded.data
+                      ? imageLoaded.data.name
+                      : 'Screenshot'}
+                  </p>
+                </div>
+                <div className="flex items-center justify-center gap-2 w-full">
+                  <Button
+                    size="sm"
+                    variant="faded"
+                    startContent={
+                      <PiArrowCounterClockwiseBold fontSize="1rem" />
+                    }
+                    onClick={onReplaceImage}
+                  >
+                    Replace
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="faded"
+                    startContent={
+                      imgVisibility ? (
+                        <PiEyeClosedBold fontSize="1rem" />
+                      ) : (
+                        <PiEyeBold fontSize="1rem" />
+                      )
+                    }
+                    onClick={() => setImgVisibility(!imgVisibility)}
+                  >
+                    {imgVisibility ? 'Hide' : 'Show'}
+                  </Button>
+                </div>
+              </div>
+              <Divider />
+              <div className="flex flex-col items-start gap-2">
+                <div className="flex items-center gap-2">
+                  <PiBrowserBold fontSize="1.1rem" />
+                  <h5>Frame</h5>
+                </div>
                 <Dropdown className="dark">
                   <DropdownTrigger>
-                    <Button isIconOnly size="sm" variant="faded">
+                    <Button size="sm" variant="faded">
+                      {imgFrame}
                       <PiCaretDownBold fontSize="1rem" />
                     </Button>
                   </DropdownTrigger>
-                  <DropdownMenu aria-label="Templates">
-                    {canvasTemplates.map((template) => (
-                      <DropdownItem
-                        key={template.name}
-                        startContent={template.icon && template.icon}
-                        endContent={
-                          <p className="text-default-400 text-xs">{`${template.width} x ${template.height}`}</p>
-                        }
-                        onClick={() => {
-                          setValue('inputWidth', template.width)
-                          setValue('inputHeight', template.height)
-                        }}
-                      >
-                        {template.name}
-                      </DropdownItem>
-                    ))}
+                  <DropdownMenu>
+                    <DropdownItem
+                      onClick={() => {
+                        setImgFrame('macOS-dark')
+                      }}
+                    >
+                      macOS dark
+                    </DropdownItem>
+                    <DropdownItem
+                      onClick={() => {
+                        setImgFrame('macOS-light')
+                      }}
+                    >
+                      macOS light
+                    </DropdownItem>
+                    <DropdownItem
+                      onClick={() => {
+                        setImgFrame('windows-light')
+                      }}
+                    >
+                      Windows light
+                    </DropdownItem>
+                    <DropdownItem
+                      onClick={() => {
+                        setImgFrame('windows-dark')
+                      }}
+                    >
+                      Windows dark
+                    </DropdownItem>
+                    <DropdownItem
+                      onClick={() => {
+                        setImgFrame('youtube')
+                      }}
+                    >
+                      YouTube
+                    </DropdownItem>
+                    <DropdownItem
+                      onClick={() => {
+                        setImgFrame('galaxy')
+                      }}
+                    >
+                      Galaxy
+                    </DropdownItem>
+                    <DropdownItem
+                      onClick={() => {
+                        setImgFrame('none')
+                      }}
+                    >
+                      None
+                    </DropdownItem>
                   </DropdownMenu>
                 </Dropdown>
               </div>
-            </div>
-            <Divider />
-            <div className="flex flex-col items-start gap-2">
-              <div className="flex items-center gap-2">
-                <PiSelectionBackgroundBold fontSize="1.1rem" />
-                <h5>Background</h5>
+              <Divider />
+              <div>
+                <div className="flex items-center gap-2">
+                  <PiArrowsOutSimpleBold fontSize="1.1rem" />
+                  <h5>Size</h5>
+                </div>
+                <Slider
+                  onValueChange={(value) => {
+                    setImgScale(value)
+                  }}
+                  min={0.5}
+                  max={2.5}
+                  step={0.01}
+                  defaultValue={[1]}
+                />
               </div>
-              <Tabs size="sm" fullWidth>
-                <Tab title="Gradient">
-                  <GradientButtons setCanvasBg={setCanvasBg} />
-                </Tab>
-                <Tab title="Wallpaper">
-                  <WallpaperPicker setCanvasBg={setCanvasBg} />
-                </Tab>
-                <Tab title="Color">
-                  <ColorPicker
-                    onChange={(color) => {
-                      setCanvasBg({ style: color, imgSrc: null })
-                    }}
-                  />
-                </Tab>
-              </Tabs>
-            </div>
-            <Divider />
-            <div className="flex flex-col gap-2 items-start">
-              <div className="flex items-center gap-2">
-                <PiGhostBold fontSize="1.1rem" />
-                <h5>Watermark</h5>
+              <Divider />
+              <div>
+                <div className="flex items-center gap-2">
+                  <PiNotchesBold fontSize="1.1rem" />
+                  <h5>Shadow</h5>
+                </div>
+                <Slider
+                  onValueChange={(value) => {
+                    setImgShadow(value)
+                  }}
+                  min={0}
+                  max={100}
+                  step={1}
+                  defaultValue={[50]}
+                />
+              </div>
+              <Divider />
+              <div>
+                <div className="flex items-center gap-2">
+                  <PiCircleDashedBold fontSize="1.1rem" />
+                  <h5>Rounded corners</h5>
+                </div>
+                <Slider
+                  onValueChange={(value) => {
+                    setBorderRadius(value)
+                  }}
+                  min={0}
+                  max={50}
+                  step={1}
+                  defaultValue={[20]}
+                />
+              </div>
+              <Divider />
+              <div>
+                <div className="flex items-center gap-2">
+                  <PiAlignCenterVerticalSimpleBold fontSize="1.1rem" />
+
+                  <h5>Rotate X</h5>
+                </div>
+                <Slider
+                  onValueChange={(value) => {
+                    setRotationX(value)
+                  }}
+                  min={-15}
+                  max={15}
+                  step={1}
+                  defaultValue={[0]}
+                />
+              </div>
+              <Divider />
+              <div>
+                <div className="flex items-center gap-2">
+                  <PiAlignCenterHorizontalSimpleBold fontSize="1.1rem" />
+                  <h5>Rotate Y</h5>
+                </div>
+                <Slider
+                  onValueChange={(value) => {
+                    setRotationY(value)
+                  }}
+                  min={-15}
+                  max={15}
+                  step={1}
+                  defaultValue={[0]}
+                />
+              </div>
+              <Divider />
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <PiDotsNineBold fontSize="1.1rem" />
+                  <h5>Position</h5>
+                </div>
+                <PositionSelector
+                  onChange={(pos) =>
+                    isLicensed ? setImgPosition(pos) : onOpen()
+                  }
+                  position={imgPosition}
+                />
                 <ChipPro />
               </div>
-              <Switch
-                size="sm"
-                color="secondary"
-                defaultSelected={snapzWatermark}
-                onChange={() => setSnapzWatermark(!snapzWatermark)}
-              >
-                SnapzEditor watermark
-              </Switch>
 
-              <Switch
-                size="sm"
-                color="secondary"
-                defaultSelected={customWatermarkToggle}
-                onChange={() =>
-                  setCustomWatermarkToggle(!customWatermarkToggle)
-                }
-              >
-                Custom watermark
-              </Switch>
-              {customWatermarkToggle && (
-                // add custom image upload
-                <div className="flex flex-col gap-2 items-start w-full">
-                  <span className="text-sm">Watermark icon</span>
-                  <Button
-                    size="sm"
-                    variant="shadow"
-                    onClick={handleWatermarkUpload}
-                  >
-                    Upload
-                  </Button>
-                  <span className="text-sm">Watermark text</span>
-                  <Input
-                    className="w-full"
-                    variant="faded"
-                    size="sm"
-                    placeholder="Add your text"
-                    onChange={(e) => setCustomWatermarkText(e.target.value)}
-                  />
-                </div>
-              )}
-            </div>
-            <Divider />
-          </Tab>
-          <Tab
-            key="image"
-            title={
-              <div className="flex items-center space-x-2">
-                <PiImageBold fontSize="1.3rem" />
-                <span>Image</span>
-              </div>
-            }
-            className="flex flex-col gap-4"
-          >
-            <Divider />
-            <div className="flex flex-col items-start gap-3">
-              <div className="flex items-center gap-2">
-                <PiFileImageBold fontSize="1.1rem" />
-                <h5>File</h5>
-                <p className="text-start text-default-600 text-sm truncate w-52">
-                  {imageLoaded.loaded && imageLoaded.data
-                    ? imageLoaded.data.name
-                    : 'Screenshot'}
-                </p>
-              </div>
-              <div className="flex items-center justify-center gap-2 w-full">
-                <Button
-                  size="sm"
-                  variant="faded"
-                  startContent={<PiArrowCounterClockwiseBold fontSize="1rem" />}
-                  onClick={onReplaceImage}
-                >
-                  Replace
-                </Button>
-                <Button
-                  size="sm"
-                  variant="faded"
-                  startContent={
-                    imgVisibility ? (
-                      <PiEyeClosedBold fontSize="1rem" />
-                    ) : (
-                      <PiEyeBold fontSize="1rem" />
-                    )
-                  }
-                  onClick={() => setImgVisibility(!imgVisibility)}
-                >
-                  {imgVisibility ? 'Hide' : 'Show'}
-                </Button>
-              </div>
-            </div>
-            <Divider />
-            <div className="flex flex-col items-start gap-2">
-              <div className="flex items-center gap-2">
-                <PiBrowserBold fontSize="1.1rem" />
-                <h5>Frame</h5>
-              </div>
-              <Dropdown className="dark">
-                <DropdownTrigger>
-                  <Button size="sm" variant="faded">
-                    {imgFrame}
-                    <PiCaretDownBold fontSize="1rem" />
-                  </Button>
-                </DropdownTrigger>
-                <DropdownMenu>
-                  <DropdownItem
-                    onClick={() => {
-                      setImgFrame('macOS-dark')
-                    }}
-                  >
-                    macOS dark
-                  </DropdownItem>
-                  <DropdownItem
-                    onClick={() => {
-                      setImgFrame('macOS-light')
-                    }}
-                  >
-                    macOS light
-                  </DropdownItem>
-                  <DropdownItem
-                    onClick={() => {
-                      setImgFrame('windows-light')
-                    }}
-                  >
-                    Windows light
-                  </DropdownItem>
-                  <DropdownItem
-                    onClick={() => {
-                      setImgFrame('windows-dark')
-                    }}
-                  >
-                    Windows dark
-                  </DropdownItem>
-                  <DropdownItem
-                    onClick={() => {
-                      setImgFrame('youtube')
-                    }}
-                  >
-                    YouTube
-                  </DropdownItem>
-                  <DropdownItem
-                    onClick={() => {
-                      setImgFrame('galaxy')
-                    }}
-                  >
-                    Galaxy
-                  </DropdownItem>
-                  <DropdownItem
-                    onClick={() => {
-                      setImgFrame('none')
-                    }}
-                  >
-                    None
-                  </DropdownItem>
-                </DropdownMenu>
-              </Dropdown>
-            </div>
-            <Divider />
-            <div>
-              <div className="flex items-center gap-2">
-                <PiArrowsOutSimpleBold fontSize="1.1rem" />
-                <h5>Size</h5>
-              </div>
-              <Slider
-                onValueChange={(value) => {
-                  setImgScale(value)
-                }}
-                min={0.5}
-                max={2.5}
-                step={0.01}
-                defaultValue={[1]}
-              />
-            </div>
-            <Divider />
-            <div>
-              <div className="flex items-center gap-2">
-                <PiNotchesBold fontSize="1.1rem" />
-                <h5>Shadow</h5>
-              </div>
-              <Slider
-                onValueChange={(value) => {
-                  setImgShadow(value)
-                }}
-                min={0}
-                max={100}
-                step={1}
-                defaultValue={[50]}
-              />
-            </div>
-            <Divider />
-            <div>
-              <div className="flex items-center gap-2">
-                <PiCircleDashedBold fontSize="1.1rem" />
-                <h5>Rounded corners</h5>
-              </div>
-              <Slider
-                onValueChange={(value) => {
-                  setBorderRadius(value)
-                }}
-                min={0}
-                max={50}
-                step={1}
-                defaultValue={[20]}
-              />
-            </div>
-            <Divider />
-            <div>
-              <div className="flex items-center gap-2">
-                <PiAlignCenterVerticalSimpleBold fontSize="1.1rem" />
-
-                <h5>Rotate X</h5>
-              </div>
-              <Slider
-                onValueChange={(value) => {
-                  setRotationX(value)
-                }}
-                min={-15}
-                max={15}
-                step={1}
-                defaultValue={[0]}
-              />
-            </div>
-            <Divider />
-            <div>
-              <div className="flex items-center gap-2">
-                <PiAlignCenterHorizontalSimpleBold fontSize="1.1rem" />
-                <h5>Rotate Y</h5>
-              </div>
-              <Slider
-                onValueChange={(value) => {
-                  setRotationY(value)
-                }}
-                min={-15}
-                max={15}
-                step={1}
-                defaultValue={[0]}
-              />
-            </div>
-            <Divider />
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <PiDotsNineBold fontSize="1.1rem" />
-                <h5>Position</h5>
-              </div>
-              <PositionSelector
-                onChange={(pos) => setImgPosition(pos)}
-                position={imgPosition}
-              />
-            </div>
-
-            {/* <Divider />
+              {/* <Divider />
             <div>
               <div className="flex items-center gap-2">
                 <PiFrameCornersBold fontSize="1.1rem" />
@@ -575,78 +594,81 @@ const ToolBar = ({
                 defaultValue={[0]}
               />
             </div> */}
-            <Divider />
-            <div className="flex flex-col items-start gap-2">
-              <div className="flex items-center gap-2">
-                <PiScanBold fontSize="1.1rem" />
-                <h5>Extract text</h5>
-                <ChipPro />
-              </div>
-              <div className="flex items-center gap-2">
-                <Dropdown className="dark">
-                  <DropdownTrigger>
-                    <Button size="sm" variant="faded" disabled={isOCRLoading}>
-                      {ocrLanguage}
-                      <PiCaretDownBold fontSize="1rem" />
-                    </Button>
-                  </DropdownTrigger>
-                  <DropdownMenu aria-label="Languages">
-                    {supportedLanguages.map((language) => (
-                      <DropdownItem
-                        key={language.value}
-                        value={language.value}
-                        onClick={() => setOcrLanguage(language.value)}
-                      >
-                        {language.label}
-                      </DropdownItem>
-                    ))}
-                  </DropdownMenu>
-                </Dropdown>
-                <Button
-                  size="sm"
-                  onClick={() => handleExtractText(ocrLanguage)}
-                  isLoading={isOCRLoading}
-                >
-                  Extract
-                </Button>
-              </div>
-              {ocrResult && (
-                <Card className="w-full max-h-200 border border-content3">
-                  <CardHeader className="py-2">
-                    <p className="text-tiny uppercase font-bold">Result</p>
-                  </CardHeader>
-                  <CardBody className="pt-1 pb-2">
-                    <div className="flex flex-col gap-1">
-                      {ocrResult?.map((line) => (
-                        <p
-                          key={line?.text}
-                          className="text-default-600 text-sm"
+              <Divider />
+              <div className="flex flex-col items-start gap-2">
+                <div className="flex items-center gap-2">
+                  <PiScanBold fontSize="1.1rem" />
+                  <h5>Extract text</h5>
+                  <ChipPro />
+                </div>
+                <div className="flex items-center gap-2">
+                  <Dropdown className="dark">
+                    <DropdownTrigger>
+                      <Button size="sm" variant="faded" disabled={isOCRLoading}>
+                        {ocrLanguage}
+                        <PiCaretDownBold fontSize="1rem" />
+                      </Button>
+                    </DropdownTrigger>
+                    <DropdownMenu aria-label="Languages">
+                      {supportedLanguages.map((language) => (
+                        <DropdownItem
+                          key={language.value}
+                          value={language.value}
+                          onClick={() => setOcrLanguage(language.value)}
                         >
-                          {line?.text}
-                        </p>
+                          {language.label}
+                        </DropdownItem>
                       ))}
-                    </div>
-                  </CardBody>
-                  <CardFooter>
-                    <Button
-                      size="sm"
-                      variant="faded"
-                      onClick={() => {
-                        navigator.clipboard.writeText(
-                          ocrResult.map((line) => line.text).join('\n')
-                        )
-                      }}
-                    >
-                      Copy
-                    </Button>
-                  </CardFooter>
-                </Card>
-              )}
-            </div>
-          </Tab>
-        </Tabs>
-      </Card>
-    </div>
+                    </DropdownMenu>
+                  </Dropdown>
+                  <Button
+                    size="sm"
+                    onClick={() =>
+                      isLicensed ? handleExtractText(ocrLanguage) : onOpen()
+                    }
+                    isLoading={isOCRLoading}
+                  >
+                    Extract
+                  </Button>
+                </div>
+                {ocrResult && (
+                  <Card className="w-full max-h-200 border border-content3">
+                    <CardHeader className="py-2">
+                      <p className="text-tiny uppercase font-bold">Result</p>
+                    </CardHeader>
+                    <CardBody className="pt-1 pb-2">
+                      <div className="flex flex-col gap-1">
+                        {ocrResult?.map((line) => (
+                          <p
+                            key={line?.text}
+                            className="text-default-600 text-sm"
+                          >
+                            {line?.text}
+                          </p>
+                        ))}
+                      </div>
+                    </CardBody>
+                    <CardFooter>
+                      <Button
+                        size="sm"
+                        variant="faded"
+                        onClick={() => {
+                          navigator.clipboard.writeText(
+                            ocrResult.map((line) => line.text).join('\n')
+                          )
+                        }}
+                      >
+                        Copy
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                )}
+              </div>
+            </Tab>
+          </Tabs>
+        </Card>
+      </div>
+    </>
   )
 }
 
