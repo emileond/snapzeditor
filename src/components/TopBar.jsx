@@ -52,7 +52,7 @@ const TopBar = ({
           defaultValue={fileName}
         />
       </div>
-      <div className="flex gap-3">
+      <div className="flex gap-3 items-center">
         {/* <Button endContent={<PiCaretDownBold fontSize="1.1rem" />}>
         Presets
       </Button> */}

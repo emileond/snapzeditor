@@ -16,8 +16,10 @@ import { supabase } from './supabaseClient.js'
 import Pricing from './components/landing/Pricing.jsx'
 import { FingerprintProvider } from './context/FingerprintContext.jsx'
 import { LicenseProvider } from './context/LicenseContext.jsx'
+import GetTerms from './components/GetTerms.jsx'
 
 const root = ReactDOM.createRoot(document.getElementById('root'))
+
 root.render(
   <React.StrictMode>
     <SessionContextProvider supabaseClient={supabase}>
@@ -64,6 +66,22 @@ root.render(
                     >
                       <App />
                     </section>
+                  }
+                />
+                <Route
+                  path="privacy-policy"
+                  element={
+                    <Layout>
+                      <GetTerms doc="privacy" />
+                    </Layout>
+                  }
+                />
+                <Route
+                  path="tos"
+                  element={
+                    <Layout>
+                      <GetTerms doc="tos" />
+                    </Layout>
                   }
                 />
               </Routes>
