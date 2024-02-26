@@ -173,7 +173,7 @@ function App() {
     if (user?.id && fingerprint) {
       checkLicense(user.id, fingerprint)
     }
-  }, [user, fingerprint])
+  }, [user, fingerprint, checkLicense])
 
   return (
     <div className={`flex flex-col items-start mx-auto bg-background h-dvh`}>

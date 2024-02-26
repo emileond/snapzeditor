@@ -14,6 +14,8 @@ import AuthModal from './AuthModal'
 import { PiBarcode, PiCrownSimple, PiPower, PiUser } from 'react-icons/pi'
 import toast from 'react-hot-toast'
 import ActivateLicenseModal from './ActivateLicenseModal'
+import { useLicense } from '../context/LicenseContext'
+import ChipPro from './ChipPro'
 
 function UserMenu() {
   const user = useUser()
@@ -21,6 +23,7 @@ function UserMenu() {
   const [openAuthModal, setOpenAuthModal] = useState(false)
   const [authViewMode, setAuthViewMode] = useState()
   const [openLicenseModal, setOpenLicenseModal] = useState(false)
+  const { isLicensed } = useLicense()
 
   const iconClasses =
     'text-xl text-default-500 pointer-events-none flex-shrink-0'
@@ -44,34 +47,42 @@ function UserMenu() {
           </DropdownTrigger>
           <DropdownMenu variant="flat" aria-label="User menu">
             <DropdownSection>
-              <DropdownItem isReadOnly isDisabled>
+              <DropdownItem
+                isReadOnly
+                className="text-default-500 hover:cursor-default py-3"
+                endContent={isLicensed && <ChipPro />}
+              >
                 {user.email}
               </DropdownItem>
             </DropdownSection>
             <DropdownItem
-              href="https://snapseditor.lemonsqueezy.com/checkout"
+              isReadOnly
+              href="https://snapseditor.lemonsqueezy.com/checkout/buy/9f4640b3-fc5c-4fee-a285-7b779c5b6aa7?media=0"
               target="_blank"
               rel="noopener noreferrer"
               variant="shadow"
               color="primary"
               startContent={<PiCrownSimple className={iconClasses} />}
-              className="text-white bg-primary hover:text-white"
+              className="text-white bg-primary hover:text-white py-2"
             >
               Purchase license
             </DropdownItem>
             <DropdownItem
+              className="py-2"
               startContent={<PiBarcode className={iconClasses} />}
               onClick={() => setOpenLicenseModal(true)}
             >
               Activate license
             </DropdownItem>
             <DropdownItem
+              className="py-2"
               startContent={<PiUser className={iconClasses} />}
               // onClick={handleSignOut}
             >
               Account
             </DropdownItem>
             <DropdownItem
+              className="py-2"
               startContent={<PiPower className={iconClasses} />}
               onClick={handleSignOut}
             >

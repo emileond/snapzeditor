@@ -13,11 +13,11 @@ export const useCheckLicense = () => {
       .eq('device_id', fingerPrint)
       .single()
 
-    if (error) {
-      return console.error('Error fetching license:', error)
+    if (!data || error) {
+      updateLicenseStatus(false)
+      console.error('Error fetching license:', error)
     }
 
-    // Assuming 'data' contains the license information
     // Update the context based on whether a valid license instance is found
     const isUserLicensed = !!data
     updateLicenseStatus(isUserLicensed)
