@@ -4,6 +4,7 @@ import {
   CardBody,
   CardFooter,
   CardHeader,
+  Link,
 } from '@nextui-org/react'
 import { PiCheckCircleBold } from 'react-icons/pi'
 
@@ -13,6 +14,7 @@ export default function Pricing() {
       title: 'Personal',
       price: '$39',
       desc: 'Pay-once license for personal use',
+      href: 'https://snapseditor.lemonsqueezy.com/checkout/buy/43989818-785a-45e2-a7bf-652e13d71bd4?media=0',
       isFeatured: false,
       features: [
         '1 Device',
@@ -25,6 +27,7 @@ export default function Pricing() {
       title: 'Standard',
       price: '$59',
       desc: 'Best for multi-device setups',
+      href: 'https://snapseditor.lemonsqueezy.com/checkout/buy/9f4640b3-fc5c-4fee-a285-7b779c5b6aa7?media=0',
       isFeatured: true,
       features: [
         '3 Devices',
@@ -37,6 +40,7 @@ export default function Pricing() {
       title: 'Extended',
       price: '$129',
       desc: 'Best for small teams',
+      href: 'https://snapseditor.lemonsqueezy.com/checkout/buy/af91c9da-f564-48c2-b9b5-a14c416502b7?media=0',
       isFeatured: false,
       features: [
         '5 Devices',
@@ -87,10 +91,12 @@ export default function Pricing() {
             </CardBody>
             <CardFooter>
               <Button
+                as={Link}
+                href={feature.href}
                 fullWidth
                 size="lg"
-                variant={feature.isFeatured ? 'shadow' : 'flat'}
-                color={feature.isFeatured ? 'secondary' : 'default'}
+                variant={feature.isFeatured ? 'shadow' : 'ghost'}
+                color="secondary"
               >
                 Get started
               </Button>

@@ -1,6 +1,7 @@
 import {
   Button,
   Input,
+  Link,
   Modal,
   ModalBody,
   ModalContent,
@@ -12,12 +13,15 @@ import { useForm } from 'react-hook-form'
 import { useState, useEffect } from 'react'
 import toast from 'react-hot-toast'
 import useDeviceName from '../hooks/useDeviceName'
-import { useFingerprint } from '../context/FingerprintContext'
 import { useUser } from '@supabase/auth-helpers-react'
 import { useLicense } from '../context/LicenseContext'
+import { useFingerprint } from '../context/FingerprintContext'
+import { useCheckLicense } from '../hooks/useLicenseCheck'
+import confetti from 'canvas-confetti'
 
 function ActivateLicenseModal({ isOpen, onOpenChange }) {
   const { isLicensed } = useLicense()
+  const { checkLicense } = useCheckLicense()
   const {
     register,
     reset,
@@ -36,10 +40,17 @@ function ActivateLicenseModal({ isOpen, onOpenChange }) {
   const user = useUser()
 
   useEffect(() => {
-    if (isOpen) {
-      console.log('isLicensed', isLicensed)
+    if (isOpen && user && fingerprint) {
+      checkLicense(user.id, fingerprint)
+      if (isLicensed) {
+        confetti({
+          particleCount: 100,
+          spread: 90,
+          origin: { y: 0.6 },
+        })
+      }
     }
-  }, [isOpen])
+  }, [isOpen, isLicensed, user, fingerprint])
 
   const onSubmit = async (data) => {
     setIsLoading(true)
@@ -68,7 +79,7 @@ function ActivateLicenseModal({ isOpen, onOpenChange }) {
       if (response?.data?.activated) {
         setIsLoading(false)
         toast.success('License activated successfully')
-        onOpenChange(true)
+        checkLicense(user.id, fingerprint)
       }
     } catch (error) {
       setIsLoading(false)
@@ -94,60 +105,98 @@ function ActivateLicenseModal({ isOpen, onOpenChange }) {
     >
       <ModalContent>
         <ModalHeader className="flex flex-col gap-1">
-          Activate license
+          {isLicensed ? '' : 'Activate license'}
         </ModalHeader>
         <ModalBody>
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <div className="flex flex-col gap-4 w-full">
-              <p className="text-sm text-default-500">
-                Your license key can be found in your email after purchasing the
-                license.
+          {isLicensed ? (
+            <div className="flex flex-col gap-3">
+              <h3 className="text-lg font-semibold">
+                Thanks for your purchase 🎉
+              </h3>
+              <p className="text-default-700">
+                Your license has been activated, you now have access to all Pro
+                features on this device.
               </p>
-              <Input
-                isInvalid={
-                  (errors?.licenseKey && true) ||
-                  (activationError?.error && true)
-                }
-                errorMessage={
-                  (errors?.licenseKey && 'License key is required') ||
-                  activationError?.error
-                }
-                placeholder="License key"
-                {...register('licenseKey', {
-                  required: true,
-                  message: 'License key is required',
-                  shouldUnregister: true,
-                })}
-              />
-              <div className="flex gap-2 items-center">
-                <Button
-                  isLoading={isLoading}
-                  type="submit"
-                  color="primary"
-                  variant="solid"
-                >
-                  Activate
-                </Button>
-                <Button
-                  isDisabled={isLoading}
-                  variant="flat"
-                  onClick={() => onOpenChange(false)}
-                >
-                  Cancel
-                </Button>
-              </div>
+              <ul className="list-disc pl-4">
+                <li className="text-default-500 text-sm pb-3">
+                  Use the same license key to activate other devices.
+                </li>
+                <li className="text-default-500 text-sm">
+                  To deactivate a device and activate on another, visit the
+                  license manager page.
+                </li>
+              </ul>
             </div>
-          </form>
+          ) : (
+            <form onSubmit={handleSubmit(onSubmit)}>
+              <div className="flex flex-col gap-4 w-full">
+                <p className="text-default-500">
+                  Your license key can be found in your email after purchasing
+                  the license.
+                </p>
+                <Input
+                  isInvalid={
+                    (errors?.licenseKey && true) ||
+                    (activationError?.error && true)
+                  }
+                  errorMessage={
+                    (errors?.licenseKey && 'License key is required') ||
+                    activationError?.error
+                  }
+                  placeholder="License key"
+                  {...register('licenseKey', {
+                    required: true,
+                    message: 'License key is required',
+                    shouldUnregister: true,
+                  })}
+                />
+                <div className="flex gap-2 items-center">
+                  <Button
+                    isLoading={isLoading}
+                    type="submit"
+                    color="primary"
+                    variant="solid"
+                  >
+                    Activate
+                  </Button>
+                  <Button
+                    isDisabled={isLoading}
+                    variant="flat"
+                    onClick={() => onOpenChange(false)}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            </form>
+          )}
         </ModalBody>
         <ModalFooter>
-          <div className="flex gap-2 items-center py-4">
-            <span className="text-sm text-default-500">
-              Don&apos;t have a license key?
-            </span>
-            <Button variant="light" color="warning">
-              Purchase license
+          {isLicensed ? (
+            <Button
+              onClick={() => onOpenChange(false)}
+              variant="solid"
+              color="secondary"
+              fullWidth
+            >
+              Continue to editor
             </Button>
-          </div>
+          ) : (
+            <div className="flex gap-4 items-center py-4">
+              <span className="text-sm text-default-500">
+                Don&apos;t have a license key?
+              </span>
+              <Link
+                size="sm"
+                href="https://snapseditor.lemonsqueezy.com/checkout/buy/9f4640b3-fc5c-4fee-a285-7b779c5b6aa7?media=0"
+                isExternal
+                showAnchorIcon
+                color="warning"
+              >
+                Purchase a license
+              </Link>
+            </div>
+          )}
         </ModalFooter>
       </ModalContent>
     </Modal>
