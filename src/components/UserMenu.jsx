@@ -19,6 +19,7 @@ function UserMenu() {
   const user = useUser()
   const supabaseClient = useSupabaseClient()
   const [openAuthModal, setOpenAuthModal] = useState(false)
+  const [authViewMode, setAuthViewMode] = useState()
   const [openLicenseModal, setOpenLicenseModal] = useState(false)
 
   const iconClasses =
@@ -66,7 +67,7 @@ function UserMenu() {
             </DropdownItem>
             <DropdownItem
               startContent={<PiUser className={iconClasses} />}
-              onClick={handleSignOut}
+              // onClick={handleSignOut}
             >
               Account
             </DropdownItem>
@@ -89,13 +90,26 @@ function UserMenu() {
   return (
     <>
       <Button
-        size="small"
-        variant="ghost"
-        onClick={() => setOpenAuthModal(true)}
+        variant="light"
+        onClick={() => {
+          setOpenAuthModal(true)
+          setAuthViewMode('login')
+        }}
       >
-        Login / Sign up
+        Login
+      </Button>
+      <Button
+        color="secondary"
+        variant="solid"
+        onClick={() => {
+          setOpenAuthModal(true)
+          setAuthViewMode('signup')
+        }}
+      >
+        Sign up
       </Button>
       <AuthModal
+        view={authViewMode}
         isOpen={openAuthModal}
         onOpenChange={() => setOpenAuthModal(false)}
       />
