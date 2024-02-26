@@ -17,6 +17,7 @@ import {
   PopoverTrigger,
   useDisclosure,
   Image,
+  Link,
 } from '@nextui-org/react'
 import {
   PiArrowSquareDownBold,
@@ -43,6 +44,7 @@ import { useHotkeys } from 'react-hotkeys-hook'
 import ChipPro from './ChipPro'
 import { useLicense } from '../context/LicenseContext'
 import Paywall from './Paywall'
+import EditorLinks from './EditorLinks'
 
 const CanvasArea = ({
   canvasRef,
@@ -1069,6 +1071,7 @@ const CanvasArea = ({
             )}
           </div>
         </div>
+        <EditorLinks />
       </div>
     </>
   )
