@@ -25,15 +25,13 @@ export default function Layout({ children }) {
         <NavbarContent className="sm:hidden" justify="start">
           <NavbarMenuToggle />
         </NavbarContent>
-
         <NavbarContent className="sm:hidden pr-3" justify="center">
           <NavbarBrand>
             <Image src="/snapzeditor-icon.svg" width={32} height={32} />
             <h4 className="ml-2 font-bold">Snapseditor</h4>
           </NavbarBrand>
         </NavbarContent>
-
-        <NavbarContent className="hidden sm:flex gap-4" justify="center">
+        <NavbarContent className="hidden sm:flex gap-6" justify="center">
           <NavbarBrand>
             <Image src="/snapzeditor-icon.svg" width={32} height={32} />
             <h4 className="ml-2 font-bold">Snapseditor</h4>
@@ -44,13 +42,18 @@ export default function Layout({ children }) {
             </Link>
           </NavbarItem>
           <NavbarItem>
-            <Link href="/#download" color="foreground">
-              Download
+            <Link href="/#pricing" color="foreground">
+              Pricing
             </Link>
           </NavbarItem>
           <NavbarItem>
-            <Link href="/#pricing" color="foreground">
-              Pricing
+            <Link href="/#faq" color="foreground">
+              FAQ
+            </Link>
+          </NavbarItem>
+          <NavbarItem>
+            <Link href="/#download" color="foreground">
+              Download
             </Link>
           </NavbarItem>
         </NavbarContent>

@@ -51,7 +51,7 @@ export default function Pricing() {
     },
   ]
   return (
-    <section id="download" className="relative py-20 bg-[rgb(15,23,42)] w-full">
+    <section id="pricing" className="relative py-20 bg-[rgb(15,23,42)] w-full">
       <div className="flex flex-col items-center justify-center gap-6 py-12">
         <h2 className="text-5xl font-bold text-center">
           Buy once, use forever
