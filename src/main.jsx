@@ -46,14 +46,14 @@ root.render(
                           opacity: 0.5,
                         }}
                       />
-                      <Download />
+                      <Pricing />
                       <Divider
                         style={{
                           maxWidth: '800px',
                           opacity: 0.5,
                         }}
                       />
-                      <Pricing />
+                      <Download />
                     </Layout>
                   }
                 />
