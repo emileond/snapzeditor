@@ -14,7 +14,7 @@ export default function Pricing() {
       title: 'Personal',
       price: '$39',
       desc: 'Pay-once license for personal use',
-      href: 'https://snapseditor.lemonsqueezy.com/checkout/buy/43989818-785a-45e2-a7bf-652e13d71bd4?media=0',
+      href: 'https://snapseditor.lemonsqueezy.com/checkout/buy/cb592c26-c3ec-4a79-b242-e6d2d5190037?media=0',
       isFeatured: false,
       features: [
         '1 Device',
@@ -27,7 +27,7 @@ export default function Pricing() {
       title: 'Standard',
       price: '$99',
       desc: 'Best for multi-device setups',
-      href: 'https://snapseditor.lemonsqueezy.com/checkout/buy/9f4640b3-fc5c-4fee-a285-7b779c5b6aa7?media=0',
+      href: 'https://snapseditor.lemonsqueezy.com/checkout/buy/9aadbed6-2db0-4f45-b0a1-2bd86bbc8955?media=0',
       isFeatured: true,
       features: [
         '3 Devices',
@@ -40,7 +40,7 @@ export default function Pricing() {
       title: 'Extended',
       price: '$145',
       desc: 'Best for small teams',
-      href: 'https://snapseditor.lemonsqueezy.com/checkout/buy/af91c9da-f564-48c2-b9b5-a14c416502b7?media=0',
+      href: 'https://snapseditor.lemonsqueezy.com/checkout/buy/5e5b889a-b7ee-4300-8064-95da43363fef?media=0',
       isFeatured: false,
       features: [
         '5 Devices',

@@ -92,7 +92,7 @@ function Paywall({ isOpen, onOpenChange }) {
             <Button
               className="hover:text-white"
               as={Link}
-              href="https://snapseditor.lemonsqueezy.com/checkout/buy/9f4640b3-fc5c-4fee-a285-7b779c5b6aa7?media=0"
+              href="https://snapseditor.lemonsqueezy.com/checkout/buy/9aadbed6-2db0-4f45-b0a1-2bd86bbc8955?media=0"
               isExternal
               color="secondary"
               variant="shadow"
