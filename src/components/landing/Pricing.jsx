@@ -25,7 +25,7 @@ export default function Pricing() {
     },
     {
       title: 'Standard',
-      price: '$59',
+      price: '$99',
       desc: 'Best for multi-device setups',
       href: 'https://snapseditor.lemonsqueezy.com/checkout/buy/9f4640b3-fc5c-4fee-a285-7b779c5b6aa7?media=0',
       isFeatured: true,
@@ -38,7 +38,7 @@ export default function Pricing() {
     },
     {
       title: 'Extended',
-      price: '$129',
+      price: '$145',
       desc: 'Best for small teams',
       href: 'https://snapseditor.lemonsqueezy.com/checkout/buy/af91c9da-f564-48c2-b9b5-a14c416502b7?media=0',
       isFeatured: false,
@@ -80,11 +80,19 @@ export default function Pricing() {
               </div>
             </CardHeader>
             <CardBody>
-              <div className="flex flex-col gap-2 text-slate-300">
-                {feature?.features?.map((item) => (
+              <div className="flex flex-col gap-3">
+                {feature?.features?.map((item, i) => (
                   <div key={item} className="flex items-center gap-2">
-                    <PiCheckCircleBold fontSize="1.1rem" />
-                    <p>{item}</p>
+                    <div className="text-success-400">
+                      <PiCheckCircleBold fontSize="1.3rem" />
+                    </div>
+                    <p
+                      className={
+                        i === 0 ? 'font-bold text-slate-100' : 'text-slate-400'
+                      }
+                    >
+                      {item}
+                    </p>
                   </div>
                 ))}
               </div>
