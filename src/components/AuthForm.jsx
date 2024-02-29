@@ -21,22 +21,58 @@ function AuthForm({ viewMode = 'signup' }) {
 
   const watchPassword = watch('password')
 
+  async function validateEmail(email) {
+    try {
+      const response = await fetch(
+        'https://disposable.github.io/disposable-email-domains/domains.json'
+      )
+      if (!response.ok) {
+        return false
+      }
+
+      const disposableDomains = await response.json()
+      const domain = email.split('@')[1]
+      const isValid = !disposableDomains.includes(domain)
+      console.log(isValid) // This should log correctly
+
+      return isValid // This ensures the value is returned to the caller
+    } catch (error) {
+      console.error('Error validating email:', error)
+      return false // Consider how you want to handle errors. This returns false as a default.
+    }
+  }
+
   const onSubmit = async (data) => {
     setIsLoading(true)
     const { email, password } = data
+
+    // Await the email validation before proceeding
+
+    const isValidEmail = await validateEmail(email)
+
+    if (!isValidEmail) {
+      setError(
+        'Disposable email addresses are not allowed, please use a valid email address'
+      )
+      setIsLoading(false)
+      return
+    }
+
     if (view === 'signup') {
       const { data, error } = await supabase.auth.signUp({ email, password })
-      if (error) setError(error.message)
-      if (data) {
+      if (error) {
+        setError(error.message)
+      } else if (data) {
         setView('signup-success')
       }
     } else {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
       if (error) setError(error.message)
     }
+
     setIsLoading(false)
   }
 
