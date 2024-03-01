@@ -4,6 +4,12 @@ import {
   PiFilePng,
   PiDownloadBold,
   PiCopy,
+  PiListBold,
+  PiArrowCounterClockwiseBold,
+  PiSwatchesBold,
+  PiShieldCheckBold,
+  PiFileCloudBold,
+  PiFileDashedBold,
 } from 'react-icons/pi'
 import {
   Button,
@@ -17,9 +23,13 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
+  Chip,
+  DropdownSection,
+  useDisclosure,
 } from '@nextui-org/react'
 import UserMenu from './UserMenu'
 import { useState } from 'react'
+import LicenseManager from './LicenseManager'
 
 const TopBar = ({
   canvasWidth,
@@ -31,16 +41,86 @@ const TopBar = ({
 }) => {
   const [exportSize, setExportSize] = useState('1x')
   const [isOpen, setIsOpen] = useState(false)
+  const {
+    isOpen: isLicenseOpen,
+    onOpen: onLicenseOpen,
+    onOpenChange: onLicenseOpenChange,
+  } = useDisclosure()
 
   return (
     <div
       id="topbar"
       className="flex justify-between items-center py-1 px-4 bg-content1 w-full z-10"
     >
+      <LicenseManager
+        isOpen={isLicenseOpen}
+        onOpenChange={onLicenseOpenChange}
+      />
       <div className="flex items-center gap-4">
-        <Image src="/snapzeditor-icon.svg" width={32} height={32} />
+        <Dropdown className="dark" backdrop="opaque">
+          <DropdownTrigger>
+            <Button isIconOnly variant="flat">
+              <PiListBold fontSize="1.2rem" />
+            </Button>
+          </DropdownTrigger>
+          <DropdownMenu>
+            <DropdownSection showDivider>
+              <DropdownItem
+                title="Start over..."
+                startContent={
+                  <PiArrowCounterClockwiseBold
+                    fontSize="1.1rem"
+                    className="text-default-400"
+                  />
+                }
+              />
+              <DropdownItem
+                title="Cloud gallery"
+                startContent={
+                  <PiFileCloudBold
+                    fontSize="1.1rem"
+                    className="text-default-400"
+                  />
+                }
+                endContent={
+                  <Chip color="secondary" size="sm" variant="flat">
+                    Soon
+                  </Chip>
+                }
+              />
+              <DropdownItem
+                title="Brand kit"
+                startContent={
+                  <PiSwatchesBold
+                    fontSize="1.1rem"
+                    className="text-default-400"
+                  />
+                }
+                endContent={
+                  <Chip color="secondary" size="sm" variant="flat">
+                    Soon
+                  </Chip>
+                }
+              />
+            </DropdownSection>
+            <DropdownSection>
+              <DropdownItem
+                title="License manager"
+                startContent={
+                  <PiShieldCheckBold
+                    fontSize="1.1rem"
+                    className="text-default-400"
+                  />
+                }
+                onClick={onLicenseOpen}
+              />
+            </DropdownSection>
+          </DropdownMenu>
+        </Dropdown>
+        <Image src="/snapseditor-logo.svg" width={140} />
       </div>
-      <div className="flex flex-row gap-3 items-baseline">
+      <div className="flex flex-row gap-2 items-center">
+        <PiFileDashedBold fontSize="1.2rem" className="text-default-500" />
         <p className="text-default-500 text-sm">File name</p>
         <Input
           size="sm"

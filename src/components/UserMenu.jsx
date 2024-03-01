@@ -6,12 +6,17 @@ import {
   DropdownMenu,
   DropdownSection,
   DropdownTrigger,
-  Link,
 } from '@nextui-org/react'
 import { useUser, useSupabaseClient } from '@supabase/auth-helpers-react'
 import { useState } from 'react'
 import AuthModal from './AuthModal'
-import { PiBarcode, PiCrownSimple, PiPower, PiUser } from 'react-icons/pi'
+import {
+  PiArrowSquareOutBold,
+  PiBarcode,
+  PiCrownSimpleBold,
+  PiPower,
+  PiUser,
+} from 'react-icons/pi'
 import toast from 'react-hot-toast'
 import ActivateLicenseModal from './ActivateLicenseModal'
 import { useLicense } from '../context/LicenseContext'
@@ -36,7 +41,7 @@ function UserMenu() {
   if (user) {
     return (
       <>
-        <Dropdown className="dark">
+        <Dropdown className="dark" backdrop="opaque">
           <DropdownTrigger>
             <Avatar
               isBordered
@@ -47,6 +52,21 @@ function UserMenu() {
           </DropdownTrigger>
           <DropdownMenu variant="flat" aria-label="User menu">
             <DropdownSection>
+              {!isLicensed && (
+                <DropdownItem
+                  isReadOnly
+                  href="https://snapseditor.lemonsqueezy.com/checkout/buy/9aadbed6-2db0-4f45-b0a1-2bd86bbc8955?media=0"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  variant="shadow"
+                  color="warning"
+                  startContent={<PiCrownSimpleBold fontSize="1.2rem" />}
+                  endContent={<PiArrowSquareOutBold fontSize="1.2rem" />}
+                  className="text-gray-900 bg-warning py-2 hover:bg-warning-800 hover:text-default-100"
+                >
+                  <p className="text-sm font-bold">Purchase a license</p>
+                </DropdownItem>
+              )}
               <DropdownItem
                 isReadOnly
                 className="text-default-500 hover:cursor-default py-3"
@@ -56,30 +76,19 @@ function UserMenu() {
               </DropdownItem>
             </DropdownSection>
             <DropdownItem
-              isReadOnly
-              href="https://snapseditor.lemonsqueezy.com/checkout/buy/9aadbed6-2db0-4f45-b0a1-2bd86bbc8955?media=0"
-              target="_blank"
-              rel="noopener noreferrer"
-              variant="shadow"
-              color="primary"
-              startContent={<PiCrownSimple className={iconClasses} />}
-              className="text-white bg-primary hover:text-white py-2"
+              className="py-2"
+              startContent={<PiUser className={iconClasses} />}
+              // onClick={handleSignOut}
             >
-              Purchase license
+              Account
             </DropdownItem>
+
             <DropdownItem
               className="py-2"
               startContent={<PiBarcode className={iconClasses} />}
               onClick={() => setOpenLicenseModal(true)}
             >
               Activate license
-            </DropdownItem>
-            <DropdownItem
-              className="py-2"
-              startContent={<PiUser className={iconClasses} />}
-              // onClick={handleSignOut}
-            >
-              Account
             </DropdownItem>
             <DropdownItem
               className="py-2"
