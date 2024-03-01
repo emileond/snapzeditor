@@ -63,7 +63,7 @@ const TopBar = ({
               <PiListBold fontSize="1.2rem" />
             </Button>
           </DropdownTrigger>
-          <DropdownMenu>
+          <DropdownMenu variant="flat" aria-label="Menu">
             <DropdownSection showDivider>
               <DropdownItem
                 title="Start over..."
