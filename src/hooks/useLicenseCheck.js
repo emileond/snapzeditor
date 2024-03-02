@@ -11,6 +11,7 @@ export const useCheckLicense = () => {
       .select('*')
       .eq('user_id', userId)
       .eq('device_id', fingerPrint)
+      .eq('status', 'active')
       .single()
 
     if (!data || error) {

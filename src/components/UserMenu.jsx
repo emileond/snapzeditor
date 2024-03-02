@@ -58,13 +58,13 @@ function UserMenu() {
                   href="https://snapseditor.lemonsqueezy.com/checkout/buy/9aadbed6-2db0-4f45-b0a1-2bd86bbc8955?media=0"
                   target="_blank"
                   rel="noopener noreferrer"
-                  variant="shadow"
+                  variant="flat"
                   color="warning"
                   startContent={<PiCrownSimpleBold fontSize="1.2rem" />}
                   endContent={<PiArrowSquareOutBold fontSize="1.2rem" />}
-                  className="text-gray-900 bg-warning py-2 hover:bg-warning-800 hover:text-default-100"
+                  className="text-warning-400 bg-warning-100 py-2"
                 >
-                  <p className="text-sm font-bold">Purchase a license</p>
+                  <p className="text-sm">Purchase a license</p>
                 </DropdownItem>
               )}
               <DropdownItem

@@ -72,7 +72,6 @@ function ActivateLicenseModal({ isOpen, onOpenChange }) {
         }
       )
       if (response?.data?.error) {
-        console.log(response)
         setIsLoading(false)
         setActivationError(response.data)
       }

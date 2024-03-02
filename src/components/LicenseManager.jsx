@@ -15,13 +15,17 @@ import {
 import { useEffect, useState } from 'react'
 import { supabase } from '../supabaseClient'
 import { useUser } from '@supabase/auth-helpers-react'
+import { useFingerprint } from '../context/FingerprintContext'
+import axios from 'axios'
 
 function LicenseManager({ isOpen, onOpenChange }) {
   const user = useUser()
+  const fingerprint = useFingerprint()
   const [licenseInstances, setLicenseInstances] = useState([])
   const [isFetching, setIsFetching] = useState(false)
   const [isConfirmationOpen, setIsConfirmationOpen] = useState(false)
   const [deactivateId, setDeactivateId] = useState()
+  const [isLoading, setIsLoading] = useState(false)
 
   // get license from supabase
   async function getLicense() {
@@ -38,10 +42,37 @@ function LicenseManager({ isOpen, onOpenChange }) {
     }
     setLicenseInstances(data)
     setIsFetching(false)
+    return
   }
 
-  //TODO: create a function to deactivate a license, and api endpoint to handle it
-  //TODO: save slots data on activation and group instances by license
+  const handleDeactivate = async (license_key, instance_id) => {
+    setIsLoading(true)
+    try {
+      const url =
+        'https://snapseditor-main-e4a52d7.d2.zuplo.dev/licenses/deactivate'
+
+      const response = await axios.post(
+        url,
+        {
+          license_key,
+          instance_id,
+        },
+        {
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+          },
+        }
+      )
+      if (response?.data?.deactivated) {
+        await getLicense()
+      }
+    } catch (error) {
+      console.error(error)
+    }
+    isConfirmationOpen(false)
+    setIsLoading(false)
+  }
 
   useEffect(() => {
     if (isOpen && user) {
@@ -77,80 +108,129 @@ function LicenseManager({ isOpen, onOpenChange }) {
                   </div>
                 ) : (
                   <div className="flex flex-col gap-6">
-                    {licenseInstances.map((license, index) => (
-                      <>
-                        <div
-                          key={license.id}
-                          className="flex gap-2 justify-between items-center"
-                        >
-                          <div className="flex flex-col gap-1">
-                            <div className="flex items-center gap-1">
-                              <p className="text-md">{license.instance_name}</p>
-                              <Chip
-                                color="success"
-                                size="sm"
-                                variant="dot"
-                                className="border-none"
-                              />
-                            </div>
-                            <p className="text-sm text-default-500">
-                              Activated on{' '}
-                              {new Date(
-                                license.created_at
-                              ).toLocaleDateString()}{' '}
-                              -{' '}
-                              {new Date(
-                                license.created_at
-                              ).toLocaleTimeString()}
-                            </p>
+                    {Object.entries(
+                      licenseInstances.reduce((acc, license) => {
+                        if (!acc[license.license_key]) {
+                          acc[license.license_key] = {
+                            licenses: [],
+                            activation_usage: license.activation_usage,
+                            activation_limit: license.activation_limit,
+                          }
+                        }
+                        acc[license.license_key].licenses.push(license)
+                        return acc
+                      }, {})
+                    ).map(
+                      ([key, { licenses, activation_limit }], groupIndex) => (
+                        <div key={key} className="flex flex-col gap-4">
+                          <div className="flex items-center gap-2 justify-between">
+                            <h4 className="text-default-400 text-md font-medium">
+                              License:{' '}
+                              {
+                                // show only the first 5 characters of the license key, everything else with *
+                                key.slice(0, 5) + '*'.repeat(key.length * 0.4)
+                              }
+                            </h4>
+                            <Chip variant="bordered" size="sm">
+                              {licenses.length}/{activation_limit} used
+                            </Chip>
                           </div>
-                          <Popover
-                            className="dark"
-                            placement="bottom-end"
-                            isOpen={
-                              deactivateId === license.id && isConfirmationOpen
-                            }
-                            onOpenChange={(open) => setIsConfirmationOpen(open)}
-                          >
-                            <PopoverTrigger>
-                              <Button
-                                size="sm"
-                                variant="solid"
-                                onClick={() => {
-                                  setDeactivateId(license.id)
-                                }}
-                              >
-                                Deactivate
-                              </Button>
-                            </PopoverTrigger>
-                            <PopoverContent>
-                              <div className="flex flex-col gap-4 p-2">
-                                <h4>Deactivate device</h4>
-                                <p>
-                                  Are you sure you want to deactivate this
-                                  device?
+                          {licenses.map((license, index) => (
+                            <div
+                              key={license.id}
+                              className="flex gap-3 justify-between items-center"
+                            >
+                              <div className="flex flex-col gap-1">
+                                <div className="flex items-center gap-1">
+                                  <p className="text-md">
+                                    {license.instance_name}
+                                    {license.device_id === fingerprint &&
+                                      ' (this device)'}
+                                  </p>
+                                  <Chip
+                                    color="success"
+                                    size="sm"
+                                    variant="dot"
+                                    className="border-none"
+                                  />
+                                </div>
+                                <p className="text-sm text-default-500">
+                                  Activated on{' '}
+                                  {new Date(
+                                    license.created_at
+                                  ).toLocaleDateString()}{' '}
+                                  -{' '}
+                                  {new Date(
+                                    license.created_at
+                                  ).toLocaleTimeString()}
                                 </p>
-                                <div className="flex gap-2">
+                              </div>
+                              <Popover
+                                className="dark"
+                                placement="bottom-end"
+                                isOpen={
+                                  deactivateId === license.id &&
+                                  isConfirmationOpen
+                                }
+                                onOpenChange={(open) =>
+                                  setIsConfirmationOpen(open)
+                                }
+                              >
+                                <PopoverTrigger>
                                   <Button
                                     size="sm"
+                                    variant="solid"
                                     onClick={() => {
-                                      setDeactivateId(null)
-                                      setIsConfirmationOpen(false)
+                                      setDeactivateId(license.id)
                                     }}
                                   >
-                                    Cancel
-                                  </Button>
-                                  <Button size="sm" color="danger">
                                     Deactivate
                                   </Button>
-                                </div>
-                              </div>
-                            </PopoverContent>
-                          </Popover>
+                                </PopoverTrigger>
+                                <PopoverContent>
+                                  <div className="flex flex-col gap-4 p-2">
+                                    <h4>Deactivate device</h4>
+                                    <p>
+                                      Are you sure you want to deactivate this
+                                      device?
+                                    </p>
+                                    <div className="flex gap-2">
+                                      <Button
+                                        size="sm"
+                                        isDisabled={isLoading}
+                                        onClick={() => {
+                                          setDeactivateId(null)
+                                          setIsConfirmationOpen(false)
+                                        }}
+                                      >
+                                        Cancel
+                                      </Button>
+                                      <Button
+                                        size="sm"
+                                        color="danger"
+                                        isLoading={isLoading}
+                                        onClick={() =>
+                                          handleDeactivate(
+                                            key,
+                                            license.instance_id
+                                          )
+                                        }
+                                      >
+                                        Deactivate
+                                      </Button>
+                                    </div>
+                                  </div>
+                                </PopoverContent>
+                              </Popover>
+                            </div>
+                          ))}
+                          {groupIndex !==
+                            Object.entries(licenseInstances).length - 1 && (
+                            <Divider />
+                          )}
                         </div>
-                        {index !== licenseInstances.length - 1 && <Divider />}
-                      </>
-                    ))}
+                      )
+                    )}
                   </div>
                 )}
               </div>
