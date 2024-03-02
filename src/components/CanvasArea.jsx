@@ -555,7 +555,7 @@ const CanvasArea = ({
               <div className="flex flex-col">
                 <span className="text-default text-sm">Made with </span>
                 <div className="flex gap-2 items-center">
-                  <Image src="/snapzeditor-icon.svg" width={20} height={20} />
+                  <Image src="/snapseditor-icon.svg" width={20} height={20} />
                   <span className="text-default text-sm font-semibold">
                     snapseditor.com
                   </span>
