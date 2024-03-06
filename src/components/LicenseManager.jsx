@@ -17,6 +17,7 @@ import { supabase } from '../supabaseClient'
 import { useUser } from '@supabase/auth-helpers-react'
 import { useFingerprint } from '../context/FingerprintContext'
 import axios from 'axios'
+import { displayToast } from '../utils/displayToast'
 
 function LicenseManager({ isOpen, onOpenChange }) {
   const user = useUser()
@@ -38,6 +39,7 @@ function LicenseManager({ isOpen, onOpenChange }) {
     if (error) {
       setIsFetching(false)
       console.error(error)
+      displayToast('error', 'An error occurredm, please try again later.')
       return
     }
     setLicenseInstances(data)
@@ -65,12 +67,13 @@ function LicenseManager({ isOpen, onOpenChange }) {
         }
       )
       if (response?.data?.deactivated) {
+        displayToast('success', 'Device deactivated.')
         await getLicense()
       }
     } catch (error) {
       console.error(error)
+      displayToast('error', 'An error occurred, please try again later.')
     }
-    isConfirmationOpen(false)
     setIsLoading(false)
   }
 
