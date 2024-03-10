@@ -16,10 +16,7 @@ function App() {
   const { checkLicense } = useCheckLicense()
   const [imgVisibility, setImgVisibility] = useState(true)
   const [triggerReplaceImage, setTriggerReplaceImage] = useState(false)
-  const [canvasBg, setCanvasBg] = useState({
-    style: 'linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%)',
-    imgSrc: null,
-  })
+  const [canvasBg, setCanvasBg] = useState({})
   const [imgScale, setImgScale] = useState(1)
   const [imgPosition, setImgPosition] = useState('center')
   const [imgShadow, setImgShadow] = useState(50) // 0 means no shadow by default
