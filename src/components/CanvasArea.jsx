@@ -1017,7 +1017,7 @@ const CanvasArea = ({
                           size="md"
                           variant="ghost"
                           onClick={() =>
-                            !isLicensed
+                            isLicensed
                               ? createSticker(i + 1)
                               : handleStickersPaywallClick()
                           }
