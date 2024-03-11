@@ -50,6 +50,7 @@ import ChipPro from './ChipPro'
 import PositionSelector from './PositionSelector'
 import { useLicense } from '../context/LicenseContext'
 import Paywall from './Paywall'
+import { useCanvasBg } from '../context/CanvasBgContext'
 
 const ToolBar = ({
   imageLoaded,
@@ -57,7 +58,6 @@ const ToolBar = ({
   setImgVisibility,
   onReplaceImage,
   imgFrame,
-  setCanvasBg,
   setImgScale,
   setImgPosition,
   imgPosition,
@@ -83,6 +83,7 @@ const ToolBar = ({
 }) => {
   const { isLicensed } = useLicense()
   const { isOpen, onOpen, onOpenChange } = useDisclosure()
+  const { setCanvasBg } = useCanvasBg()
 
   const handleWatermarkUpload = () => {
     const input = document.createElement('input')
@@ -306,10 +307,10 @@ const ToolBar = ({
                 </div>
                 <Tabs size="sm" fullWidth>
                   <Tab title="Gradient">
-                    <GradientButtons setCanvasBg={setCanvasBg} />
+                    <GradientButtons />
                   </Tab>
                   <Tab title="Wallpaper">
-                    <WallpaperPicker setCanvasBg={setCanvasBg} />
+                    <WallpaperPicker />
                   </Tab>
                   <Tab title="Color">
                     <ColorPicker
@@ -333,7 +334,7 @@ const ToolBar = ({
                   isSelected={snapzWatermark}
                   onChange={handleDefaultWatermarkToggle}
                 >
-                  SnapzEditor watermark
+                  SnapsEditor watermark
                 </Switch>
 
                 <Switch

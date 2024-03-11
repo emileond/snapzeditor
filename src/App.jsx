@@ -9,14 +9,15 @@ import toast from 'react-hot-toast'
 import { useUser } from '@supabase/auth-helpers-react'
 import { useCheckLicense } from './hooks/useLicenseCheck'
 import { useFingerprint } from './context/FingerprintContext'
+import { useLicense } from './context/LicenseContext'
 
 function App() {
   const user = useUser()
   const fingerprint = useFingerprint()
   const { checkLicense } = useCheckLicense()
+  const { isLicensed } = useLicense()
   const [imgVisibility, setImgVisibility] = useState(true)
   const [triggerReplaceImage, setTriggerReplaceImage] = useState(false)
-  const [canvasBg, setCanvasBg] = useState({})
   const [imgScale, setImgScale] = useState(1)
   const [imgPosition, setImgPosition] = useState('center')
   const [imgShadow, setImgShadow] = useState(50) // 0 means no shadow by default
@@ -30,7 +31,9 @@ function App() {
     `snap-${Intl.DateTimeFormat('sv-SE').format(Date.now())}`
   )
   const [imgFrame, setImgFrame] = useState('macOS-dark')
-  const [snapzWatermark, setSnapzWatermark] = useState(true)
+  const [snapzWatermark, setSnapzWatermark] = useState(
+    isLicensed ? false : true
+  )
   const [customWatermarkToggle, setCustomWatermarkToggle] = useState(false)
   const [customWatermarkImg, setCustomWatermarkImg] = useState()
   const [customWatermarkText, setCustomWatermarkText] = useState()
@@ -201,7 +204,6 @@ function App() {
           register={register}
           setValue={setValue}
           imgFrame={imgFrame}
-          setCanvasBg={setCanvasBg}
           setImgScale={setImgScale}
           setImgPosition={setImgPosition}
           imgPosition={imgPosition}
@@ -222,7 +224,6 @@ function App() {
         />
         <CanvasArea
           canvasRef={canvasRef}
-          canvasBg={canvasBg}
           imgScale={imgScale}
           imgPosition={imgPosition}
           imgShadow={imgShadow}

@@ -5,6 +5,7 @@ import { createApi } from 'unsplash-js'
 import ChipPro from './ChipPro'
 import { useLicense } from '../context/LicenseContext'
 import Paywall from './Paywall'
+import { useCanvasBg } from '../context/CanvasBgContext'
 
 const unsplash = createApi({
   accessKey: import.meta.env.VITE_UNSPLASH_ACCESS_KEY,
@@ -22,7 +23,8 @@ const thumbnails = Array.from(
   (_, i) => `/images/wallpapers/thumb-${i + 1}.jpg`
 )
 
-function WallpaperPicker({ setCanvasBg }) {
+function WallpaperPicker() {
+  const { setCanvasBg } = useCanvasBg()
   const [selectedWallpaperIndex, setSelectedWallpaperIndex] = useState(null)
   const [isUnsplashLoading, setIsUnsplashLoading] = useState(false)
   const [isUploadLoading, setIsUploadLoading] = useState(false)
