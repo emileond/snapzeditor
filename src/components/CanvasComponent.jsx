@@ -17,11 +17,11 @@ import {
   MdFullscreen,
   MdClosedCaption,
 } from 'react-icons/md'
+import { useCanvasBg } from '../context/CanvasBgContext'
 
 const CanvasComponent = forwardRef(
   (
     {
-      canvasBg,
       shadow,
       borderRadius,
       rotationX,
@@ -48,12 +48,15 @@ const CanvasComponent = forwardRef(
     }
 
     const position = positionsMap[imgPosition]
+
+    const { canvasBg } = useCanvasBg()
+
     return (
       <div
         ref={ref}
         className={`canvas flex ${position} w-full h-full overflow-hidden`}
         style={{
-          background: canvasBg.style,
+          background: canvasBg?.style,
         }}
       >
         {canvasBg?.imgSrc && (

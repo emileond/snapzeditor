@@ -17,7 +17,6 @@ import {
   PopoverTrigger,
   useDisclosure,
   Image,
-  Link,
 } from '@nextui-org/react'
 import {
   PiArrowSquareDownBold,
@@ -29,7 +28,6 @@ import {
   PiRectangleBold,
   PiShapesBold,
   PiStarBold,
-  PiStarFill,
   PiStickerBold,
   PiTextAaBold,
   PiTextTBold,
@@ -50,7 +48,6 @@ import EditorLinks from './EditorLinks'
 
 const CanvasArea = ({
   canvasRef,
-  canvasBg,
   imgScale,
   imgPosition,
   imgShadow,
@@ -678,7 +675,6 @@ const CanvasArea = ({
           })}
           <CanvasComponent
             ref={canvasComponentRef}
-            canvasBg={canvasBg}
             imgSrc={imageSrc}
             imgScale={initialScale}
             imgPosition={imgPosition}
