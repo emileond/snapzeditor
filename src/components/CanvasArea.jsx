@@ -28,6 +28,8 @@ import {
   PiEraserBold,
   PiRectangleBold,
   PiShapesBold,
+  PiStarBold,
+  PiStarFill,
   PiStickerBold,
   PiTextAaBold,
   PiTextTBold,
@@ -76,7 +78,7 @@ const CanvasArea = ({
   const [scaledHeight, setScaledHeight] = useState(0)
   const wrapperRef = useRef()
   const canvasComponentRef = useRef()
-  const stickers = 28
+  const stickers = 35
 
   // Debounce the dimensions
   const debouncedWidth = useDebounce(canvasWidth, 200)
@@ -183,12 +185,12 @@ const CanvasArea = ({
     { keydown: true, keyup: true }
   )
 
-  const createEllipse = () => {
+  const createShape = (type) => {
     const newAnnotations = [
       ...renderedAnnotations,
       {
-        id: `ellipse-${Date.now()}`,
-        type: 'ellipse',
+        id: `${type}-${Date.now()}`,
+        type: type,
         fill: '#000000',
       },
     ]
@@ -199,29 +201,7 @@ const CanvasArea = ({
         ? {
             id: newAnnotations[newAnnotations.length - 1].id,
             index: newAnnotations.length - 1,
-            type: 'ellipse',
-          }
-        : null
-    )
-  }
-
-  const createRectangle = () => {
-    const newAnnotations = [
-      ...renderedAnnotations,
-      {
-        id: `rectangle-${Date.now()}`,
-        type: 'rectangle',
-        fill: '#000000',
-      },
-    ]
-    setRenderedAnnotations(newAnnotations)
-
-    setSelectedElement(
-      newAnnotations.length > 0
-        ? {
-            id: newAnnotations[newAnnotations.length - 1].id,
-            index: newAnnotations.length - 1,
-            type: 'rectangle',
+            type: type,
           }
         : null
     )
@@ -663,8 +643,8 @@ const CanvasArea = ({
                     style={{
                       width: '100%',
                       height: '100%',
-                      minWidth: '50px',
-                      minHeight: '50px',
+                      minWidth: '15px',
+                      minHeight: '15px',
                       borderRadius: '50%',
                       backgroundColor: element?.fill,
                     }}
@@ -675,11 +655,23 @@ const CanvasArea = ({
                     style={{
                       width: '100%',
                       height: '100%',
-                      minWidth: '50px',
-                      minHeight: '50px',
+                      minWidth: '5px',
+                      minHeight: '5px',
                       backgroundColor: element?.fill,
                     }}
                   />
+                )}
+                {element?.type === 'star' && (
+                  <div style={{ width: '100%', height: '100%' }}>
+                    <svg
+                      width="100%"
+                      height="100%"
+                      fill={element?.fill}
+                      viewBox="0 0 24 24"
+                    >
+                      <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z" />
+                    </svg>
+                  </div>
                 )}
               </Rnd>
             )
@@ -723,6 +715,7 @@ const CanvasArea = ({
                         switch (type) {
                           case 'ellipse':
                           case 'rectangle':
+                          case 'star':
                             updateElement(selectedElement, 'fill', color)
                             break
                           case 'label':
@@ -972,17 +965,24 @@ const CanvasArea = ({
                   <DropdownMenu aria-label="Add shape" selectionMode="single">
                     <DropdownItem
                       key="ellipse"
-                      onClick={createEllipse}
+                      onClick={() => createShape('ellipse')}
                       startContent={<PiCircleBold fontSize="1.1rem" />}
                     >
                       Ellipse
                     </DropdownItem>
                     <DropdownItem
                       key="rectangle"
-                      onClick={createRectangle}
+                      onClick={() => createShape('rectangle')}
                       startContent={<PiRectangleBold fontSize="1.1rem" />}
                     >
                       Rectangle
+                    </DropdownItem>
+                    <DropdownItem
+                      key="star"
+                      onClick={() => createShape('star')}
+                      startContent={<PiStarBold fontSize="1.1rem" />}
+                    >
+                      Star
                     </DropdownItem>
                   </DropdownMenu>
                 </Dropdown>
@@ -1010,11 +1010,11 @@ const CanvasArea = ({
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent>
-                    <div className="flex flex-wrap gap-2 max-w-[200px]">
+                    <div className="flex flex-wrap gap-2 max-w-[240px]">
                       {Array.from(Array(stickers).keys()).map((i) => (
                         <Button
                           key={i}
-                          size="sm"
+                          size="md"
                           variant="ghost"
                           onClick={() =>
                             isLicensed
@@ -1026,7 +1026,7 @@ const CanvasArea = ({
                           <img
                             src={`/stickers/${i + 1}.svg`}
                             alt={`Sticker ${i + 1}`}
-                            className="w-6 h-6"
+                            className="w-7 h-7"
                           />
                         </Button>
                       ))}
