@@ -247,6 +247,9 @@ function App() {
             setTriggerReplaceImage(false)
           }}
           triggerReplaceImage={triggerReplaceImage}
+          onCancelUpload={() => {
+            setTriggerReplaceImage(false)
+          }}
           fileName={fileName}
         />
       </div>

@@ -45,6 +45,7 @@ import ChipPro from './ChipPro'
 import { useLicense } from '../context/LicenseContext'
 import Paywall from './Paywall'
 import EditorLinks from './EditorLinks'
+import { displayToast } from '../utils/displayToast'
 
 const CanvasArea = ({
   canvasRef,
@@ -68,6 +69,7 @@ const CanvasArea = ({
   onExtractedText,
   onImageLoaded,
   triggerReplaceImage,
+  onCancelUpload,
   fileName,
 }) => {
   const { isLicensed } = useLicense()
@@ -408,6 +410,8 @@ const CanvasArea = ({
         setInitialScale(aspectScale)
         setImageSrc(imgSrc)
         onImageLoaded({ loaded: true, data: file })
+
+        displayToast('success', 'Image loaded')
       }
     },
     [scaledWidth, scaledHeight]
@@ -427,7 +431,7 @@ const CanvasArea = ({
     }
     // handle cancel
     input.oncancel = () => {
-      return
+      return onCancelUpload()
     }
     input.click()
   }
