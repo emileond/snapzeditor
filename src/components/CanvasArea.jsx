@@ -516,13 +516,13 @@ const CanvasArea = ({
         // className="w-full flex flex-col items-center justify-center overflow-hidden"
         className="w-full flex flex-col items-center justify-center"
       >
-        {!imageSrc && (
+        {/* {!imageSrc && (
           <ImgEmptyState
             loadImage={loadImage}
             handleUpload={handleUpload}
             handlePaste={handlePaste}
           />
-        )}
+        )} */}
         <div
           ref={canvasRef}
           className="relative flex items-center justify-center"

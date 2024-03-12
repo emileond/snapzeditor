@@ -17,6 +17,8 @@
     "@supabase/auth-ui-shared": "^0.1.8",
     "@supabase/supabase-js": "^2.39.2",
     "@thumbmarkjs/thumbmarkjs": "^0.13.5",
+    "@uiw/codemirror-themes": "^4.21.24",
+    "@uiw/react-codemirror": "^4.21.24",
     "axios": "^1.6.5",
     "canvas-confetti": "^1.9.2",
     "framer-motion": "^11.0.8",

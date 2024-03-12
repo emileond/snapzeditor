@@ -18,6 +18,9 @@ import {
   MdClosedCaption,
 } from 'react-icons/md'
 import { useCanvasBg } from '../context/CanvasBgContext'
+import ReactCodeMirror from '@uiw/react-codemirror'
+import { createTheme } from '@uiw/codemirror-themes'
+import { tags as t } from '@lezer/highlight'
 
 const CanvasComponent = forwardRef(
   (
@@ -51,6 +54,30 @@ const CanvasComponent = forwardRef(
 
     const { canvasBg } = useCanvasBg()
 
+    const myTheme = createTheme({
+      dark: 'dark',
+      settings: {
+        background: '',
+        backgroundImage: '',
+        foreground: '#4D4D4C',
+        caret: '#AEAFAD',
+        selection: '#D6D6D6',
+        selectionMatch: '#D6D6D6',
+        gutterBackground: '#FFFFFF',
+        gutterForeground: '#4D4D4C',
+        gutterBorder: '#dddddd',
+        gutterActiveForeground: '',
+        lineHighlight: '#EFEFEF',
+      },
+      styles: [
+        { tag: t.comment, color: '#787b80' },
+        { tag: t.definition(t.typeName), color: '#194a7b' },
+        { tag: t.typeName, color: '#194a7b' },
+        { tag: t.tagName, color: '#008a02' },
+        { tag: t.variableName, color: '#1a00db' },
+      ],
+    })
+
     return (
       <div
         ref={ref}
@@ -59,6 +86,32 @@ const CanvasComponent = forwardRef(
           background: canvasBg?.style,
         }}
       >
+        <div
+          className="bg-content1 p-4"
+          style={{
+            borderRadius: `${borderRadius}px`,
+            transform: `scale(${
+              imgScale * sliderScale
+            }) perspective(1000px) rotateX(${rotationX}deg) rotateY(${rotationY}deg) rotateZ(0deg)`,
+            boxShadow: `rgba(0, 0, 0, 0.6) 0px ${shadow}px ${
+              shadow * 0.9
+            }px 0px`,
+          }}
+        >
+          <ReactCodeMirror
+            value="console.log('hello world!');"
+            theme={myTheme}
+            height="200px"
+            basicSetup={{
+              lineNumbers: false,
+              foldGutter: false,
+              highlightActiveLineGutter: false,
+              highlightSpecialChars: false,
+              allowMultipleSelections: false,
+              highlightActiveLine: false,
+            }}
+          />
+        </div>
         {canvasBg?.imgSrc && (
           <img
             className="absolute top-0 w-full h-full object-cover"
