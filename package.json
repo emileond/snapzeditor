@@ -17,6 +17,7 @@
     "@supabase/auth-ui-shared": "^0.1.8",
     "@supabase/supabase-js": "^2.39.2",
     "@thumbmarkjs/thumbmarkjs": "^0.13.5",
+    "@uiw/codemirror-extensions-langs": "^4.21.24",
     "@uiw/codemirror-themes": "^4.21.24",
     "@uiw/react-codemirror": "^4.21.24",
     "axios": "^1.6.5",
@@ -32,6 +33,7 @@
     "react-icons": "^5.0.1",
     "react-rnd": "^10.4.1",
     "react-router-dom": "^6.21.1",
+    "strip-indent": "^4.0.0",
     "tesseract.js": "^5.0.4",
     "unsplash-js": "^7.0.19"
   },
