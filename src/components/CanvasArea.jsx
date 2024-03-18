@@ -46,6 +46,7 @@ import { useLicense } from '../context/LicenseContext'
 import Paywall from './Paywall'
 import EditorLinks from './EditorLinks'
 import { displayToast } from '../utils/displayToast'
+import { useEditorMode } from '../context/EditorModeContext'
 
 const CanvasArea = ({
   canvasRef,
@@ -72,6 +73,7 @@ const CanvasArea = ({
   onCancelUpload,
   fileName,
 }) => {
+  const { mode } = useEditorMode()
   const { isLicensed } = useLicense()
   const [scaledWidth, setScaledWidth] = useState(0)
   const [scaledHeight, setScaledHeight] = useState(0)
@@ -516,7 +518,7 @@ const CanvasArea = ({
         // className="w-full flex flex-col items-center justify-center overflow-hidden"
         className="w-full flex flex-col items-center justify-center"
       >
-        {!imageSrc && (
+        {mode === 'screenshot' && !imageSrc && (
           <ImgEmptyState
             loadImage={loadImage}
             handleUpload={handleUpload}

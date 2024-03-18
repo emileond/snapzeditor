@@ -52,7 +52,7 @@ import { useLicense } from '../context/LicenseContext'
 import Paywall from './Paywall'
 import { useCanvasBg } from '../context/CanvasBgContext'
 
-const ToolBar = ({
+const ToolBarScreenshot = ({
   imageLoaded,
   imgVisibility,
   setImgVisibility,
@@ -425,9 +425,12 @@ const ToolBar = ({
                 </div>
                 <Dropdown className="dark">
                   <DropdownTrigger>
-                    <Button size="sm" variant="faded">
+                    <Button
+                      size="sm"
+                      variant="faded"
+                      endContent={<PiCaretDownBold />}
+                    >
                       {imgFrame}
-                      <PiCaretDownBold fontSize="1rem" />
                     </Button>
                   </DropdownTrigger>
                   <DropdownMenu>
@@ -605,9 +608,13 @@ const ToolBar = ({
                 <div className="flex items-center gap-2">
                   <Dropdown className="dark">
                     <DropdownTrigger>
-                      <Button size="sm" variant="faded" disabled={isOCRLoading}>
+                      <Button
+                        size="sm"
+                        variant="faded"
+                        disabled={isOCRLoading}
+                        endContent={<PiCaretDownBold />}
+                      >
                         {ocrLanguage}
-                        <PiCaretDownBold fontSize="1rem" />
                       </Button>
                     </DropdownTrigger>
                     <DropdownMenu aria-label="Languages">
@@ -673,4 +680,4 @@ const ToolBar = ({
   )
 }
 
-export default ToolBar
+export default ToolBarScreenshot
