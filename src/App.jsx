@@ -3,16 +3,19 @@ import './App.css'
 import { useForm } from 'react-hook-form'
 import ExportOverlay from './components/ExportOverlay'
 import TopBar from './components/TopBar'
-import ToolBar from './components/ToolBar'
 import CanvasArea from './components/CanvasArea'
 import toast from 'react-hot-toast'
 import { useUser } from '@supabase/auth-helpers-react'
 import { useCheckLicense } from './hooks/useLicenseCheck'
 import { useFingerprint } from './context/FingerprintContext'
 import { useLicense } from './context/LicenseContext'
+import ToolBarScreenshot from './components/ToolBarScreenshot'
+import ToolBarDev from './components/ToolBarDev'
+import { useEditorMode } from './context/EditorModeContext'
 
 function App() {
   const user = useUser()
+  const { mode } = useEditorMode()
   const fingerprint = useFingerprint()
   const { checkLicense } = useCheckLicense()
   const { isLicensed } = useLicense()
@@ -112,7 +115,7 @@ function App() {
         setCanvasWidth(watchedWidth)
         setCanvasHeight(watchedHeight)
       }
-    }, 300)
+    }, 200)
 
     updateDimensions()
 
@@ -173,7 +176,7 @@ function App() {
     if (user?.id && fingerprint) {
       checkLicense(user.id, fingerprint)
     }
-  }, [user, fingerprint, checkLicense])
+  }, [user, fingerprint])
 
   return (
     <div className={`flex flex-col items-start mx-auto bg-background h-dvh`}>
@@ -191,37 +194,64 @@ function App() {
             <ExportOverlay isVisible />
           </div>
         )}
-        <ToolBar
-          imgVisibility={imgVisibility}
-          setImgVisibility={setImgVisibility}
-          onReplaceImage={() => {
-            setTriggerReplaceImage(true)
-          }}
-          imageLoaded={imageLoaded}
-          canvasWidth={canvasWidth}
-          canvasHeight={canvasHeight}
-          sizeError={sizeError}
-          register={register}
-          setValue={setValue}
-          imgFrame={imgFrame}
-          setImgScale={setImgScale}
-          setImgPosition={setImgPosition}
-          imgPosition={imgPosition}
-          setImgShadow={setImgShadow}
-          setBorderRadius={setBorderRadius}
-          setRotationX={setRotationX}
-          setRotationY={setRotationY}
-          setImgFrame={setImgFrame}
-          snapzWatermark={snapzWatermark}
-          setSnapzWatermark={setSnapzWatermark}
-          customWatermarkToggle={customWatermarkToggle}
-          setCustomWatermarkToggle={setCustomWatermarkToggle}
-          setCustomWatermarkImg={setCustomWatermarkImg}
-          setCustomWatermarkText={setCustomWatermarkText}
-          handleExtractText={handleExtractText}
-          isOCRLoading={isOCRLoading}
-          ocrResult={ocrResult}
-        />
+        {mode === 'dev' && (
+          <ToolBarDev
+            canvasWidth={canvasWidth}
+            canvasHeight={canvasHeight}
+            sizeError={sizeError}
+            register={register}
+            setValue={setValue}
+            imgFrame={imgFrame}
+            setImgScale={setImgScale}
+            setImgPosition={setImgPosition}
+            imgPosition={imgPosition}
+            setImgShadow={setImgShadow}
+            setBorderRadius={setBorderRadius}
+            setRotationX={setRotationX}
+            setRotationY={setRotationY}
+            setImgFrame={setImgFrame}
+            snapzWatermark={snapzWatermark}
+            setSnapzWatermark={setSnapzWatermark}
+            customWatermarkToggle={customWatermarkToggle}
+            setCustomWatermarkToggle={setCustomWatermarkToggle}
+            setCustomWatermarkImg={setCustomWatermarkImg}
+            setCustomWatermarkText={setCustomWatermarkText}
+          />
+        )}
+        {mode === 'screenshot' && (
+          <ToolBarScreenshot
+            imgVisibility={imgVisibility}
+            setImgVisibility={setImgVisibility}
+            onReplaceImage={() => {
+              setTriggerReplaceImage(true)
+            }}
+            imageLoaded={imageLoaded}
+            canvasWidth={canvasWidth}
+            canvasHeight={canvasHeight}
+            sizeError={sizeError}
+            register={register}
+            setValue={setValue}
+            imgFrame={imgFrame}
+            setImgScale={setImgScale}
+            setImgPosition={setImgPosition}
+            imgPosition={imgPosition}
+            setImgShadow={setImgShadow}
+            setBorderRadius={setBorderRadius}
+            setRotationX={setRotationX}
+            setRotationY={setRotationY}
+            setImgFrame={setImgFrame}
+            snapzWatermark={snapzWatermark}
+            setSnapzWatermark={setSnapzWatermark}
+            customWatermarkToggle={customWatermarkToggle}
+            setCustomWatermarkToggle={setCustomWatermarkToggle}
+            setCustomWatermarkImg={setCustomWatermarkImg}
+            setCustomWatermarkText={setCustomWatermarkText}
+            handleExtractText={handleExtractText}
+            isOCRLoading={isOCRLoading}
+            ocrResult={ocrResult}
+          />
+        )}
+
         <CanvasArea
           canvasRef={canvasRef}
           imgScale={imgScale}

@@ -30,6 +30,7 @@ import {
 import UserMenu from './UserMenu'
 import { useState } from 'react'
 import LicenseManager from './LicenseManager'
+import EditorModeSelector from './EditorModeSelector'
 
 const TopBar = ({
   canvasWidth,
@@ -118,6 +119,8 @@ const TopBar = ({
           </DropdownMenu>
         </Dropdown>
         <Image src="/snapseditor-logo.svg" width={140} />
+        <Divider orientation="vertical" />
+        <EditorModeSelector />
       </div>
       <div className="flex flex-row gap-2 items-center">
         <PiFileDashedBold fontSize="1.2rem" className="text-default-500" />
