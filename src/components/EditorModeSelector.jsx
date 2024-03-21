@@ -26,18 +26,21 @@ function EditorModeSelector() {
       title: 'Screenshot',
       description: 'Beautify screenshots in seconds',
       icon: <PiImageDuotone fontSize="1.5rem" />,
+      mode: 'screenshot',
     },
     {
       title: 'Dev',
       description: 'Generate screenshots for your code snippets',
       icon: <PiCodeBlockDuotone fontSize="1.5rem" />,
+      mode: 'dev',
     },
-    // {
-    //   title: 'AI Upscale',
-    //   description: 'Enhance your images with AI',
-    //   icon: <PiMagicWandDuotone fontSize="1.5rem" />,
-    //   isDisabled: true,
-    // },
+    {
+      title: 'AI Image Enhancer',
+      description: 'Enhance your images with AI',
+      icon: <PiMagicWandDuotone fontSize="1.5rem" />,
+      mode: 'ai',
+      isDisabled: false,
+    },
   ]
 
   const handleModeChange = (mode) => {
@@ -70,20 +73,19 @@ function EditorModeSelector() {
             </p>
           </ModalHeader>
           <ModalBody className="p-4 w-full">
-            <Listbox selectedKeys={[0]} className="w-full">
+            <Listbox selectedKeys={[0]} className="w-full" variant="faded">
               {availableModes.map((item, index) => (
                 <ListboxItem
                   key={index}
-                  variant="flat"
+                  // variant="bordered
                   onClick={() =>
-                    !item.isDisabled &&
-                    handleModeChange(item.title.toLowerCase())
+                    !item.isDisabled && handleModeChange(item.mode)
                   }
                   endContent={
-                    mode === item.title.toLowerCase() && (
-                      <div className="flex gap-1 bg-success/10 rounded-full px-1 text-success">
-                        <PiCheckBold fontSize=".85rem" />
-                        <span className="text-xs">Active</span>
+                    mode === item.mode && (
+                      <div className="flex gap-1 bg-content3/50 rounded-full px-[6px] py-[2px] text-success items-center">
+                        <PiCheckBold fontSize=".9rem" />
+                        <span className="text-sm text-default-600">Active</span>
                       </div>
                     )
                   }
@@ -97,8 +99,8 @@ function EditorModeSelector() {
                 >
                   <div className="flex gap-3 group">
                     <div
-                      className={`flex items-center justify-center p-2 rounded-md bg-content1 text-default-500
-                      group-hover:bg-content2 group-hover:text-default-800
+                      className={`flex items-center justify-center w-12 h-12 rounded-md bg-content1 text-default-500
+                      group-hover:bg-content2 group-hover:text-secondary-500
                       `}
                     >
                       {item.icon}
