@@ -12,6 +12,7 @@ import { useLicense } from './context/LicenseContext'
 import ToolBarScreenshot from './components/ToolBarScreenshot'
 import ToolBarDev from './components/ToolBarDev'
 import { useEditorMode } from './context/EditorModeContext'
+import ToolBarAI from './components/ToolBarAI'
 
 function App() {
   const user = useUser()
@@ -251,7 +252,7 @@ function App() {
             ocrResult={ocrResult}
           />
         )}
-
+        {mode === 'ai' && <ToolBarAI />}
         <CanvasArea
           canvasRef={canvasRef}
           imgScale={imgScale}

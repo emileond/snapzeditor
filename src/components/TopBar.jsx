@@ -31,6 +31,7 @@ import UserMenu from './UserMenu'
 import { useState } from 'react'
 import LicenseManager from './LicenseManager'
 import EditorModeSelector from './EditorModeSelector'
+import { useEditorMode } from '../context/EditorModeContext'
 
 const TopBar = ({
   canvasWidth,
@@ -40,6 +41,8 @@ const TopBar = ({
   onExport,
   isExporting,
 }) => {
+  const { mode } = useEditorMode()
+
   const [exportSize, setExportSize] = useState('1x')
   const [isOpen, setIsOpen] = useState(false)
   const {
@@ -150,6 +153,7 @@ const TopBar = ({
               isLoading={isExporting}
               color="primary"
               startContent={<PiExportBold fontSize="1.1rem" />}
+              isDisabled={isExporting || mode === 'ai'}
             >
               Export
             </Button>
