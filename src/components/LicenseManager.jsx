@@ -47,12 +47,24 @@ function LicenseManager({ isOpen, onOpenChange }) {
     return
   }
 
-  const handleDeactivate = async (license_key, instance_id) => {
-    setIsLoading(true)
-    try {
-      const url =
-        'https://snapseditor-main-e4a52d7.d2.zuplo.dev/licenses/deactivate'
+  const baseUrl =
+    'https://snapseditor-main-e4a52d7.d2.zuplo.dev/licenses/deactivate'
 
+  const viededingueUrl =
+    'https://snapseditor-main-e4a52d7.d2.zuplo.dev/licenses/viededingue/deactivate'
+
+  const handleDeactivate = async (license_key, instance_id, vendor) => {
+    setIsLoading(true)
+    let url = ''
+    switch (vendor) {
+      case 'viededingue':
+        url = viededingueUrl
+        break
+      default:
+        url = baseUrl
+    }
+
+    try {
       const response = await axios.post(
         url,
         {
@@ -138,7 +150,7 @@ function LicenseManager({ isOpen, onOpenChange }) {
                               {licenses.length}/{activation_limit} used
                             </Chip>
                           </div>
-                          {licenses.map((license, index) => (
+                          {licenses.map((license) => (
                             <div
                               key={license.id}
                               className="flex gap-3 justify-between items-center"
@@ -175,9 +187,11 @@ function LicenseManager({ isOpen, onOpenChange }) {
                                   deactivateId === license.id &&
                                   isConfirmationOpen
                                 }
-                                onOpenChange={(open) =>
-                                  setIsConfirmationOpen(open)
-                                }
+                                onOpenChange={(open) => {
+                                  open
+                                    ? setIsConfirmationOpen(open)
+                                    : setDeactivateId(null)
+                                }}
                               >
                                 <PopoverTrigger>
                                   <Button
@@ -215,7 +229,8 @@ function LicenseManager({ isOpen, onOpenChange }) {
                                         onClick={() =>
                                           handleDeactivate(
                                             key,
-                                            license.instance_id
+                                            license.instance_id,
+                                            license.vendor
                                           )
                                         }
                                       >

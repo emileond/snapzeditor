@@ -128,8 +128,6 @@ const CanvasArea = ({
 
   const [aiExample, setAiExample] = useState(aiExamples[0])
 
-  console.log('aiExample', aiExample)
-
   // paywall modal
   const {
     isOpen: isPaywallOpen,
