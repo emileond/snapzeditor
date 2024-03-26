@@ -1,5 +1,9 @@
 import {
   Button,
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownItem,
   Input,
   Link,
   Modal,
@@ -18,6 +22,7 @@ import { useLicense } from '../context/LicenseContext'
 import { useFingerprint } from '../context/FingerprintContext'
 import { useCheckLicense } from '../hooks/useLicenseCheck'
 import confetti from 'canvas-confetti'
+import { PiCaretDownBold } from 'react-icons/pi'
 
 function ActivateLicenseModal({ isOpen, onOpenChange }) {
   const { isLicensed } = useLicense()
@@ -31,9 +36,12 @@ function ActivateLicenseModal({ isOpen, onOpenChange }) {
   } = useForm()
 
   const url = 'https://snapseditor-main-e4a52d7.d2.zuplo.dev/licenses'
+  const viededingueUrl =
+    'https://snapseditor-main-e4a52d7.d2.zuplo.dev/licenses/viededingue'
 
   const [activationError, setActivationError] = useState()
   const [isLoading, setIsLoading] = useState(false)
+  const [marketplace, setMarketplace] = useState(null)
 
   const deviceName = useDeviceName()
   const fingerprint = useFingerprint()
@@ -57,12 +65,13 @@ function ActivateLicenseModal({ isOpen, onOpenChange }) {
 
     try {
       const response = await axios.post(
-        url,
+        marketplace === 'VieDeDingue' ? viededingueUrl : url,
         {
           license_key: data.licenseKey,
           instance_name: deviceName,
           device_id: fingerprint,
           user_id: user.id,
+          user_email: user.email,
         },
         {
           headers: {
@@ -71,6 +80,7 @@ function ActivateLicenseModal({ isOpen, onOpenChange }) {
           },
         }
       )
+
       if (response?.data?.error) {
         setIsLoading(false)
         setActivationError(response.data)
@@ -106,7 +116,7 @@ function ActivateLicenseModal({ isOpen, onOpenChange }) {
         <ModalHeader className="flex flex-col gap-1">
           {isLicensed ? '' : 'Activate license'}
         </ModalHeader>
-        <ModalBody>
+        <ModalBody className="pb-12">
           {isLicensed ? (
             <div className="flex flex-col gap-3">
               <h3 className="text-lg font-semibold">
@@ -134,6 +144,7 @@ function ActivateLicenseModal({ isOpen, onOpenChange }) {
                   the license.
                 </p>
                 <Input
+                  autoComplete="off"
                   isInvalid={
                     (errors?.licenseKey && true) ||
                     (activationError?.error && true)
@@ -149,22 +160,50 @@ function ActivateLicenseModal({ isOpen, onOpenChange }) {
                     shouldUnregister: true,
                   })}
                 />
-                <div className="flex gap-2 items-center">
-                  <Button
-                    isLoading={isLoading}
-                    type="submit"
-                    color="primary"
-                    variant="solid"
-                  >
-                    Activate
-                  </Button>
-                  <Button
-                    isDisabled={isLoading}
-                    variant="flat"
-                    onClick={() => onOpenChange(false)}
-                  >
-                    Cancel
-                  </Button>
+                <div className="flex gap-2 items-center justify-between">
+                  <Dropdown className="dark">
+                    <DropdownTrigger>
+                      <Button
+                        variant="light"
+                        className="text-default-600"
+                        endContent={
+                          <PiCaretDownBold className="text-default-600" />
+                        }
+                      >
+                        {marketplace ? marketplace : 'Marketplace'}
+                      </Button>
+                    </DropdownTrigger>
+                    <DropdownMenu
+                      className="dark"
+                      selectionMode="single"
+                      selectedKeys={[marketplace]}
+                      onAction={(selected) => {
+                        selected === 'none'
+                          ? setMarketplace(null)
+                          : setMarketplace(selected)
+                      }}
+                    >
+                      <DropdownItem key="none">None</DropdownItem>
+                      <DropdownItem key="VieDeDingue">VieDeDingue</DropdownItem>
+                    </DropdownMenu>
+                  </Dropdown>
+                  <div className="flex gap-2 items-center">
+                    <Button
+                      isLoading={isLoading}
+                      type="submit"
+                      color="primary"
+                      variant="solid"
+                    >
+                      Activate
+                    </Button>
+                    <Button
+                      isDisabled={isLoading}
+                      variant="flat"
+                      onClick={() => onOpenChange(false)}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
                 </div>
               </div>
             </form>
