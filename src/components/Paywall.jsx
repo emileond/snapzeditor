@@ -10,19 +10,8 @@ import {
 } from '@nextui-org/react'
 import { PiCheckCircleBold, PiCrownSimpleBold } from 'react-icons/pi'
 import ChipPro from './ChipPro'
-import axios from 'axios'
 
 function Paywall({ isOpen, onOpenChange }) {
-  async function getHelloWorld() {
-    const response = await axios.get('/api/helloworld')
-
-    return response.data
-  }
-
-  getHelloWorld().then((response) => {
-    console.log(response)
-  })
-
   return (
     <Modal isOpen={isOpen} onOpenChange={onOpenChange} className="dark">
       <ModalContent>

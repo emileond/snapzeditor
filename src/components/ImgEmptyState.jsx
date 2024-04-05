@@ -23,7 +23,7 @@ export default function ImgEmptyState({
         const reader = new FileReader()
         reader.readAsDataURL(file)
         reader.onload = () => {
-          loadImage(reader.result)
+          loadImage(reader.result, file)
         }
       }
     },

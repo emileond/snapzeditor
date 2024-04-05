@@ -10,12 +10,24 @@ import { Button, Card, Divider, useDisclosure } from '@nextui-org/react'
 import Slider from './Slider'
 import { useLicense } from '../context/LicenseContext'
 import Paywall from './Paywall'
+import axios from 'axios'
+import ImageInput from './ImageInput'
 
 const ToolBarAI = () => {
   const { isLicensed } = useLicense()
   const { isOpen, onOpen, onOpenChange } = useDisclosure()
 
   const [selectedTab, setSelectedTab] = useState('image')
+
+  const handleTransform = async () => {
+    const response = await axios.post('/api/ai-transformer', {
+      image: 'https://example.com/image.jpg',
+      prompt: 'A beautiful sunset',
+      num_samples: 1,
+      negative_prompt: 'A stormy day',
+    })
+    console.log(response.data)
+  }
 
   return (
     <>
@@ -30,60 +42,8 @@ const ToolBarAI = () => {
             Enhance your images with AI and achieve new levels of creativity and
             quality.
           </p>
-          {/* <Tabs
-            className="mb-2"
-            color="primary"
-            fullWidth
-            selectedKey={selectedTab}
-            onSelectionChange={setSelectedTab}
-          >
-            <Tab
-              key="image"
-              title={
-                <div className="flex items-center space-x-2">
-                  <PiImageBold fontSize="1.3rem" />
-                  <span>Image</span>
-                </div>
-              }
-              className="flex flex-col gap-4"
-            > */}
-          {/* <Divider />
-          <div className="flex flex-col items-start gap-3">
-            <div className="flex items-center gap-2">
-              <PiFileImageBold fontSize="1.1rem" />
-              <h5>File</h5>
-              <p className="text-start text-default-600 text-sm truncate w-52">
-                {imageLoaded.loaded && imageLoaded.data
-                  ? imageLoaded.data.name
-                  : 'Screenshot'}
-              </p>
-            </div>
-            <div className="flex items-center justify-center gap-2 w-full">
-              <Button
-                size="sm"
-                variant="faded"
-                startContent={<PiArrowCounterClockwiseBold fontSize="1rem" />}
-                onClick={onReplaceImage}
-              >
-                Replace
-              </Button>
-              <Button
-                size="sm"
-                variant="faded"
-                startContent={
-                  imgVisibility ? (
-                    <PiEyeClosedBold fontSize="1rem" />
-                  ) : (
-                    <PiEyeBold fontSize="1rem" />
-                  )
-                }
-                onClick={() => setImgVisibility(!imgVisibility)}
-              >
-                {imgVisibility ? 'Hide' : 'Show'}
-              </Button>
-            </div>
-          </div> */}
           <Divider />
+          <ImageInput />
           <div>
             <div className="flex items-center gap-2">
               <PiSparkleBold fontSize="1.1rem" />
@@ -132,7 +92,7 @@ const ToolBarAI = () => {
             variant="faded"
             startContent={<PiMagicWandBold fontSize="1.1rem" />}
           >
-            Coming soon
+            Transform
           </Button>
         </Card>
       </div>
