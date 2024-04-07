@@ -7,22 +7,24 @@ const AiImagesContext = createContext()
 export const AiImagesProvider = ({ children }) => {
   const [images, setImages] = useState([])
 
-  // Function to add a new image object
-  const addImage = (imageObject) => {
-    setImages((prevImages) => [...prevImages, imageObject])
+  // Function to add a new prediction object
+  const addImage = (prediction) => {
+    setImages((prevPredictions) => [prediction, ...prevPredictions])
   }
 
-  // Function to update the output of a specific image
-  const updateImageOutput = (imageIndex, output) => {
-    setImages((prevImages) =>
-      prevImages.map((img, index) =>
-        index === imageIndex ? { ...img, output: output } : img
+  // Function to update a prediction's object
+  const updateImage = (prediction_id, update) => {
+    setImages((prevPredictions) =>
+      prevPredictions.map((prediction) =>
+        prediction.id === prediction_id
+          ? { ...prediction, ...update }
+          : prediction
       )
     )
   }
 
   return (
-    <AiImagesContext.Provider value={{ images, addImage, updateImageOutput }}>
+    <AiImagesContext.Provider value={{ images, addImage, updateImage }}>
       {children}
     </AiImagesContext.Provider>
   )

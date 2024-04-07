@@ -182,7 +182,9 @@ function App() {
   }, [user, fingerprint])
 
   return (
-    <div className={`flex flex-col items-start mx-auto bg-background h-dvh`}>
+    <div
+      className={`dark flex flex-col items-start mx-auto bg-background h-dvh`}
+    >
       <TopBar
         canvasWidth={canvasWidth}
         canvasHeight={canvasHeight}
