@@ -27,6 +27,7 @@ import ImageInput from './ImageInput'
 import HelpIndicator from './HelpIndicator'
 import { useForm } from 'react-hook-form'
 import { useAiImages } from '../context/AiImagesContext'
+import { displayToast } from '../utils/displayToast'
 
 const ToolBarAI = () => {
   const { isLicensed } = useLicense()
@@ -44,6 +45,7 @@ const ToolBarAI = () => {
     let processingStartTime = null // Track when we start processing
     const timeout = 120000 // 2 minutes in milliseconds
     let status = 'starting'
+    let updateCount = 0 // Initialize an update counter
 
     // Use an outer loop to continuously check until we're done or need to cancel
     while (status !== 'succeeded') {
@@ -56,20 +58,28 @@ const ToolBarAI = () => {
         status = prediction.status
         console.log('Prediction status:', status)
 
-        // When status first switches to "processing", record the start time
-        if (status === 'processing' && processingStartTime === null) {
-          updateImage(predictionId, { status, logs })
-          processingStartTime = Date.now()
+        // Increment the update counter every time the status is checked and still 'processing'
+        if (status === 'processing') {
+          updateCount++
+          // Include the updateCount in the update to force re-render
+          updateImage(predictionId, { status, logs, updateCount })
+
+          // Record the start time once when the status first switches to "processing"
+          if (processingStartTime === null) {
+            processingStartTime = Date.now()
+          }
         }
 
         if (status === 'succeeded') {
           console.log('Prediction succeeded:', prediction)
           updateImage(predictionId, { status, output: prediction.output, logs })
+          displayToast('success', 'Image generated successfully')
           break
         }
 
         if (status === 'failed') {
           console.error('Prediction failed:', response.data)
+          displayToast('error', 'Failed to generate image, credits refunded')
           updateImage(predictionId, { status, logs })
           break
         }
@@ -110,7 +120,6 @@ const ToolBarAI = () => {
         },
       })
 
-      console.log('response', response.data)
       addImage({
         id: response.data.id,
         input: inputImage.src,
@@ -118,9 +127,11 @@ const ToolBarAI = () => {
         status: response.data.status,
         logs: response.data.logs,
       })
+      displayToast('info', 'Image generation started')
       return checkPredictionStatus(response.data.id)
     } catch (error) {
       console.error('Error creating prediction:', error)
+      return displayToast('error', 'Failed to generate image, please try again')
     }
   }
 

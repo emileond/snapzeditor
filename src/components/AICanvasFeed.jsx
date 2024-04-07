@@ -3,7 +3,7 @@ import {
   ReactCompareSlider,
   ReactCompareSliderImage,
 } from 'react-compare-slider'
-import { Chip, Progress } from '@nextui-org/react'
+import { Chip, Progress, Spinner, Textarea } from '@nextui-org/react'
 import { useAiImages } from '../context/AiImagesContext'
 
 export default function AICanvasFeed() {
@@ -34,7 +34,7 @@ export default function AICanvasFeed() {
                   }
                   itemTwo={
                     <div className="w-full h-full flex items-center justify-center">
-                      <Chip className="absolute right-2">AI Enhanced</Chip>
+                      <Chip className="absolute right-2">AI Generated</Chip>
                       <ReactCompareSliderImage
                         src={output}
                         alt={`AI Enhanced ${idx + 1}`}
@@ -44,12 +44,20 @@ export default function AICanvasFeed() {
                 />
               ))
             ) : (
-              <div key={image.id} className="flex flex-col gap-2 w-full">
-                <Progress isIndeterminate color="primary" size="sm" />
+              <div
+                key={image.id}
+                className="flex flex-col items-center justify-center gap-2 py-4 w-full min-h-[300px]"
+              >
+                <Spinner size="large" color="primary" />
                 <h4>{image?.status}</h4>
-                <p className="whitespace-pre text-sm text-default-600">
-                  {image?.logs}
-                </p>
+                <div className="w-[400px] bg-content1 rounded-lg p-2 text-left">
+                  <p className="text-default-400 text-sm p-2">
+                    <strong>Logs:</strong>
+                  </p>
+                  <p className="text-default-500 text-sm whitespace-pre p-2">
+                    {image?.logs}
+                  </p>
+                </div>
               </div>
             )
           )}
