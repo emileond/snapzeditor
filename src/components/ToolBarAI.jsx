@@ -40,6 +40,7 @@ const ToolBarAI = () => {
   const { addImage, updateImage } = useAiImages()
   const { isOpen, onOpen, onOpenChange } = useDisclosure()
   const [isLoading, setIsLoading] = useState(false)
+  const [imgError, setImgError] = useState()
 
   async function checkPredictionStatus(predictionId) {
     let processingStartTime = null // Track when we start processing
@@ -49,10 +50,16 @@ const ToolBarAI = () => {
 
     // Use an outer loop to continuously check until we're done or need to cancel
     while (status !== 'succeeded') {
+      const controller = new AbortController() // Create a new instance of AbortController
+
       try {
         const response = await axios.get(
-          `/api/get-prediction?prediction_id=${predictionId}`
+          `/api/get-prediction?prediction_id=${predictionId}`,
+          {
+            signal: controller.signal, // Use the signal in the request
+          }
         )
+
         const prediction = response.data
         const logs = prediction.logs
         status = prediction.status
@@ -61,7 +68,6 @@ const ToolBarAI = () => {
         // Increment the update counter every time the status is checked and still 'processing'
         if (status === 'processing') {
           updateCount++
-          // Include the updateCount in the update to force re-render
           updateImage(predictionId, { status, logs, updateCount })
 
           // Record the start time once when the status first switches to "processing"
@@ -84,26 +90,32 @@ const ToolBarAI = () => {
           break
         }
 
-        // If we've started processing and exceeded the timeout, cancel the prediction
         if (processingStartTime && Date.now() - processingStartTime > timeout) {
           console.log('Prediction taking too long, attempting to cancel...')
           await axios.post(`/api/cancel-prediction/${predictionId}`)
           break
         }
       } catch (error) {
-        console.error('Failed to check prediction status:', error)
-        break
+        if (axios.isCancel(error)) {
+          console.log('Request canceled:', error.message)
+        } else {
+          console.error('Failed to check prediction status:', error)
+          break
+        }
+      } finally {
+        // Cancel the request if still pending after 5 seconds
+        setTimeout(() => controller.abort(), 5000)
       }
 
-      // Wait for 5 seconds before the next check, but only if we're not done yet
-      if (status !== 'succeeded') {
-        await new Promise((resolve) => setTimeout(resolve, 5000))
-      }
+      // Avoid starting a new loop iteration immediately
+      await new Promise((resolve) => setTimeout(resolve, 5000))
     }
     setIsLoading(false)
   }
 
   const onSubmit = async (data) => {
+    if (!inputImage) return setImgError('Image is required')
+
     setIsLoading(true)
     // Prepare the JSON payload
     const payload = {
@@ -228,9 +240,10 @@ const ToolBarAI = () => {
           <Divider />
           <ImageInput
             onChange={(img) => {
-              setInputImage(img)
+              setInputImage(img), img && img.src && setImgError()
             }}
           />
+          {imgError && <p className="text-tiny text-danger">{imgError}</p>}
           <Divider />
           <div>
             <div className="flex flex-col gap-3">
