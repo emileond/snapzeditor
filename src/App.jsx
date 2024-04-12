@@ -13,6 +13,8 @@ import ToolBarScreenshot from './components/ToolBarScreenshot'
 import ToolBarDev from './components/ToolBarDev'
 import { useEditorMode } from './context/EditorModeContext'
 import ToolBarAI from './components/ToolBarAI'
+import EditorLinks from './components/EditorLinks'
+import AICanvasFeed from './components/AICanvasFeed'
 
 function App() {
   const user = useUser()
@@ -180,7 +182,9 @@ function App() {
   }, [user, fingerprint])
 
   return (
-    <div className={`flex flex-col items-start mx-auto bg-background h-dvh`}>
+    <div
+      className={`dark flex flex-col items-start mx-auto bg-background h-dvh`}
+    >
       <TopBar
         canvasWidth={canvasWidth}
         canvasHeight={canvasHeight}
@@ -252,37 +256,47 @@ function App() {
             ocrResult={ocrResult}
           />
         )}
-        {mode === 'ai' && <ToolBarAI />}
-        <CanvasArea
-          canvasRef={canvasRef}
-          imgScale={imgScale}
-          imgPosition={imgPosition}
-          imgShadow={imgShadow}
-          borderRadius={borderRadius}
-          rotationX={rotationX}
-          rotationY={rotationY}
-          canvasWidth={canvasWidth}
-          canvasHeight={canvasHeight}
-          imgFrame={imgFrame}
-          imgVisibility={imgVisibility}
-          snapzWatermark={snapzWatermark}
-          customWatermarkToggle={customWatermarkToggle}
-          customWatermarkImg={customWatermarkImg}
-          customWatermarkText={customWatermarkText}
-          startExport={startExport}
-          onExported={handleExported}
-          extractText={extractText}
-          onExtractedText={handleExtractedText}
-          onImageLoaded={(file) => {
-            setImageLoaded(file)
-            setTriggerReplaceImage(false)
-          }}
-          triggerReplaceImage={triggerReplaceImage}
-          onCancelUpload={() => {
-            setTriggerReplaceImage(false)
-          }}
-          fileName={fileName}
-        />
+        {mode === 'ai' && (
+          <>
+            <ToolBarAI />
+            <AICanvasFeed />
+          </>
+        )}
+        {mode !== 'ai' && (
+          <CanvasArea
+            canvasRef={canvasRef}
+            imgScale={imgScale}
+            imgPosition={imgPosition}
+            imgShadow={imgShadow}
+            borderRadius={borderRadius}
+            rotationX={rotationX}
+            rotationY={rotationY}
+            canvasWidth={canvasWidth}
+            canvasHeight={canvasHeight}
+            imgFrame={imgFrame}
+            imgVisibility={imgVisibility}
+            snapzWatermark={snapzWatermark}
+            customWatermarkToggle={customWatermarkToggle}
+            customWatermarkImg={customWatermarkImg}
+            customWatermarkText={customWatermarkText}
+            startExport={startExport}
+            onExported={handleExported}
+            extractText={extractText}
+            onExtractedText={handleExtractedText}
+            onImageLoaded={(file) => {
+              setImageLoaded(file)
+              setTriggerReplaceImage(false)
+            }}
+            triggerReplaceImage={triggerReplaceImage}
+            onCancelUpload={() => {
+              setTriggerReplaceImage(false)
+            }}
+            fileName={fileName}
+          />
+        )}
+        <div className="absolute bottom-4 right-4">
+          <EditorLinks />
+        </div>
       </div>
     </div>
   )

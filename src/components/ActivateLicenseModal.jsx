@@ -155,8 +155,7 @@ function ActivateLicenseModal({ isOpen, onOpenChange }) {
                   }
                   placeholder="License key"
                   {...register('licenseKey', {
-                    required: true,
-                    message: 'License key is required',
+                    required: 'License key is required',
                     shouldUnregister: true,
                   })}
                 />
