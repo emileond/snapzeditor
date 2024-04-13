@@ -31,6 +31,7 @@ import { displayToast } from '../utils/displayToast'
 
 const ToolBarAI = () => {
   const { isLicensed } = useLicense()
+  console.log(isLicensed)
   const {
     register,
     handleSubmit,
