@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   PiMagicWandBold,
   PiSparkleBold,
@@ -9,10 +9,14 @@ import {
   PiPaintBrushBold,
   PiCardsBold,
   PiImagesBold,
+  PiCoinVerticalBold,
+  PiCrownSimpleBold,
+  PiArrowSquareOutBold,
 } from 'react-icons/pi'
 import {
   Button,
   Card,
+  Chip,
   Divider,
   Input,
   Select,
@@ -27,12 +31,16 @@ import ImageInput from './ImageInput'
 import HelpIndicator from './HelpIndicator'
 import { useForm } from 'react-hook-form'
 import { useAiImages } from '../context/AiImagesContext'
+import { useCheckAiCredits } from '../hooks/useCheckAiCredits'
 import { displayToast } from '../utils/displayToast'
+import ChipPro from './ChipPro'
 
 const ToolBarAI = () => {
   const { license } = useLicense()
+  const { checkAiCredits } = useCheckAiCredits()
   const {
     register,
+    watch,
     handleSubmit,
     formState: { errors },
   } = useForm()
@@ -41,8 +49,12 @@ const ToolBarAI = () => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure()
   const [isLoading, setIsLoading] = useState(false)
   const [imgError, setImgError] = useState()
+  const [runCount, setRunCount] = useState(0)
+
+  const creditsCost = watch('num_samples') * 2
 
   async function checkPredictionStatus(predictionId) {
+    setRunCount(runCount + 1)
     let processingStartTime = null // Track when we start processing
     const timeout = 120000 // 2 minutes in milliseconds
     let status = 'starting'
@@ -63,7 +75,6 @@ const ToolBarAI = () => {
         const prediction = response.data
         const logs = prediction.logs
         status = prediction.status
-        console.log('Prediction status:', status)
 
         // Increment the update counter every time the status is checked and still 'processing'
         if (status === 'processing') {
@@ -77,7 +88,6 @@ const ToolBarAI = () => {
         }
 
         if (status === 'succeeded') {
-          console.log('Prediction succeeded:', prediction)
           updateImage(predictionId, { status, output: prediction.output, logs })
           displayToast('success', 'Image generated successfully')
           break
@@ -91,13 +101,12 @@ const ToolBarAI = () => {
         }
 
         if (processingStartTime && Date.now() - processingStartTime > timeout) {
-          console.log('Prediction taking too long, attempting to cancel...')
           await axios.post(`/api/cancel-prediction/${predictionId}`)
           break
         }
       } catch (error) {
         if (axios.isCancel(error)) {
-          console.log('Request canceled:', error.message)
+          console.error('Request canceled:', error.message)
         } else {
           console.error('Failed to check prediction status:', error)
           break
@@ -114,6 +123,7 @@ const ToolBarAI = () => {
   }
 
   const onSubmit = async (data) => {
+    if (!license?.isLicensed) return onOpen()
     if (!inputImage) return setImgError('Image is required')
 
     setIsLoading(true)
@@ -123,6 +133,7 @@ const ToolBarAI = () => {
       prompt: `${useCase.basePrompt} ${data.prompt}, ${data?.attributes}, ${useCase.baseAttributes}`,
       num_samples: data.num_samples,
       negative_prompt: `${useCase.negativePrompt}`,
+      license_key: license?.deviceLicense?.license_key,
     }
 
     try {
@@ -131,6 +142,12 @@ const ToolBarAI = () => {
           'Content-Type': 'application/json',
         },
       })
+
+      if (response.data.error) {
+        console.error('Error:', response.data.error)
+        setIsLoading(false)
+        return displayToast('error', response.data.error)
+      }
 
       addImage({
         id: response.data.id,
@@ -143,7 +160,8 @@ const ToolBarAI = () => {
       return checkPredictionStatus(response.data.id)
     } catch (error) {
       console.error('Error creating prediction:', error)
-      return displayToast('error', 'Failed to generate image, please try again')
+      setIsLoading(false)
+      return displayToast('error', error.message)
     }
   }
 
@@ -219,6 +237,22 @@ const ToolBarAI = () => {
   ]
 
   const [useCase, setUseCase] = useState(useCaseOptions[0])
+  const [aiCredits, setAiCredits] = useState(0)
+
+  useEffect(() => {
+    async function fetchData() {
+      if (license?.isLicensed && license?.deviceLicense?.license_key) {
+        const credits = await checkAiCredits(
+          license?.deviceLicense?.license_key
+        )
+        setAiCredits(credits?.balance || 0)
+      }
+      if (!license?.isLicensed) {
+        setAiCredits(0)
+      }
+    }
+    fetchData()
+  }, [license.isLicensed, license.deviceLicense?.license_key, runCount])
 
   return (
     <>
@@ -232,11 +266,38 @@ const ToolBarAI = () => {
           <div className="flex items-center gap-2 text-default-600">
             <PiMagicWandDuotone fontSize="1.3rem" />
             <h4 className="font-semibold">AI Image Enhancer</h4>
+            <ChipPro />
           </div>
           <p className="text-default-500 text-sm text-left">
             Enhance your images with AI and achieve new levels of creativity and
             quality.
           </p>
+          {!license?.isLicensed ? (
+            <div className="flex flex-col gap-2">
+              <Button
+                color="warning"
+                variant="faded"
+                fullWidth
+                startContent={<PiCrownSimpleBold fontSize="1.1rem" />}
+                endContent={<PiArrowSquareOutBold fontSize="1.2rem" />}
+                onClick={onOpen}
+              >
+                Buy a license
+              </Button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-1">
+              <Chip
+                color="warning"
+                variant="faded"
+                startContent={<PiCoinVerticalBold fontSize="1.1rem" />}
+              >
+                <span className="text-sm font-semibold text-default-600">
+                  {aiCredits.toLocaleString()} AI credits
+                </span>
+              </Chip>
+            </div>
+          )}
           <Divider />
           <ImageInput
             onChange={(img) => {
@@ -330,14 +391,17 @@ const ToolBarAI = () => {
               errorMessage={errors?.num_samples?.message}
             />
           </div>
-          <Button
-            type="submit"
-            color="secondary"
-            startContent={<PiMagicWandBold fontSize="1.1rem" />}
-            isLoading={isLoading}
-          >
-            Generate
-          </Button>
+          <div className="flex flex-col gap-2">
+            <Button
+              fullWidth
+              type="submit"
+              color="secondary"
+              startContent={<PiMagicWandBold fontSize="1.1rem" />}
+              isLoading={isLoading}
+            >
+              Generate ({creditsCost} credits)
+            </Button>
+          </div>
         </Card>
       </div>
     </>

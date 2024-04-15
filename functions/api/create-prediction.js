@@ -25,7 +25,21 @@ export async function onRequestPost(context) {
     .eq('status', 'active')
     .single()
 
-  console.log('balance', data)
+  if (error) {
+    console.error(error)
+    return new Response(JSON.stringify({ error: error.message }))
+  }
+
+  // if balance is less than required credits, return an error response
+  if (data.balance < requiredCredits) {
+    return new Response(
+      JSON.stringify({
+        error: 'Insufficient credits',
+        requiredCredits,
+        availableCredits: data.balance,
+      })
+    )
+  }
 
   const replicateApiToken = context.env.REPLICATE_API_TOKEN
   const replicate = new Replicate({
@@ -41,6 +55,17 @@ export async function onRequestPost(context) {
       num_samples: parseInt(num_samples),
     },
   })
+
+  // Deduct the required credits from the license
+  const { error: creditsError } = await supabase
+    .from('license_ai_credits')
+    .update({ balance: data.balance - requiredCredits })
+    .eq('license_key', license_key)
+    .eq('status', 'active')
+
+  if (creditsError) {
+    return new Response(JSON.stringify({ error: creditsError.message }))
+  }
 
   // Return the prediction result as JSON
   return new Response(JSON.stringify(prediction), {

@@ -10,7 +10,6 @@ import {
   Spinner,
   Button,
   Tooltip,
-  Skeleton,
 } from '@nextui-org/react' // Assuming Text is available for textual feedback
 import { useAiImages } from '../context/AiImagesContext'
 import {
@@ -24,6 +23,26 @@ import {
 export default function AICanvasFeed() {
   const { images } = useAiImages()
   const [showLogs, setShowLogs] = useState(false)
+
+  const downloadImage = async (url) => {
+    try {
+      const response = await fetch(url)
+      if (!response.ok)
+        throw new Error(`HTTP error! status: ${response.status}`)
+
+      const blob = await response.blob()
+      const downloadUrl = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = downloadUrl
+      link.setAttribute('download', 'download.png') // You can customize the download file name
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(downloadUrl) // Clean up
+    } catch (error) {
+      console.error('Download failed:', error)
+    }
+  }
 
   // Helper function to render the content based on the image status
   const renderContentBasedOnStatus = (image) => {
@@ -81,22 +100,27 @@ export default function AICanvasFeed() {
                   className="relative w-full h-full"
                 >
                   <div className="flex gap-2 absolute top-3 right-3 z-10">
-                    <Tooltip content="Use image as reference">
+                    {/* <Tooltip content="Use image as reference">
                       <Button size="sm" isIconOnly variant="faded">
                         <PiSlidersHorizontalBold fontSize="1.1rem" />
                       </Button>
-                    </Tooltip>
+                    </Tooltip> */}
                     <Tooltip content="Download generated image">
-                      <Button size="sm" isIconOnly variant="faded">
+                      <Button
+                        size="sm"
+                        isIconOnly
+                        variant="faded"
+                        onClick={() => downloadImage(output)}
+                      >
                         <PiDownloadSimpleBold fontSize="1.1rem" />
                       </Button>
                     </Tooltip>
-                    <Tooltip content="Upload to cloud">
+                    {/* <Tooltip content="Upload to cloud">
                       <Button size="sm" isIconOnly variant="faded" isDisabled>
                         <PiCloudArrowUpBold fontSize="1.1rem" />
                       </Button>
-                    </Tooltip>
-                    <Tooltip content="Delete">
+                    </Tooltip> */}
+                    {/* <Tooltip content="Delete">
                       <Button
                         size="sm"
                         isIconOnly
@@ -106,7 +130,7 @@ export default function AICanvasFeed() {
                       >
                         <PiTrashSimpleBold fontSize="1.1rem" />
                       </Button>
-                    </Tooltip>
+                    </Tooltip> */}
                   </div>
                   <ReactCompareSlider
                     itemOne={
