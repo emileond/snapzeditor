@@ -70,7 +70,7 @@ const ToolBarDev = ({
   register,
   setValue,
 }) => {
-  const { isLicensed } = useLicense()
+  const { license } = useLicense()
   const { isOpen, onOpen, onOpenChange } = useDisclosure()
   const { setCanvasBg } = useCanvasBg()
   const { settings, updateSettings } = useDevModeSettings()
@@ -181,7 +181,7 @@ const ToolBarDev = ({
   ]
 
   const handleDefaultWatermarkToggle = (e) => {
-    if (isLicensed) {
+    if (license?.isLicensed) {
       setSnapzWatermark(!snapzWatermark)
     } else {
       onOpen()
@@ -189,7 +189,7 @@ const ToolBarDev = ({
   }
 
   const handleCustomWatermarkToggle = () => {
-    if (isLicensed) {
+    if (license?.isLicensed) {
       setCustomWatermarkToggle(!customWatermarkToggle)
     } else {
       onOpen()
@@ -589,7 +589,7 @@ const ToolBarDev = ({
                 </div>
                 <PositionSelector
                   onChange={(pos) =>
-                    isLicensed ? setImgPosition(pos) : onOpen()
+                    license?.isLicensed ? setImgPosition(pos) : onOpen()
                   }
                   position={imgPosition}
                 />

@@ -3,15 +3,15 @@ import { createContext, useContext, useState } from 'react'
 const LicenseContext = createContext()
 
 export const LicenseProvider = ({ children }) => {
-  const [isLicensed, setIsLicensed] = useState(false)
+  const [license, setLicense] = useState(false)
 
   // Method to update the license status
   const updateLicenseStatus = (status) => {
-    setIsLicensed(status)
+    setLicense(status)
   }
 
   return (
-    <LicenseContext.Provider value={{ isLicensed, updateLicenseStatus }}>
+    <LicenseContext.Provider value={{ license, updateLicenseStatus }}>
       {children}
     </LicenseContext.Provider>
   )

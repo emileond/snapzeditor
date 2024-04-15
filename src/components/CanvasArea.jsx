@@ -73,7 +73,7 @@ const CanvasArea = ({
   fileName,
 }) => {
   const { mode } = useEditorMode()
-  const { isLicensed } = useLicense()
+  const { license } = useLicense()
   const [scaledWidth, setScaledWidth] = useState(0)
   const [scaledHeight, setScaledHeight] = useState(0)
   const wrapperRef = useRef()
@@ -1018,7 +1018,7 @@ const CanvasArea = ({
                           size="md"
                           variant="ghost"
                           onClick={() =>
-                            isLicensed
+                            license?.isLicensed
                               ? createSticker(i + 1)
                               : handleStickersPaywallClick()
                           }
