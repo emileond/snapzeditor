@@ -18,6 +18,7 @@ import { useUser } from '@supabase/auth-helpers-react'
 import { useFingerprint } from '../context/FingerprintContext'
 import axios from 'axios'
 import { displayToast } from '../utils/displayToast'
+import { useLicense } from '../context/LicenseContext'
 
 function LicenseManager({ isOpen, onOpenChange }) {
   const user = useUser()
@@ -27,6 +28,7 @@ function LicenseManager({ isOpen, onOpenChange }) {
   const [isConfirmationOpen, setIsConfirmationOpen] = useState(false)
   const [deactivateId, setDeactivateId] = useState()
   const [isLoading, setIsLoading] = useState(false)
+  const { updateLicenseStatus } = useLicense()
 
   // get license from supabase
   async function getLicense() {
@@ -39,7 +41,7 @@ function LicenseManager({ isOpen, onOpenChange }) {
     if (error) {
       setIsFetching(false)
       console.error(error)
-      displayToast('error', 'An error occurredm, please try again later.')
+      displayToast('error', 'An error occurred, please try again later.')
       return
     }
     setLicenseInstances(data)
@@ -47,11 +49,8 @@ function LicenseManager({ isOpen, onOpenChange }) {
     return
   }
 
-  const baseUrl =
-    'https://snapseditor-main-e4a52d7.d2.zuplo.dev/licenses/deactivate'
-
-  const viededingueUrl =
-    'https://snapseditor-main-e4a52d7.d2.zuplo.dev/licenses/viededingue/deactivate'
+  const baseUrl = '/api/deactivate-license'
+  const viededingueUrl = '/api/deactivate-viededingue-license'
 
   const handleDeactivate = async (license_key, instance_id, vendor) => {
     setIsLoading(true)
@@ -80,6 +79,7 @@ function LicenseManager({ isOpen, onOpenChange }) {
       )
       if (response?.data?.deactivated) {
         displayToast('success', 'Device deactivated.')
+        updateLicenseStatus(false)
         await getLicense()
       }
     } catch (error) {

@@ -11,6 +11,7 @@ import {
   ModalContent,
   ModalFooter,
   ModalHeader,
+  Divider,
 } from '@nextui-org/react'
 import axios from 'axios'
 import { useForm } from 'react-hook-form'
@@ -25,7 +26,7 @@ import confetti from 'canvas-confetti'
 import { PiCaretDownBold } from 'react-icons/pi'
 
 function ActivateLicenseModal({ isOpen, onOpenChange }) {
-  const { isLicensed } = useLicense()
+  const { license } = useLicense()
   const { checkLicense } = useCheckLicense()
   const {
     register,
@@ -35,9 +36,8 @@ function ActivateLicenseModal({ isOpen, onOpenChange }) {
     formState: { errors },
   } = useForm()
 
-  const url = 'https://snapseditor-main-e4a52d7.d2.zuplo.dev/licenses'
-  const viededingueUrl =
-    'https://snapseditor-main-e4a52d7.d2.zuplo.dev/licenses/viededingue'
+  const url = '/api/activate-license'
+  const viededingueUrl = '/api/activate-viededingue-license'
 
   const [activationError, setActivationError] = useState()
   const [isLoading, setIsLoading] = useState(false)
@@ -49,8 +49,7 @@ function ActivateLicenseModal({ isOpen, onOpenChange }) {
 
   useEffect(() => {
     if (isOpen && user && fingerprint) {
-      checkLicense(user.id, fingerprint)
-      if (isLicensed) {
+      if (license.isLicensed) {
         confetti({
           particleCount: 100,
           spread: 90,
@@ -58,7 +57,7 @@ function ActivateLicenseModal({ isOpen, onOpenChange }) {
         })
       }
     }
-  }, [isOpen, isLicensed, user, fingerprint])
+  }, [isOpen, license, user, fingerprint])
 
   const onSubmit = async (data) => {
     setIsLoading(true)
@@ -88,7 +87,7 @@ function ActivateLicenseModal({ isOpen, onOpenChange }) {
       if (response?.data?.activated) {
         setIsLoading(false)
         toast.success('License activated successfully')
-        checkLicense(user.id, fingerprint)
+        checkLicense(user, fingerprint)
       }
     } catch (error) {
       setIsLoading(false)
@@ -114,25 +113,36 @@ function ActivateLicenseModal({ isOpen, onOpenChange }) {
     >
       <ModalContent>
         <ModalHeader className="flex flex-col gap-1">
-          {isLicensed ? '' : 'Activate license'}
+          {license?.isLicensed ? '' : 'Activate license'}
         </ModalHeader>
-        <ModalBody className="pb-12">
-          {isLicensed ? (
-            <div className="flex flex-col gap-3">
+        <ModalBody className="pb-6">
+          {license?.isLicensed ? (
+            <div className="flex flex-col gap-4">
               <h3 className="text-lg font-semibold">
                 Thanks for your purchase 🎉
               </h3>
-              <p className="text-default-700">
-                Your license has been activated, you now have access to all Pro
-                features on this device.
+              <p className="text-default-600 ">
+                Congratulations! Your license has been successfully activated.
+                You now have full access to all Pro features.
               </p>
-              <ul className="list-disc pl-4">
-                <li className="text-default-500 text-sm pb-3">
-                  Use the same license key to activate other devices.
+              <Divider />
+              <p className="text-default-700 text-sm font-semibold mt-2">
+                Here&apos;s what you need to know:
+              </p>
+              <ul className="list-disc pl-4 flex flex-col gap-3">
+                <li className="text-default-700 text-sm">
+                  When you login on another device/app, your license will
+                  automatically be activated.
                 </li>
-                <li className="text-default-500 text-sm">
-                  To deactivate a device and activate on another, visit the
-                  license manager page.
+                <li className="text-default-700 text-sm">
+                  You can view and manage your activated devices anytime, from
+                  the License Manager.
+                </li>
+                <li className="text-default-700 text-sm">
+                  If you need help, please send an email to: &nbsp;
+                  <a href="mailto:hello@snapseditor.com">
+                    hello@snapseditor.com
+                  </a>
                 </li>
               </ul>
             </div>
@@ -155,8 +165,7 @@ function ActivateLicenseModal({ isOpen, onOpenChange }) {
                   }
                   placeholder="License key"
                   {...register('licenseKey', {
-                    required: true,
-                    message: 'License key is required',
+                    required: 'License key is required',
                     shouldUnregister: true,
                   })}
                 />
@@ -210,7 +219,7 @@ function ActivateLicenseModal({ isOpen, onOpenChange }) {
           )}
         </ModalBody>
         <ModalFooter>
-          {isLicensed ? (
+          {license?.isLicensed ? (
             <Button
               onClick={() => onOpenChange(false)}
               variant="solid"

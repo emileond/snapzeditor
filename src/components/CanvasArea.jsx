@@ -17,7 +17,6 @@ import {
   PopoverTrigger,
   useDisclosure,
   Image,
-  Chip,
 } from '@nextui-org/react'
 import {
   PiArrowSquareDownBold,
@@ -28,7 +27,6 @@ import {
   PiEraserBold,
   PiRectangleBold,
   PiShapesBold,
-  PiShuffleBold,
   PiStarBold,
   PiStickerBold,
   PiTextAaBold,
@@ -46,13 +44,8 @@ import { useHotkeys } from 'react-hotkeys-hook'
 import ChipPro from './ChipPro'
 import { useLicense } from '../context/LicenseContext'
 import Paywall from './Paywall'
-import EditorLinks from './EditorLinks'
 import { displayToast } from '../utils/displayToast'
 import { useEditorMode } from '../context/EditorModeContext'
-import {
-  ReactCompareSlider,
-  ReactCompareSliderImage,
-} from 'react-compare-slider'
 
 const CanvasArea = ({
   canvasRef,
@@ -80,7 +73,7 @@ const CanvasArea = ({
   fileName,
 }) => {
   const { mode } = useEditorMode()
-  const { isLicensed } = useLicense()
+  const { license } = useLicense()
   const [scaledWidth, setScaledWidth] = useState(0)
   const [scaledHeight, setScaledHeight] = useState(0)
   const wrapperRef = useRef()
@@ -101,32 +94,6 @@ const CanvasArea = ({
     height: '16px',
     borderRadius: '30%',
   }
-
-  // ai examples
-  const aiExamples = [
-    {
-      description: 'Add depth and detail to your images',
-      before: '/ai-examples/example1-before.webp',
-      after: '/ai-examples/example1-after.webp',
-    },
-    {
-      description: 'Upscale graphics and images',
-      before: '/ai-examples/example2-before.webp',
-      after: '/ai-examples/example2-after.webp',
-    },
-    {
-      description: 'Enhance your photos',
-      before: '/ai-examples/example3-before.webp',
-      after: '/ai-examples/example3-after.webp',
-    },
-    {
-      description: 'Bring your sketches to life',
-      before: '/ai-examples/example4-before.webp',
-      after: '/ai-examples/example4-after.webp',
-    },
-  ]
-
-  const [aiExample, setAiExample] = useState(aiExamples[0])
 
   // paywall modal
   const {
@@ -549,29 +516,6 @@ const CanvasArea = ({
         ref={wrapperRef}
         className="w-full flex flex-col items-center justify-center"
       >
-        {mode === 'ai' && (
-          <div className="flex gap-4 items-center">
-            <h4 className="text-default-700 font-medium">
-              {aiExample.description}
-            </h4>
-            <Button
-              color="primary"
-              size="sm"
-              onClick={() => {
-                setAiExample(
-                  aiExamples[
-                    aiExamples.findIndex(
-                      (el) => el.description === aiExample.description
-                    ) + 1
-                  ] || aiExamples[0]
-                )
-              }}
-            >
-              <PiShuffleBold fontSize="1.1rem" />
-              Load another
-            </Button>
-          </div>
-        )}
         {mode === 'screenshot' && !imageSrc && (
           <ImgEmptyState
             loadImage={loadImage}
@@ -616,549 +560,518 @@ const CanvasArea = ({
               </div>
             </div>
           )}
-          {mode !== 'ai' ? (
-            <>
-              {renderedAnnotations.map((element, i) => {
-                return (
-                  <Rnd
-                    key={element.id}
-                    className="dnd-element"
-                    default={{
-                      x: 0,
-                      y: 0,
-                      width: element?.type !== 'label' && 100,
-                      height: element?.type !== 'label' && 100,
-                    }}
+          {renderedAnnotations.map((element, i) => {
+            return (
+              <Rnd
+                key={element.id}
+                className="dnd-element"
+                default={{
+                  x: 0,
+                  y: 0,
+                  width: element?.type !== 'label' && 100,
+                  height: element?.type !== 'label' && 100,
+                }}
+                style={{
+                  zIndex: 1,
+                  border:
+                    selectedElement?.id === element.id
+                      ? '2px solid #5c7cfa'
+                      : 'none',
+                }}
+                bounds="parent"
+                lockAspectRatio={
+                  element?.type === 'sticker' ? true : lockElementAspectRatio
+                }
+                resizeHandleStyles={
+                  selectedElement?.id === element.id && !hideHandles
+                    ? {
+                        topRight: {
+                          ...handleStyles,
+                        },
+                        topLeft: {
+                          ...handleStyles,
+                        },
+                        bottomRight: {
+                          ...handleStyles,
+                        },
+                        bottomLeft: {
+                          ...handleStyles,
+                        },
+                      }
+                    : {}
+                }
+                onMouseDown={() => setSelectedElement(element)}
+              >
+                {element?.type === 'sticker' && (
+                  <div
                     style={{
-                      zIndex: 1,
-                      border:
-                        selectedElement?.id === element.id
-                          ? '2px solid #5c7cfa'
-                          : 'none',
+                      backgroundImage: `url(${element?.src})`,
+                      backgroundSize: 'contain',
+                      backgroundRepeat: 'no-repeat',
+                      objectFit: 'cover',
+                      width: '100%',
+                      height: '100%',
+                      minWidth: '50px',
+                      minHeight: '50px',
                     }}
-                    bounds="parent"
-                    lockAspectRatio={
-                      element?.type === 'sticker'
-                        ? true
-                        : lockElementAspectRatio
-                    }
-                    resizeHandleStyles={
-                      selectedElement?.id === element.id && !hideHandles
-                        ? {
-                            topRight: {
-                              ...handleStyles,
-                            },
-                            topLeft: {
-                              ...handleStyles,
-                            },
-                            bottomRight: {
-                              ...handleStyles,
-                            },
-                            bottomLeft: {
-                              ...handleStyles,
-                            },
-                          }
-                        : {}
-                    }
-                    onMouseDown={() => setSelectedElement(element)}
+                  />
+                )}
+                {element?.type === 'label' && (
+                  <div
+                    style={{
+                      padding: '8px',
+                    }}
                   >
-                    {element?.type === 'sticker' && (
-                      <div
-                        style={{
-                          backgroundImage: `url(${element?.src})`,
-                          backgroundSize: 'contain',
-                          backgroundRepeat: 'no-repeat',
-                          objectFit: 'cover',
-                          width: '100%',
-                          height: '100%',
-                          minWidth: '50px',
-                          minHeight: '50px',
-                        }}
-                      />
-                    )}
-                    {element?.type === 'label' && (
-                      <div
-                        style={{
-                          padding: '8px',
-                        }}
-                      >
-                        <EditableText
-                          color={element?.color}
-                          size={element?.size}
-                          weight={element?.weight}
-                          background={element?.bg}
-                          initialText={element?.text}
-                          onEdit={(isEditing) => {
-                            if (isEditing) {
-                              setHideHandles(true)
-                            }
-                          }}
-                          onChange={(text) => {
-                            updateElement(element, 'text', text)
-                          }}
-                        />
-                      </div>
-                    )}
-                    {element?.type === 'ellipse' && (
-                      <div
-                        style={{
-                          width: '100%',
-                          height: '100%',
-                          minWidth: '15px',
-                          minHeight: '15px',
-                          borderRadius: '50%',
-                          backgroundColor: element?.fill,
-                        }}
-                      />
-                    )}
-                    {element?.type === 'rectangle' && (
-                      <div
-                        style={{
-                          width: '100%',
-                          height: '100%',
-                          minWidth: '5px',
-                          minHeight: '5px',
-                          backgroundColor: element?.fill,
-                        }}
-                      />
-                    )}
-                    {element?.type === 'star' && (
-                      <div style={{ width: '100%', height: '100%' }}>
-                        <svg
-                          width="100%"
-                          height="100%"
-                          fill={element?.fill}
-                          viewBox="0 0 24 24"
-                        >
-                          <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z" />
-                        </svg>
-                      </div>
-                    )}
-                  </Rnd>
-                )
-              })}
-              <CanvasComponent
-                ref={canvasComponentRef}
-                imgSrc={imageSrc}
-                imgScale={initialScale}
-                imgPosition={imgPosition}
-                sliderScale={imgScale}
-                shadow={imgShadow}
-                borderRadius={borderRadius}
-                rotationX={rotationX}
-                rotationY={rotationY}
-                imgFrame={imgFrame}
-                imgVisibility={imgVisibility}
-                snapzWatermark={snapzWatermark}
-                customWatermark={customWatermarkToggle}
-                customWatermarkImg={customWatermarkImg}
-                customWatermarkText={customWatermarkText}
-              />
-            </>
-          ) : (
-            <div className="w-full h-inherit">
-              <ReactCompareSlider
-                itemOne={
-                  <div className="w-full h-full flex items-center justify-center">
-                    <Chip className="absolute left-2">Before</Chip>
-                    <ReactCompareSliderImage
-                      src={aiExample.before}
-                      alt="Original"
-                    />
-                  </div>
-                }
-                itemTwo={
-                  <div className="w-full h-full flex items-center justify-center">
-                    <Chip className="absolute right-2">After</Chip>
-                    <ReactCompareSliderImage
-                      src={aiExample.after}
-                      alt="Original"
-                    />
-                  </div>
-                }
-              />
-            </div>
-          )}
-        </div>
-        {mode !== 'ai' && (
-          <div className="w-fit flex min-h-14 mt-4">
-            <div className="w-full h-full flex gap-4 items-center bg-content2 rounded-lg px-4">
-              {selectedElement ? (
-                <div className="annotation-edit-mode flex gap-4 items-center">
-                  <h6 className="text-default-600 text-sm font-medium">
-                    Edit {selectedElement.type}
-                  </h6>
-                  <Divider orientation="vertical" className="h-6" />
-                  {selectedElement?.type !== 'sticker' && (
-                    <div className="flex gap-2 items-center">
-                      <span className="text-sm text-white font-medium">
-                        Color
-                      </span>
-                      <ColorPicker
-                        editAnnotation
-                        onChange={(color) => {
-                          const type = selectedElement.type
-                          switch (type) {
-                            case 'ellipse':
-                            case 'rectangle':
-                            case 'star':
-                              updateElement(selectedElement, 'fill', color)
-                              break
-                            case 'label':
-                              updateElement(selectedElement, 'color', color)
-
-                              break
-                            default:
-                              break
-                          }
-                        }}
-                        defaultColor={
-                          selectedElement?.color || selectedElement?.fill
+                    <EditableText
+                      color={element?.color}
+                      size={element?.size}
+                      weight={element?.weight}
+                      background={element?.bg}
+                      initialText={element?.text}
+                      onEdit={(isEditing) => {
+                        if (isEditing) {
+                          setHideHandles(true)
                         }
-                        showInput={false}
-                      />
-                    </div>
-                  )}
-                  {selectedElement?.type === 'label' && (
-                    <>
-                      <Dropdown className="dark">
-                        <DropdownTrigger>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            startContent={<PiTextAaBold fontSize="1.1rem" />}
-                            endContent={<PiCaretDownBold fontSize="1.1rem" />}
-                          >
-                            Size
-                          </Button>
-                        </DropdownTrigger>
-                        <DropdownMenu
-                          aria-label="Size"
-                          disallowEmptySelection
-                          selectionMode="single"
-                          selectedKeys={[selectedElement?.size]}
-                          onSelectionChange={(selectedKeys) => {
-                            updateElement(
-                              selectedElement,
-                              'size',
-                              selectedKeys[0]
-                            )
-                          }}
-                        >
-                          <DropdownItem
-                            key="xs"
-                            onClick={() =>
-                              updateElement(selectedElement, 'size', 'xs')
-                            }
-                          >
-                            Extra small
-                          </DropdownItem>
-                          <DropdownItem
-                            key="sm"
-                            onClick={() =>
-                              updateElement(selectedElement, 'size', 'sm')
-                            }
-                          >
-                            Small
-                          </DropdownItem>
-                          <DropdownItem
-                            key="md"
-                            onClick={() =>
-                              updateElement(selectedElement, 'size', 'md')
-                            }
-                          >
-                            Medium
-                          </DropdownItem>
-                          <DropdownItem
-                            key="lg"
-                            onClick={() =>
-                              updateElement(selectedElement, 'size', 'lg')
-                            }
-                          >
-                            Large
-                          </DropdownItem>
-                          <DropdownItem
-                            key="xl"
-                            onClick={() =>
-                              updateElement(selectedElement, 'size', 'xl')
-                            }
-                          >
-                            Extra large
-                          </DropdownItem>
-                        </DropdownMenu>
-                      </Dropdown>
-                      <Dropdown className="dark">
-                        <DropdownTrigger>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            startContent={<PiTextTBold fontSize="1.1rem" />}
-                            endContent={<PiCaretDownBold fontSize="1.1rem" />}
-                          >
-                            Weight
-                          </Button>
-                        </DropdownTrigger>
-                        <DropdownMenu
-                          aria-label="Weight"
-                          selectionMode="single"
-                          selectedKeys={[selectedElement?.weight]}
-                          onSelectionChange={(selectedKeys) => {
-                            updateElement(
-                              selectedElement,
-                              'weight',
-                              selectedKeys[0]
-                            )
-                          }}
-                        >
-                          <DropdownItem
-                            key="200"
-                            onClick={() =>
-                              updateElement(selectedElement, 'weight', '200')
-                            }
-                          >
-                            Thin
-                          </DropdownItem>
-                          <DropdownItem
-                            key="300"
-                            onClick={() =>
-                              updateElement(selectedElement, 'weight', '300')
-                            }
-                          >
-                            Light
-                          </DropdownItem>
-                          <DropdownItem
-                            key="400"
-                            onClick={() =>
-                              updateElement(selectedElement, 'weight', '400')
-                            }
-                          >
-                            Regular
-                          </DropdownItem>
-                          <DropdownItem
-                            key="500"
-                            onClick={() =>
-                              updateElement(selectedElement, 'weight', '500')
-                            }
-                          >
-                            Medium
-                          </DropdownItem>
-                          <DropdownItem
-                            key="700"
-                            onClick={() =>
-                              updateElement(selectedElement, 'weight', '700')
-                            }
-                          >
-                            Bold
-                          </DropdownItem>
-                          <DropdownItem
-                            key="900"
-                            onClick={() =>
-                              updateElement(selectedElement, 'weight', '800')
-                            }
-                          >
-                            Black
-                          </DropdownItem>
-                        </DropdownMenu>
-                      </Dropdown>
-                      <Dropdown className="dark">
-                        <DropdownTrigger>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            startContent={<PiArticleBold fontSize="1.1rem" />}
-                            endContent={<PiCaretDownBold fontSize="1.1rem" />}
-                          >
-                            Bg
-                          </Button>
-                        </DropdownTrigger>
-                        <DropdownMenu
-                          aria-label="Weight"
-                          selectionMode="single"
-                          selectedKeys={[selectedElement?.bg]}
-                          onSelectionChange={(selectedKeys) => {
-                            updateElement(
-                              selectedElement,
-                              'bg',
-                              selectedKeys.currentKey
-                            )
-                          }}
-                        >
-                          <DropdownItem key="transparent">None</DropdownItem>
-                          <DropdownItem key="black">Black</DropdownItem>
-                          <DropdownItem key="white">White</DropdownItem>
-                        </DropdownMenu>
-                      </Dropdown>
-                    </>
-                  )}
-                  <Button
-                    variant="light"
-                    onClick={() => {
-                      const index = renderedAnnotations.findIndex(
-                        (el) => el.id === selectedElement.id
-                      )
-                      const newAnnotations = [
-                        ...renderedAnnotations.slice(0, index),
-                        ...renderedAnnotations.slice(index + 1),
-                        selectedElement,
-                      ]
-                      setRenderedAnnotations(newAnnotations)
+                      }}
+                      onChange={(text) => {
+                        updateElement(element, 'text', text)
+                      }}
+                    />
+                  </div>
+                )}
+                {element?.type === 'ellipse' && (
+                  <div
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      minWidth: '15px',
+                      minHeight: '15px',
+                      borderRadius: '50%',
+                      backgroundColor: element?.fill,
                     }}
-                    startContent={<PiArrowSquareUpBold fontSize="1.1rem" />}
-                  >
-                    Move up
-                  </Button>
-                  <Button
-                    variant="light"
-                    onClick={() => {
-                      const index = renderedAnnotations.findIndex(
-                        (el) => el.id === selectedElement.id
-                      )
-                      const newAnnotations = [
-                        selectedElement,
-                        ...renderedAnnotations.slice(0, index),
-                        ...renderedAnnotations.slice(index + 1),
-                      ]
-                      setRenderedAnnotations(newAnnotations)
+                  />
+                )}
+                {element?.type === 'rectangle' && (
+                  <div
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      minWidth: '5px',
+                      minHeight: '5px',
+                      backgroundColor: element?.fill,
                     }}
-                    startContent={<PiArrowSquareDownBold fontSize="1.1rem" />}
-                  >
-                    Move down
-                  </Button>
-                  <Button
-                    color="danger"
-                    variant="light"
-                    onClick={() => {
-                      deleteAnnotation(selectedElement)
-                    }}
-                    startContent={<PiTrashSimpleBold fontSize="1.1rem" />}
-                  >
-                    Delete
-                  </Button>
-                </div>
-              ) : (
-                <>
-                  <Dropdown className="dark">
-                    <DropdownTrigger>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        startContent={<PiShapesBold fontSize="1.1rem" />}
-                        endContent={<PiCaretDownBold fontSize="1.1rem" />}
-                      >
-                        Shapes
-                      </Button>
-                    </DropdownTrigger>
-                    <DropdownMenu aria-label="Add shape" selectionMode="single">
-                      <DropdownItem
-                        key="ellipse"
-                        onClick={() => createShape('ellipse')}
-                        startContent={<PiCircleBold fontSize="1.1rem" />}
-                      >
-                        Ellipse
-                      </DropdownItem>
-                      <DropdownItem
-                        key="rectangle"
-                        onClick={() => createShape('rectangle')}
-                        startContent={<PiRectangleBold fontSize="1.1rem" />}
-                      >
-                        Rectangle
-                      </DropdownItem>
-                      <DropdownItem
-                        key="star"
-                        onClick={() => createShape('star')}
-                        startContent={<PiStarBold fontSize="1.1rem" />}
-                      >
-                        Star
-                      </DropdownItem>
-                    </DropdownMenu>
-                  </Dropdown>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    startContent={<PiTextTBold fontSize="1.1rem" />}
-                    onClick={createLabel}
-                  >
-                    Text
-                  </Button>
-                  <Popover
-                    className="dark"
-                    isOpen={isStickersPopoverOpen}
-                    onOpenChange={(open) => setIsStickersPopoverOpen(open)}
-                  >
-                    <PopoverTrigger>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        startContent={<PiStickerBold fontSize="1.1rem" />}
-                        endContent={<ChipPro />}
-                      >
-                        Stickers
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent>
-                      <div className="flex flex-wrap gap-2 max-w-[240px]">
-                        {Array.from(Array(stickers).keys()).map((i) => (
-                          <Button
-                            key={i}
-                            size="md"
-                            variant="ghost"
-                            onClick={() =>
-                              isLicensed
-                                ? createSticker(i + 1)
-                                : handleStickersPaywallClick()
-                            }
-                            isIconOnly
-                          >
-                            <img
-                              src={`/stickers/${i + 1}.svg`}
-                              alt={`Sticker ${i + 1}`}
-                              className="w-7 h-7"
-                            />
-                          </Button>
-                        ))}
-                      </div>
-                    </PopoverContent>
-                  </Popover>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    isDisabled={!renderedAnnotations.length}
-                    startContent={<PiEraserBold fontSize="1.1rem" />}
-                    onClick={onOpen}
-                  >
-                    Erase all
-                  </Button>
-                  <Modal
-                    isOpen={isOpen}
-                    onOpenChange={onOpenChange}
-                    className="dark"
-                  >
-                    <ModalContent>
-                      <ModalHeader>Erase annotations?</ModalHeader>
-                      <ModalBody className="flex flex-col gap-4">
-                        <p>
-                          Are you sure you want to erase all annotations? This
-                          action cannot be undone.
-                        </p>
-                      </ModalBody>
-                      <ModalFooter>
-                        <Button onClick={onOpenChange}>Cancel</Button>
+                  />
+                )}
+                {element?.type === 'star' && (
+                  <div style={{ width: '100%', height: '100%' }}>
+                    <svg
+                      width="100%"
+                      height="100%"
+                      fill={element?.fill}
+                      viewBox="0 0 24 24"
+                    >
+                      <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z" />
+                    </svg>
+                  </div>
+                )}
+              </Rnd>
+            )
+          })}
+          <CanvasComponent
+            ref={canvasComponentRef}
+            imgSrc={imageSrc}
+            imgScale={initialScale}
+            imgPosition={imgPosition}
+            sliderScale={imgScale}
+            shadow={imgShadow}
+            borderRadius={borderRadius}
+            rotationX={rotationX}
+            rotationY={rotationY}
+            imgFrame={imgFrame}
+            imgVisibility={imgVisibility}
+            snapzWatermark={snapzWatermark}
+            customWatermark={customWatermarkToggle}
+            customWatermarkImg={customWatermarkImg}
+            customWatermarkText={customWatermarkText}
+          />
+        </div>
+
+        <div className="w-fit flex min-h-14 mt-4">
+          <div className="w-full h-full flex gap-4 items-center bg-content2 rounded-lg px-4">
+            {selectedElement ? (
+              <div className="annotation-edit-mode flex gap-4 items-center">
+                <h6 className="text-default-600 text-sm font-medium">
+                  Edit {selectedElement.type}
+                </h6>
+                <Divider orientation="vertical" className="h-6" />
+                {selectedElement?.type !== 'sticker' && (
+                  <div className="flex gap-2 items-center">
+                    <span className="text-sm text-white font-medium">
+                      Color
+                    </span>
+                    <ColorPicker
+                      editAnnotation
+                      onChange={(color) => {
+                        const type = selectedElement.type
+                        switch (type) {
+                          case 'ellipse':
+                          case 'rectangle':
+                          case 'star':
+                            updateElement(selectedElement, 'fill', color)
+                            break
+                          case 'label':
+                            updateElement(selectedElement, 'color', color)
+
+                            break
+                          default:
+                            break
+                        }
+                      }}
+                      defaultColor={
+                        selectedElement?.color || selectedElement?.fill
+                      }
+                      showInput={false}
+                    />
+                  </div>
+                )}
+                {selectedElement?.type === 'label' && (
+                  <>
+                    <Dropdown className="dark">
+                      <DropdownTrigger>
                         <Button
-                          variant="solid"
-                          color="danger"
-                          onClick={handleEraseAnnotations}
+                          size="sm"
+                          variant="ghost"
+                          startContent={<PiTextAaBold fontSize="1.1rem" />}
+                          endContent={<PiCaretDownBold fontSize="1.1rem" />}
                         >
-                          Erase
+                          Size
                         </Button>
-                      </ModalFooter>
-                    </ModalContent>
-                  </Modal>
-                </>
-              )}
-            </div>
+                      </DropdownTrigger>
+                      <DropdownMenu
+                        aria-label="Size"
+                        disallowEmptySelection
+                        selectionMode="single"
+                        selectedKeys={[selectedElement?.size]}
+                        onSelectionChange={(selectedKeys) => {
+                          updateElement(
+                            selectedElement,
+                            'size',
+                            selectedKeys[0]
+                          )
+                        }}
+                      >
+                        <DropdownItem
+                          key="xs"
+                          onClick={() =>
+                            updateElement(selectedElement, 'size', 'xs')
+                          }
+                        >
+                          Extra small
+                        </DropdownItem>
+                        <DropdownItem
+                          key="sm"
+                          onClick={() =>
+                            updateElement(selectedElement, 'size', 'sm')
+                          }
+                        >
+                          Small
+                        </DropdownItem>
+                        <DropdownItem
+                          key="md"
+                          onClick={() =>
+                            updateElement(selectedElement, 'size', 'md')
+                          }
+                        >
+                          Medium
+                        </DropdownItem>
+                        <DropdownItem
+                          key="lg"
+                          onClick={() =>
+                            updateElement(selectedElement, 'size', 'lg')
+                          }
+                        >
+                          Large
+                        </DropdownItem>
+                        <DropdownItem
+                          key="xl"
+                          onClick={() =>
+                            updateElement(selectedElement, 'size', 'xl')
+                          }
+                        >
+                          Extra large
+                        </DropdownItem>
+                      </DropdownMenu>
+                    </Dropdown>
+                    <Dropdown className="dark">
+                      <DropdownTrigger>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          startContent={<PiTextTBold fontSize="1.1rem" />}
+                          endContent={<PiCaretDownBold fontSize="1.1rem" />}
+                        >
+                          Weight
+                        </Button>
+                      </DropdownTrigger>
+                      <DropdownMenu
+                        aria-label="Weight"
+                        selectionMode="single"
+                        selectedKeys={[selectedElement?.weight]}
+                        onSelectionChange={(selectedKeys) => {
+                          updateElement(
+                            selectedElement,
+                            'weight',
+                            selectedKeys[0]
+                          )
+                        }}
+                      >
+                        <DropdownItem
+                          key="200"
+                          onClick={() =>
+                            updateElement(selectedElement, 'weight', '200')
+                          }
+                        >
+                          Thin
+                        </DropdownItem>
+                        <DropdownItem
+                          key="300"
+                          onClick={() =>
+                            updateElement(selectedElement, 'weight', '300')
+                          }
+                        >
+                          Light
+                        </DropdownItem>
+                        <DropdownItem
+                          key="400"
+                          onClick={() =>
+                            updateElement(selectedElement, 'weight', '400')
+                          }
+                        >
+                          Regular
+                        </DropdownItem>
+                        <DropdownItem
+                          key="500"
+                          onClick={() =>
+                            updateElement(selectedElement, 'weight', '500')
+                          }
+                        >
+                          Medium
+                        </DropdownItem>
+                        <DropdownItem
+                          key="700"
+                          onClick={() =>
+                            updateElement(selectedElement, 'weight', '700')
+                          }
+                        >
+                          Bold
+                        </DropdownItem>
+                        <DropdownItem
+                          key="900"
+                          onClick={() =>
+                            updateElement(selectedElement, 'weight', '800')
+                          }
+                        >
+                          Black
+                        </DropdownItem>
+                      </DropdownMenu>
+                    </Dropdown>
+                    <Dropdown className="dark">
+                      <DropdownTrigger>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          startContent={<PiArticleBold fontSize="1.1rem" />}
+                          endContent={<PiCaretDownBold fontSize="1.1rem" />}
+                        >
+                          Bg
+                        </Button>
+                      </DropdownTrigger>
+                      <DropdownMenu
+                        aria-label="Weight"
+                        selectionMode="single"
+                        selectedKeys={[selectedElement?.bg]}
+                        onSelectionChange={(selectedKeys) => {
+                          updateElement(
+                            selectedElement,
+                            'bg',
+                            selectedKeys.currentKey
+                          )
+                        }}
+                      >
+                        <DropdownItem key="transparent">None</DropdownItem>
+                        <DropdownItem key="black">Black</DropdownItem>
+                        <DropdownItem key="white">White</DropdownItem>
+                      </DropdownMenu>
+                    </Dropdown>
+                  </>
+                )}
+                <Button
+                  variant="light"
+                  onClick={() => {
+                    const index = renderedAnnotations.findIndex(
+                      (el) => el.id === selectedElement.id
+                    )
+                    const newAnnotations = [
+                      ...renderedAnnotations.slice(0, index),
+                      ...renderedAnnotations.slice(index + 1),
+                      selectedElement,
+                    ]
+                    setRenderedAnnotations(newAnnotations)
+                  }}
+                  startContent={<PiArrowSquareUpBold fontSize="1.1rem" />}
+                >
+                  Move up
+                </Button>
+                <Button
+                  variant="light"
+                  onClick={() => {
+                    const index = renderedAnnotations.findIndex(
+                      (el) => el.id === selectedElement.id
+                    )
+                    const newAnnotations = [
+                      selectedElement,
+                      ...renderedAnnotations.slice(0, index),
+                      ...renderedAnnotations.slice(index + 1),
+                    ]
+                    setRenderedAnnotations(newAnnotations)
+                  }}
+                  startContent={<PiArrowSquareDownBold fontSize="1.1rem" />}
+                >
+                  Move down
+                </Button>
+                <Button
+                  color="danger"
+                  variant="light"
+                  onClick={() => {
+                    deleteAnnotation(selectedElement)
+                  }}
+                  startContent={<PiTrashSimpleBold fontSize="1.1rem" />}
+                >
+                  Delete
+                </Button>
+              </div>
+            ) : (
+              <>
+                <Dropdown className="dark">
+                  <DropdownTrigger>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      startContent={<PiShapesBold fontSize="1.1rem" />}
+                      endContent={<PiCaretDownBold fontSize="1.1rem" />}
+                    >
+                      Shapes
+                    </Button>
+                  </DropdownTrigger>
+                  <DropdownMenu aria-label="Add shape" selectionMode="single">
+                    <DropdownItem
+                      key="ellipse"
+                      onClick={() => createShape('ellipse')}
+                      startContent={<PiCircleBold fontSize="1.1rem" />}
+                    >
+                      Ellipse
+                    </DropdownItem>
+                    <DropdownItem
+                      key="rectangle"
+                      onClick={() => createShape('rectangle')}
+                      startContent={<PiRectangleBold fontSize="1.1rem" />}
+                    >
+                      Rectangle
+                    </DropdownItem>
+                    <DropdownItem
+                      key="star"
+                      onClick={() => createShape('star')}
+                      startContent={<PiStarBold fontSize="1.1rem" />}
+                    >
+                      Star
+                    </DropdownItem>
+                  </DropdownMenu>
+                </Dropdown>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  startContent={<PiTextTBold fontSize="1.1rem" />}
+                  onClick={createLabel}
+                >
+                  Text
+                </Button>
+                <Popover
+                  className="dark"
+                  isOpen={isStickersPopoverOpen}
+                  onOpenChange={(open) => setIsStickersPopoverOpen(open)}
+                >
+                  <PopoverTrigger>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      startContent={<PiStickerBold fontSize="1.1rem" />}
+                      endContent={<ChipPro />}
+                    >
+                      Stickers
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent>
+                    <div className="flex flex-wrap gap-2 max-w-[240px]">
+                      {Array.from(Array(stickers).keys()).map((i) => (
+                        <Button
+                          key={i}
+                          size="md"
+                          variant="ghost"
+                          onClick={() =>
+                            license?.isLicensed
+                              ? createSticker(i + 1)
+                              : handleStickersPaywallClick()
+                          }
+                          isIconOnly
+                        >
+                          <img
+                            src={`/stickers/${i + 1}.svg`}
+                            alt={`Sticker ${i + 1}`}
+                            className="w-7 h-7"
+                          />
+                        </Button>
+                      ))}
+                    </div>
+                  </PopoverContent>
+                </Popover>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  isDisabled={!renderedAnnotations.length}
+                  startContent={<PiEraserBold fontSize="1.1rem" />}
+                  onClick={onOpen}
+                >
+                  Erase all
+                </Button>
+                <Modal
+                  isOpen={isOpen}
+                  onOpenChange={onOpenChange}
+                  className="dark"
+                >
+                  <ModalContent>
+                    <ModalHeader>Erase annotations?</ModalHeader>
+                    <ModalBody className="flex flex-col gap-4">
+                      <p>
+                        Are you sure you want to erase all annotations? This
+                        action cannot be undone.
+                      </p>
+                    </ModalBody>
+                    <ModalFooter>
+                      <Button onClick={onOpenChange}>Cancel</Button>
+                      <Button
+                        variant="solid"
+                        color="danger"
+                        onClick={handleEraseAnnotations}
+                      >
+                        Erase
+                      </Button>
+                    </ModalFooter>
+                  </ModalContent>
+                </Modal>
+              </>
+            )}
           </div>
-        )}
-        <EditorLinks />
+        </div>
       </div>
     </>
   )

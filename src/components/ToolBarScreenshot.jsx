@@ -81,7 +81,7 @@ const ToolBarScreenshot = ({
   isOCRLoading,
   ocrResult,
 }) => {
-  const { isLicensed } = useLicense()
+  const { license } = useLicense()
   const { isOpen, onOpen, onOpenChange } = useDisclosure()
   const { setCanvasBg } = useCanvasBg()
 
@@ -187,7 +187,7 @@ const ToolBarScreenshot = ({
   }, [imageLoaded])
 
   const handleDefaultWatermarkToggle = (e) => {
-    if (isLicensed) {
+    if (license?.isLicensed) {
       setSnapzWatermark(!snapzWatermark)
     } else {
       onOpen()
@@ -195,7 +195,7 @@ const ToolBarScreenshot = ({
   }
 
   const handleCustomWatermarkToggle = () => {
-    if (isLicensed) {
+    if (license?.isLicensed) {
       setCustomWatermarkToggle(!customWatermarkToggle)
     } else {
       onOpen()
@@ -575,7 +575,7 @@ const ToolBarScreenshot = ({
                 </div>
                 <PositionSelector
                   onChange={(pos) =>
-                    isLicensed ? setImgPosition(pos) : onOpen()
+                    license?.isLicensed ? setImgPosition(pos) : onOpen()
                   }
                   position={imgPosition}
                 />
@@ -632,7 +632,9 @@ const ToolBarScreenshot = ({
                   <Button
                     size="sm"
                     onClick={() =>
-                      isLicensed ? handleExtractText(ocrLanguage) : onOpen()
+                      license?.isLicensed
+                        ? handleExtractText(ocrLanguage)
+                        : onOpen()
                     }
                     isLoading={isOCRLoading}
                   >

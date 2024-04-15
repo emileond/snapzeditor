@@ -21,6 +21,7 @@ import FAQ from './components/landing/FAQ.jsx'
 import { CanvasBgProvider } from './context/CanvasBgContext.jsx'
 import { EditorModeProvider } from './context/EditorModeContext.jsx'
 import { DevModeSettingsProvider } from './context/DevModeSettingsContext.jsx'
+import { AiImagesProvider } from './context/AiImagesContext.jsx'
 
 const root = ReactDOM.createRoot(document.getElementById('root'))
 
@@ -33,68 +34,70 @@ root.render(
             <NextUIProvider>
               <DevModeSettingsProvider>
                 <CanvasBgProvider>
-                  <Router>
-                    <Routes>
-                      <Route
-                        path="/"
-                        element={
-                          <Layout>
-                            <Hero />
-                            <Divider
-                              style={{
-                                maxWidth: '800px',
-                                opacity: 0.5,
-                              }}
-                            />
-                            <FeaturesGrid />
-                            <Divider
-                              style={{
-                                maxWidth: '800px',
-                                opacity: 0.5,
-                              }}
-                            />
-                            <Pricing />
-                            <Divider
-                              style={{
-                                maxWidth: '800px',
-                                opacity: 0.5,
-                              }}
-                            />
-                            <FAQ />
-                            <Divider />
-                            <Download />
-                          </Layout>
-                        }
-                      />
-                      <Route
-                        path="/app"
-                        element={
-                          <section
-                            id="app"
-                            className="dark bg-background/8 w-dvw h-dvh"
-                          >
-                            <App />
-                          </section>
-                        }
-                      />
-                      <Route
-                        path="privacy-policy"
-                        element={
-                          <Layout>
-                            <GetTerms doc="privacy" />
-                          </Layout>
-                        }
-                      />
-                      <Route
-                        path="tos"
-                        element={
-                          <Layout>
-                            <GetTerms doc="tos" />
-                          </Layout>
-                        }
-                      />
-                    </Routes>
-                  </Router>
+                  <AiImagesProvider>
+                    <Router>
+                      <Routes>
+                        <Route
+                          path="/"
+                          element={
+                            <Layout>
+                              <Hero />
+                              <Divider
+                                style={{
+                                  maxWidth: '800px',
+                                  opacity: 0.5,
+                                }}
+                              />
+                              <FeaturesGrid />
+                              <Divider
+                                style={{
+                                  maxWidth: '800px',
+                                  opacity: 0.5,
+                                }}
+                              />
+                              <Pricing />
+                              <Divider
+                                style={{
+                                  maxWidth: '800px',
+                                  opacity: 0.5,
+                                }}
+                              />
+                              <FAQ />
+                              <Divider />
+                              <Download />
+                            </Layout>
+                          }
+                        />
+                        <Route
+                          path="/app"
+                          element={
+                            <section
+                              id="app"
+                              className="dark bg-background/8 w-dvw h-dvh"
+                            >
+                              <App />
+                            </section>
+                          }
+                        />
+                        <Route
+                          path="privacy-policy"
+                          element={
+                            <Layout>
+                              <GetTerms doc="privacy" />
+                            </Layout>
+                          }
+                        />
+                        <Route
+                          path="tos"
+                          element={
+                            <Layout>
+                              <GetTerms doc="tos" />
+                            </Layout>
+                          }
+                        />
+                      </Routes>
+                    </Router>
+                  </AiImagesProvider>
                 </CanvasBgProvider>
               </DevModeSettingsProvider>
               <AbralyticsScript />
