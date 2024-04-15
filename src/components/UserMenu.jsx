@@ -28,7 +28,7 @@ function UserMenu() {
   const [openAuthModal, setOpenAuthModal] = useState(false)
   const [authViewMode, setAuthViewMode] = useState()
   const [openLicenseModal, setOpenLicenseModal] = useState(false)
-  const { isLicensed } = useLicense()
+  const { license } = useLicense()
 
   const iconClasses =
     'text-xl text-default-500 pointer-events-none flex-shrink-0'
@@ -52,7 +52,7 @@ function UserMenu() {
           </DropdownTrigger>
           <DropdownMenu variant="flat" aria-label="User menu">
             <DropdownSection>
-              {!isLicensed && (
+              {!license?.isLicensed && (
                 <DropdownItem
                   isReadOnly
                   href="https://snapseditor.lemonsqueezy.com/checkout/buy/9aadbed6-2db0-4f45-b0a1-2bd86bbc8955?media=0"
@@ -70,7 +70,7 @@ function UserMenu() {
               <DropdownItem
                 isReadOnly
                 className="text-default-500 hover:cursor-default py-3"
-                endContent={isLicensed && <ChipPro />}
+                endContent={license?.isLicensed && <ChipPro />}
               >
                 {user.email}
               </DropdownItem>

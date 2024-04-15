@@ -21,7 +21,7 @@ function App() {
   const { mode } = useEditorMode()
   const fingerprint = useFingerprint()
   const { checkLicense } = useCheckLicense()
-  const { isLicensed } = useLicense()
+  const { license } = useLicense()
   const [imgVisibility, setImgVisibility] = useState(true)
   const [triggerReplaceImage, setTriggerReplaceImage] = useState(false)
   const [imgScale, setImgScale] = useState(1)
@@ -38,7 +38,7 @@ function App() {
   )
   const [imgFrame, setImgFrame] = useState('macOS-dark')
   const [snapzWatermark, setSnapzWatermark] = useState(
-    isLicensed ? false : true
+    license?.isLicensed ? false : true
   )
   const [customWatermarkToggle, setCustomWatermarkToggle] = useState(false)
   const [customWatermarkImg, setCustomWatermarkImg] = useState()
@@ -177,7 +177,7 @@ function App() {
 
   useEffect(() => {
     if (user?.id && fingerprint) {
-      checkLicense(user.id, fingerprint)
+      checkLicense(user, fingerprint)
     }
   }, [user, fingerprint])
 
