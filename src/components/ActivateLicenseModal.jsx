@@ -50,7 +50,6 @@ function ActivateLicenseModal({ isOpen, onOpenChange }) {
   useEffect(() => {
     if (isOpen && user && fingerprint) {
       if (license.isLicensed) {
-        console.log('license', license)
         confetti({
           particleCount: 100,
           spread: 90,
@@ -80,8 +79,6 @@ function ActivateLicenseModal({ isOpen, onOpenChange }) {
           },
         }
       )
-
-      console.log('response data', response)
 
       if (response?.data?.error) {
         setIsLoading(false)

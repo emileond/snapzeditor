@@ -99,7 +99,7 @@ export default function ImageInput({ onChange, onCancel }) {
   }, [image, onChange])
 
   return (
-    <>
+    <div className="flex flex-col gap-3">
       <div className="flex items-center gap-2">
         <PiFileImageBold fontSize="1.1rem" />
         <h5>Image</h5>
@@ -186,6 +186,6 @@ export default function ImageInput({ onChange, onCancel }) {
           </CardFooter>
         </div>
       </Card>
-    </>
+    </div>
   )
 }
