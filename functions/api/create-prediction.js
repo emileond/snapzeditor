@@ -59,7 +59,10 @@ export async function onRequestPost(context) {
   // Deduct the required credits from the license
   const { error: creditsError } = await supabase
     .from('license_ai_credits')
-    .update({ balance: data.balance - requiredCredits })
+    .update({
+      balance: data.balance - requiredCredits,
+      api_calls_count: data.api_calls_count + 1,
+    })
     .eq('license_key', license_key)
     .eq('status', 'active')
 
