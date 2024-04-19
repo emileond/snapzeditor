@@ -13,6 +13,8 @@ import {
   CardHeader,
   CardFooter,
   Divider,
+  Image,
+  Progress,
 } from '@nextui-org/react' // Assuming Text is available for textual feedback
 import { useAiImages } from '../context/AiImagesContext'
 import {
@@ -56,18 +58,20 @@ export default function AICanvasFeed() {
       case 'starting':
         return (
           <>
-            <h4>Sending image to the server for processing...</h4>
+            <Image src="/empty-states/dark/57.svg" width={100} height={100} />
+            <h4>Starting server...</h4>
             <p className="text-default-500">
-              This can take a few minutes, depending on the server load.
+              This can take several minutes, depending on the server load.
             </p>
           </>
         )
       case 'processing':
         return (
           <>
-            <h4>Image processing in progress...</h4>
+            <Image src="/empty-states/dark/ai.svg" width={140} height={140} />
+            <h4>Processing image...</h4>
             <p className="text-default-500">
-              This might take a while, do not refresh or close the window.
+              Please do not refresh or close the window during the process.
             </p>
           </>
         )
@@ -181,14 +185,19 @@ export default function AICanvasFeed() {
             ) : (
               <Card
                 key={image.id}
-                className="border-none"
+                className="border-none min-h-[400px] shrink-0"
                 isFooterBlurred
                 radius="lg"
               >
-                <CardBody className="w-full h-full min-h-[400px]">
+                <CardBody className="w-full h-full">
                   <div className="flex flex-col items-center justify-center gap-3 py-4 w-full h-full">
-                    <Spinner size="large" color="primary" />
                     {renderContentBasedOnStatus(image)}
+                    <Progress
+                      size="sm"
+                      isIndeterminate
+                      aria-label="Loading..."
+                      className="max-w-md"
+                    />
                     <Button
                       startContent={<PiTerminalBold fontSize="1rem" />}
                       size="sm"
