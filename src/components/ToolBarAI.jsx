@@ -12,6 +12,8 @@ import {
   PiCoinVerticalBold,
   PiCrownSimpleBold,
   PiArrowSquareOutBold,
+  PiWarehouseBold,
+  PiCouchBold,
 } from 'react-icons/pi'
 import {
   Button,
@@ -51,7 +53,81 @@ const ToolBarAI = () => {
   const [imgError, setImgError] = useState()
   const [runCount, setRunCount] = useState(0)
 
-  const creditsCost = watch('num_samples') * 2
+  const creditsCost = watch('num_samples') * 4
+
+  const interiorDesignStyles = [
+    'modern',
+    'minimalist',
+    'vintage',
+    'retro',
+    'industrial',
+    'bohemian',
+    'scandinavian',
+    'rustic',
+    'shabby chic',
+    'mid-century modern',
+    'contemporary',
+    'traditional',
+    'futuristic',
+    'art deco',
+    'mediterranean',
+    'tropical',
+    'coastal',
+    'mexican',
+  ]
+
+  const dayTimes = ['morning', 'afternoon', 'evening', 'night']
+
+  const [interiorDesignStyle, setInteriorDesignStyle] = useState(
+    interiorDesignStyles[0]
+  )
+  const [dayTime, setDayTime] = useState(dayTimes[0])
+
+  const useCaseOptions = [
+    {
+      icon: <PiMagicWandBold fontSize="1.3rem" color="grey" />,
+      name: 'General use',
+      description: 'Transform images to any style',
+      key: 'general',
+      basePrompt: 'A photo of',
+      baseAttributes: '4k photo, highly detailed',
+      negativePrompt:
+        'anime, cartoon, graphic, text, painting, crayon, graphite, abstract, glitch, deformed, mutated, ugly, disfigured',
+    },
+    {
+      icon: <PiBuildingsBold fontSize="1.3rem" color="grey" />,
+      name: 'Interior design',
+      description: 'Get ideas for interior and exterior design',
+      key: 'interior',
+      basePrompt: 'An shot of',
+      baseAttributes: `designed by a professional interior designer, add decoration, add furniture, 4k photo, highly detailed, realistic`,
+      negativePrompt:
+        'empty, plain, boring, anime, cartoon, graphic, text, painting, crayon, graphite, abstract, glitch, deformed, mutated, ugly, disfigured',
+    },
+    // {
+    //   icon: <PiPaintBrushBold fontSize="1.3rem" color="grey" />,
+    //   name: 'Illustration',
+    //   description: 'Create illustrations and concept art',
+    //   key: 'illustration',
+    //   basePrompt: 'A 2d illustration of',
+    //   baseAttributes: 'illustration, highly detailed, 4k photo',
+    //   negativePrompt:
+    //     'text, abstract, glitch, deformed, mutated, ugly, disfigured',
+    // },
+    {
+      icon: <PiCubeBold fontSize="1.3rem" color="grey" />,
+      name: '3D Design',
+      description: 'Create 3D characters and scenes',
+      key: '3d',
+      basePrompt: 'A 3D model of',
+      baseAttributes: 'pixar style, 4k photo, highly detailed',
+      negativePrompt:
+        'anime, graphic, text, painting, crayon, graphite, abstract, glitch, deformed, mutated, ugly, disfigured',
+    },
+  ]
+
+  const [useCase, setUseCase] = useState(useCaseOptions[0])
+  const [aiCredits, setAiCredits] = useState(0)
 
   async function checkPredictionStatus(predictionId) {
     setRunCount(runCount + 1)
@@ -130,7 +206,10 @@ const ToolBarAI = () => {
     // Prepare the JSON payload
     const payload = {
       image: inputImage.src, // Base64 string of the image
-      prompt: `${useCase.basePrompt} ${data.prompt}, ${data?.attributes}, ${useCase.baseAttributes}`,
+      prompt: `${useCase.basePrompt} ${data.prompt} ${
+        useCase.key === 'interior' &&
+        `in ${interiorDesignStyle} architecture style`
+      }${data?.attributes}, ${useCase.baseAttributes}`,
       num_samples: data.num_samples,
       negative_prompt: `${useCase.negativePrompt}`,
       license_key: license?.deviceLicense?.license_key,
@@ -165,80 +244,6 @@ const ToolBarAI = () => {
     }
   }
 
-  const interiorDesignStyles = [
-    'modern',
-    'minimalist',
-    'vintage',
-    'retro',
-    'industrial',
-    'bohemian',
-    'scandinavian',
-    'rustic',
-    'shabby chic',
-    'mid-century modern',
-    'contemporary',
-    'traditional',
-    'futuristic',
-    'art deco',
-    'mediterranean',
-    'tropical',
-    'coastal',
-    'mexican',
-  ]
-
-  const dayTimes = ['morning', 'afternoon', 'evening', 'night']
-
-  const [interiorDesignStyle, setInteriorDesignStyle] = useState(
-    interiorDesignStyles[0]
-  )
-  const [dayTime, setDayTime] = useState(dayTimes[0])
-
-  const useCaseOptions = [
-    {
-      icon: <PiMagicWandBold fontSize="1.3rem" color="grey" />,
-      name: 'General use',
-      description: 'Transform images to any style',
-      key: 'general',
-      basePrompt: 'A photo of',
-      baseAttributes: '4k photo, highly detailed',
-      negativePrompt:
-        'anime, cartoon, graphic, text, painting, crayon, graphite, abstract, glitch, deformed, mutated, ugly, disfigured',
-    },
-    {
-      icon: <PiBuildingsBold fontSize="1.3rem" color="grey" />,
-      name: 'Interior design',
-      description: 'Get ideas for interior and exterior design',
-      key: 'interior',
-      basePrompt: 'An photo of',
-      baseAttributes: `designed by a professional interior designer, ${interiorDesignStyle}, ${dayTime}, add decoration, add furniture, 4k photo, highly detailed`,
-      negativePrompt:
-        'empty, plain, boring, anime, cartoon, graphic, text, painting, crayon, graphite, abstract, glitch, deformed, mutated, ugly, disfigured',
-    },
-    {
-      icon: <PiPaintBrushBold fontSize="1.3rem" color="grey" />,
-      name: 'Illustration',
-      description: 'Create illustrations and concept art',
-      key: 'illustration',
-      basePrompt: 'A 2d illustration of',
-      baseAttributes: 'illustration, highly detailed, 4k photo',
-      negativePrompt:
-        'text, abstract, glitch, deformed, mutated, ugly, disfigured',
-    },
-    {
-      icon: <PiCubeBold fontSize="1.3rem" color="grey" />,
-      name: '3D Design',
-      description: 'Create 3D characters and scenes',
-      key: '3d',
-      basePrompt: 'A 3D model of',
-      baseAttributes: 'pixar style, 4k photo, highly detailed',
-      negativePrompt:
-        'anime, graphic, text, painting, crayon, graphite, abstract, glitch, deformed, mutated, ugly, disfigured',
-    },
-  ]
-
-  const [useCase, setUseCase] = useState(useCaseOptions[0])
-  const [aiCredits, setAiCredits] = useState(0)
-
   useEffect(() => {
     async function fetchData() {
       if (license?.isLicensed && license?.deviceLicense?.license_key) {
@@ -265,12 +270,11 @@ const ToolBarAI = () => {
         >
           <div className="flex items-center gap-2 text-default-600">
             <PiMagicWandDuotone fontSize="1.3rem" />
-            <h4 className="font-semibold">AI Image Enhancer</h4>
+            <h4 className="font-semibold">AI Reimagine</h4>
             <ChipPro />
           </div>
           <p className="text-default-500 text-sm text-left">
-            Enhance your images with AI and achieve new levels of creativity and
-            quality.
+            Transform images using an image reference and your ideas.
           </p>
           {!license?.isLicensed ? (
             <div className="flex flex-col gap-2">
@@ -331,16 +335,48 @@ const ToolBarAI = () => {
             </div>
           </div>
           <Divider />
+          {useCase.key === 'interior' && (
+            <>
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center gap-2">
+                  <PiWarehouseBold fontSize="1.1rem" />
+                  <h5>Design Style</h5>
+                </div>
+                <Select defaultSelectedKeys={[interiorDesignStyle]}>
+                  {interiorDesignStyles.map((option) => (
+                    <SelectItem
+                      key={option}
+                      value={option}
+                      onClick={() => setInteriorDesignStyle(option)}
+                    >
+                      {option}
+                    </SelectItem>
+                  ))}
+                </Select>
+              </div>
+              <Divider />
+            </>
+          )}
           <div className="flex flex-col items-start gap-3">
             <div className="flex items-center gap-2">
-              <PiSunDimBold fontSize="1.1rem" />
-              <h5>Prompt</h5>
+              {useCase.key === 'interior' ? (
+                <PiCouchBold fontSize="1.1rem" />
+              ) : (
+                <PiSunDimBold fontSize="1.1rem" />
+              )}
+              <h5>{useCase.key === 'interior' ? 'Room type' : 'Prompt'} </h5>
               <HelpIndicator
-                content={`Provide a description of the image you want to generate. For example, "a lego car".`}
+                content={`Provide a description of the ${
+                  useCase.key === 'interior'
+                    ? 'room you want to redesign, example: a bedroom'
+                    : 'image you want to generate, example: a futuristic car'
+                }`}
               />
             </div>
             <Textarea
-              placeholder="i.e. A race car"
+              placeholder={`i.e. A ${
+                useCase.key === 'interior' ? 'living room' : 'race car'
+              }`}
               {...register('prompt', {
                 required: 'Prompt is required',
                 shouldUnregister: true,
@@ -393,8 +429,9 @@ const ToolBarAI = () => {
           </div>
           <div className="flex flex-col gap-2">
             <Button
-              fullWidth
               type="submit"
+              fullWidth
+              variant={inputImage ? 'shadow' : 'flat'}
               color="secondary"
               startContent={<PiMagicWandBold fontSize="1.1rem" />}
               isLoading={isLoading}

@@ -93,7 +93,7 @@ export default function ImageInput({ onChange, onCancel }) {
   })
 
   useEffect(() => {
-    if (image && onChange) {
+    if (onChange) {
       onChange(image)
     }
   }, [image, onChange])
@@ -175,7 +175,7 @@ export default function ImageInput({ onChange, onCancel }) {
                 <Button
                   size="sm"
                   fullWidth
-                  variant="flat"
+                  variant="shadow"
                   color="secondary"
                   onClick={handleUpload}
                 >
