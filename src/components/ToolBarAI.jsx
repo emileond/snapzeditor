@@ -265,12 +265,11 @@ const ToolBarAI = () => {
         >
           <div className="flex items-center gap-2 text-default-600">
             <PiMagicWandDuotone fontSize="1.3rem" />
-            <h4 className="font-semibold">AI Image Enhancer</h4>
+            <h4 className="font-semibold">AI Reimagine</h4>
             <ChipPro />
           </div>
           <p className="text-default-500 text-sm text-left">
-            Enhance your images with AI and achieve new levels of creativity and
-            quality.
+            Transform images using an image reference and your ideas.
           </p>
           {!license?.isLicensed ? (
             <div className="flex flex-col gap-2">
@@ -393,8 +392,9 @@ const ToolBarAI = () => {
           </div>
           <div className="flex flex-col gap-2">
             <Button
-              fullWidth
               type="submit"
+              fullWidth
+              variant={inputImage ? 'shadow' : 'flat'}
               color="secondary"
               startContent={<PiMagicWandBold fontSize="1.1rem" />}
               isLoading={isLoading}

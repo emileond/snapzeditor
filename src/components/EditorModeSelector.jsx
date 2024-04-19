@@ -24,19 +24,20 @@ function EditorModeSelector() {
   const availableModes = [
     {
       title: 'Screenshot',
-      description: 'Beautify screenshots in seconds',
+      description: 'Beautify screenshots in seconds.',
       icon: <PiImageDuotone fontSize="1.5rem" />,
       mode: 'screenshot',
     },
     {
       title: 'Dev',
-      description: 'Generate screenshots for your code snippets',
+      description: 'Generate screenshots for your code snippets.',
       icon: <PiCodeBlockDuotone fontSize="1.5rem" />,
       mode: 'dev',
     },
     {
-      title: 'AI Image Enhancer',
-      description: 'Enhance your images with AI',
+      title: 'AI Reimagine',
+      description:
+        'Transform your images into new creations across multiple visual styles.',
       icon: <PiMagicWandDuotone fontSize="1.5rem" />,
       mode: 'ai',
       isDisabled: false,
@@ -63,7 +64,7 @@ function EditorModeSelector() {
       <Modal
         isOpen={isOpen}
         onOpenChange={onOpenChange}
-        className="dark min-w-[520px]"
+        className="dark min-w-[580px]"
       >
         <ModalContent>
           <ModalHeader className="flex flex-col gap-1">
@@ -95,12 +96,16 @@ function EditorModeSelector() {
                       ? 'dark:text-default-400 dark:cursor-not-allowed'
                       : 'dark:hover:bg-opacity-20'
                   }
+                  ${mode === item.mode && 'border-default-100'}
                   `}
                 >
-                  <div className="flex gap-3 group">
+                  <div className={`flex gap-3 group`}>
                     <div
-                      className={`flex items-center justify-center w-12 h-12 rounded-md bg-content1 text-default-500
-                      group-hover:bg-content2 group-hover:text-secondary-500
+                      className={`w-[48px] h-[48px] flex items-center justify-center flex-shrink-0 rounded-md bg-content1 text-default-500
+                      group-hover:bg-content2 group-hover:text-secondary-500 ${
+                        mode === item.mode &&
+                        'bg-secondary-200/30 text-secondary-600'
+                      }
                       `}
                     >
                       {item.icon}
@@ -109,7 +114,7 @@ function EditorModeSelector() {
                       <h4 className="text-lg font-medium text-default-600 group-hover:text-default-900">
                         {item.title}
                       </h4>
-                      <p className="text-default-400 group-hover:text-default-600">
+                      <p className="text-default-400 group-hover:text-default-600 text-wrap">
                         {item.description}
                       </p>
                     </div>
