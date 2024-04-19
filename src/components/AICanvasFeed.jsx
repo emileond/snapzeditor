@@ -10,6 +10,9 @@ import {
   Spinner,
   Button,
   Tooltip,
+  CardHeader,
+  CardFooter,
+  Divider,
   Image,
   Progress,
 } from '@nextui-org/react' // Assuming Text is available for textual feedback
@@ -17,10 +20,13 @@ import { useAiImages } from '../context/AiImagesContext'
 import {
   PiCloudArrowUpBold,
   PiDownloadSimpleBold,
+  PiPlayCircleBold,
   PiSlidersHorizontalBold,
   PiTerminalBold,
   PiTrashSimpleBold,
 } from 'react-icons/pi'
+import ImgEmptyState from './ImgEmptyState'
+import ImageInput from './ImageInput'
 
 export default function AICanvasFeed() {
   const { images } = useAiImages()
@@ -52,8 +58,8 @@ export default function AICanvasFeed() {
       case 'starting':
         return (
           <>
-            <Image src="/empty-states/dark/time.svg" width={100} height={100} />
-            <h4>Sending image to the server...</h4>
+            <Image src="/empty-states/dark/57.svg" width={100} height={100} />
+            <h4>Starting server...</h4>
             <p className="text-default-500">
               This can take several minutes, depending on the server load.
             </p>
@@ -65,7 +71,7 @@ export default function AICanvasFeed() {
             <Image src="/empty-states/dark/ai.svg" width={140} height={140} />
             <h4>Processing image...</h4>
             <p className="text-default-500">
-              Do not refresh or close the window.
+              Please do not refresh or close the window during the process.
             </p>
           </>
         )
@@ -92,10 +98,28 @@ export default function AICanvasFeed() {
     }
   }
 
+  const examples = [
+    {
+      input: '/ai-examples/reimagine/1-input.png',
+      output: '/ai-examples/reimagine/1-output.png',
+      description: 'Transform images into new creations',
+    },
+    {
+      input: '/ai-examples/reimagine/2-input.png',
+      output: '/ai-examples/reimagine/2-output.png',
+      description: 'Get interior design ideas',
+    },
+    {
+      input: '/ai-examples/reimagine/3-input.png',
+      output: '/ai-examples/reimagine/3-output.png',
+      description: 'Create 3D characters and scenes',
+    },
+  ]
+
   return (
     <div className="w-full flex flex-col items-center justify-start overflow-auto">
       <div className="container mx-auto flex flex-col gap-5 sm:px-4 md:px-8 lg:px-16 xl:px-24 2xl:px-32 py-8">
-        {images?.length > 0 &&
+        {images?.length > 0 ? (
           images.map((image) =>
             image?.output && image.output.length > 1 ? (
               image.output.slice(1).map((output, idx) => (
@@ -159,8 +183,13 @@ export default function AICanvasFeed() {
                 </div>
               ))
             ) : (
-              <Card key={image.id} className="w-full h-full">
-                <CardBody className="w-full h-full min-h-[400px]">
+              <Card
+                key={image.id}
+                className="border-none min-h-[400px] shrink-0"
+                isFooterBlurred
+                radius="lg"
+              >
+                <CardBody className="w-full h-full">
                   <div className="flex flex-col items-center justify-center gap-3 py-4 w-full h-full">
                     {renderContentBasedOnStatus(image)}
                     <Progress
@@ -188,7 +217,70 @@ export default function AICanvasFeed() {
                 </CardBody>
               </Card>
             )
-          )}
+          )
+        ) : (
+          <Card className="w-full h-full py-8">
+            <CardHeader className="flex flex-col gap-4 items-center justify-center w-full">
+              <h2>AI Reimagine</h2>
+              <div>
+                <p className="text-default-500 text-lg">
+                  Transform images using an image reference and your vision.
+                </p>
+                <p className="text-default-500 text-lg">
+                  Ideal for creating 3D scenes, characters, interior design
+                  ideas, and more.
+                </p>
+              </div>
+              <div>
+                <Button
+                  variant="light"
+                  color="primary"
+                  startContent={<PiPlayCircleBold fontSize="1.1rem" />}
+                >
+                  Watch a demo
+                </Button>
+              </div>
+            </CardHeader>
+            <CardBody className="w-full h-full min-h-[400px]">
+              <div className="w-full flex items-center justify-center gap-5 flex-wrap">
+                {examples.map((example, idx) => (
+                  <Card key={idx} className="w-[400px] h-[240px]">
+                    <CardBody className="p-0">
+                      <ReactCompareSlider
+                        itemOne={
+                          <div className="w-full h-full flex items-center justify-center">
+                            <Chip className="absolute left-2 text-xs">
+                              Original
+                            </Chip>
+
+                            <ReactCompareSliderImage
+                              src={example.input}
+                              alt="Original"
+                            />
+                          </div>
+                        }
+                        itemTwo={
+                          <div className="w-full h-full flex items-center justify-center">
+                            <Chip className="absolute right-2 text-xs">
+                              AI Reimagine
+                            </Chip>
+                            <ReactCompareSliderImage
+                              src={example.output}
+                              alt="AI Generated"
+                            />
+                          </div>
+                        }
+                      />
+                    </CardBody>
+                    <CardFooter className="text-sm font-500 text-default-500 text-center">
+                      {example.description}
+                    </CardFooter>
+                  </Card>
+                ))}
+              </div>
+            </CardBody>
+          </Card>
+        )}
       </div>
     </div>
   )

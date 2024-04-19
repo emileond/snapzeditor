@@ -9,7 +9,7 @@ export async function onRequestPost(context) {
   const { image, prompt, num_samples, negative_prompt, license_key } =
     await context.request.json()
 
-  const requiredCredits = num_samples * 2
+  const requiredCredits = num_samples * 4
 
   const supabaseUrl = context.env.VITE_SUPABASE_URL
 
