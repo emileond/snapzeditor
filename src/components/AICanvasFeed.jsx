@@ -63,6 +63,12 @@ export default function AICanvasFeed() {
             <p className="text-default-500">
               This can take several minutes, depending on the server load.
             </p>
+            <Progress
+              size="sm"
+              isIndeterminate
+              aria-label="Loading..."
+              className="max-w-md"
+            />
           </>
         )
       case 'processing':
@@ -73,6 +79,12 @@ export default function AICanvasFeed() {
             <p className="text-default-500">
               Please do not refresh or close the window during the process.
             </p>
+            <Progress
+              size="sm"
+              isIndeterminate
+              aria-label="Loading..."
+              className="max-w-md"
+            />
           </>
         )
       case 'succeeded':
@@ -86,8 +98,9 @@ export default function AICanvasFeed() {
       case 'failed':
         return (
           <>
+            <Image src="/empty-states/dark/10.svg" width={100} height={100} />
             <h4>Image processing failed.</h4>
-            <p className="text-error">
+            <p className="text-default-500">
               {image?.errorMessage ||
                 'Please try again or contact support if the issue persists.'}
             </p>
@@ -192,12 +205,6 @@ export default function AICanvasFeed() {
                 <CardBody className="w-full h-full">
                   <div className="flex flex-col items-center justify-center gap-3 py-4 w-full h-full">
                     {renderContentBasedOnStatus(image)}
-                    <Progress
-                      size="sm"
-                      isIndeterminate
-                      aria-label="Loading..."
-                      className="max-w-md"
-                    />
                     <Button
                       startContent={<PiTerminalBold fontSize="1rem" />}
                       size="sm"

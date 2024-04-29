@@ -1,3 +1,4 @@
+import { useParams, useNavigate } from 'react-router-dom'
 import { useEffect, useState, useRef } from 'react'
 import './App.css'
 import { useForm } from 'react-hook-form'
@@ -15,10 +16,13 @@ import { useEditorMode } from './context/EditorModeContext'
 import ToolBarAI from './components/ToolBarAI'
 import EditorLinks from './components/EditorLinks'
 import AICanvasFeed from './components/AICanvasFeed'
+import { editorModes } from './components/editorModes'
 
 function App() {
   const user = useUser()
-  const { mode } = useEditorMode()
+  const { mode: urlMode } = useParams()
+  const navigate = useNavigate()
+  const { mode, setMode } = useEditorMode()
   const fingerprint = useFingerprint()
   const { checkLicense } = useCheckLicense()
   const { license } = useLicense()
@@ -180,6 +184,20 @@ function App() {
       checkLicense(user, fingerprint)
     }
   }, [user, fingerprint])
+
+  useEffect(() => {
+    console.log('urlMode', urlMode)
+    if (urlMode) {
+      // check if the mode is valid (exists as a mode in editorModes)
+      const modeExists = editorModes.some((item) => item.mode === urlMode)
+      if (modeExists) {
+        setMode(urlMode)
+      } else {
+        // change route to default mode
+        navigate('/app/screenshot')
+      }
+    }
+  }, [urlMode, setMode])
 
   return (
     <div

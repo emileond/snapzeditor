@@ -142,7 +142,7 @@ const ToolBarAI = () => {
 
       try {
         const response = await axios.get(
-          `/api/get-prediction?prediction_id=${predictionId}`,
+          `/api/get-prediction?prediction_id=${predictionId}&license_key=${license.deviceLicense.license_key}`,
           {
             signal: controller.signal, // Use the signal in the request
           }
@@ -173,6 +173,8 @@ const ToolBarAI = () => {
           console.error('Prediction failed:', response.data)
           displayToast('error', 'Failed to generate image, credits refunded')
           updateImage(predictionId, { status, logs })
+          // force a re-render to update the credits
+          setAiCredits((prev) => prev + creditsCost)
           break
         }
 
