@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom'
 import {
   Button,
   useDisclosure,
@@ -10,42 +11,15 @@ import {
   ModalFooter,
 } from '@nextui-org/react'
 import { useEditorMode } from '../context/EditorModeContext'
-import {
-  PiImageDuotone,
-  PiCodeBlockDuotone,
-  PiMagicWandDuotone,
-  PiFadersHorizontalBold,
-  PiCheckBold,
-} from 'react-icons/pi'
+import { PiFadersHorizontalBold, PiCheckBold } from 'react-icons/pi'
+import { editorModes } from './editorModes'
 
 function EditorModeSelector() {
-  const { mode, setMode } = useEditorMode()
-
-  const availableModes = [
-    {
-      title: 'Screenshot',
-      description: 'Beautify screenshots in seconds.',
-      icon: <PiImageDuotone fontSize="1.5rem" />,
-      mode: 'screenshot',
-    },
-    {
-      title: 'Dev',
-      description: 'Generate screenshots for your code snippets.',
-      icon: <PiCodeBlockDuotone fontSize="1.5rem" />,
-      mode: 'dev',
-    },
-    {
-      title: 'AI Reimagine',
-      description:
-        'Transform your images into new creations across multiple visual styles.',
-      icon: <PiMagicWandDuotone fontSize="1.5rem" />,
-      mode: 'ai',
-      isDisabled: false,
-    },
-  ]
+  const navigate = useNavigate()
+  const { mode } = useEditorMode()
 
   const handleModeChange = (mode) => {
-    setMode(mode)
+    navigate(`/app/${mode}`)
     onOpenChange()
   }
 
@@ -75,7 +49,7 @@ function EditorModeSelector() {
           </ModalHeader>
           <ModalBody className="p-4 w-full">
             <Listbox selectedKeys={[0]} className="w-full" variant="faded">
-              {availableModes.map((item, index) => (
+              {editorModes.map((item, index) => (
                 <ListboxItem
                   key={index}
                   // variant="bordered
