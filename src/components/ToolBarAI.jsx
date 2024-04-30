@@ -6,7 +6,6 @@ import {
   PiMagicWandDuotone,
   PiCubeBold,
   PiBuildingsBold,
-  PiPaintBrushBold,
   PiCardsBold,
   PiImagesBold,
   PiCoinVerticalBold,
@@ -208,10 +207,11 @@ const ToolBarAI = () => {
     // Prepare the JSON payload
     const payload = {
       image: inputImage.src, // Base64 string of the image
-      prompt: `${useCase.basePrompt} ${data.prompt} ${
-        useCase.key === 'interior' &&
-        `in ${interiorDesignStyle} architecture style`
-      }${data?.attributes}, ${useCase.baseAttributes}`,
+      prompt: `${useCase.basePrompt} ${data.prompt}${
+        useCase.key === 'interior'
+          ? `in ${interiorDesignStyle} architecture style`
+          : ','
+      } ${data?.attributes}, ${useCase.baseAttributes}`,
       num_samples: data.num_samples,
       negative_prompt: `${useCase.negativePrompt}`,
       license_key: license?.deviceLicense?.license_key,
@@ -319,6 +319,7 @@ const ToolBarAI = () => {
                 <h5>Use case</h5>
               </div>
               <Select
+                aria-label="Use case"
                 startContent={useCase.icon}
                 defaultSelectedKeys={[useCase.key]}
               >
@@ -344,7 +345,10 @@ const ToolBarAI = () => {
                   <PiWarehouseBold fontSize="1.1rem" />
                   <h5>Design Style</h5>
                 </div>
-                <Select defaultSelectedKeys={[interiorDesignStyle]}>
+                <Select
+                  defaultSelectedKeys={[interiorDesignStyle]}
+                  aria-label="Interior design style"
+                >
                   {interiorDesignStyles.map((option) => (
                     <SelectItem
                       key={option}
