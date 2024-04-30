@@ -69,7 +69,7 @@ root.render(
                           }
                         />
                         <Route
-                          path="/app/:mode"
+                          path="/app"
                           element={
                             <section
                               id="app"

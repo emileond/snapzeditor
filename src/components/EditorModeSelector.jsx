@@ -19,7 +19,7 @@ function EditorModeSelector() {
   const { mode } = useEditorMode()
 
   const handleModeChange = (mode) => {
-    navigate(`/app/${mode}`)
+    navigate(`/app?mode=${mode}`)
     onOpenChange()
   }
 

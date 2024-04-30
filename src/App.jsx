@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useEffect, useState, useRef } from 'react'
 import './App.css'
 import { useForm } from 'react-hook-form'
@@ -18,9 +18,15 @@ import EditorLinks from './components/EditorLinks'
 import AICanvasFeed from './components/AICanvasFeed'
 import { editorModes } from './components/editorModes'
 
+function useQuery() {
+  const { search } = useLocation()
+  return new URLSearchParams(search)
+}
+
 function App() {
   const user = useUser()
-  const { mode: urlMode } = useParams()
+  const query = useQuery()
+  const urlMode = query.get('mode')
   const navigate = useNavigate()
   const { mode, setMode } = useEditorMode()
   const fingerprint = useFingerprint()
@@ -193,9 +199,10 @@ function App() {
       if (modeExists) {
         setMode(urlMode)
       } else {
-        // change route to default mode
-        navigate('/app/screenshot')
+        navigate('/app?mode=screenshot')
       }
+    } else {
+      setMode(mode)
     }
   }, [urlMode, setMode])
 
