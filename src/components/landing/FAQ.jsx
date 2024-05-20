@@ -75,7 +75,7 @@ export default function FAQ() {
           Suggestions are welcome! If you have a feature you would like to see
           in SnapsEditor, visit our{' '}
           <Link
-            href="https://snapseditor.canny.io/feature-requests"
+            href="https://feedback.snapseditor.com"
             isExternal
             showAnchorIcon
           >
