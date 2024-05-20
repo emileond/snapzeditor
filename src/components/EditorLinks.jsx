@@ -1,30 +1,32 @@
-import { Link } from '@nextui-org/react'
+import { Button, Link } from '@nextui-org/react'
 
 function EditorLinks() {
+  const openTaku = () => {
+    window.Taku('news:show')
+  }
+
   return (
-    <div className="flex gap-4 text-default-600 text-sm font-medium self-end px-4">
+    <div className="flex gap-4 text-sm self-end px-4">
       <Link
-        className="text-xs hover:text-default-900"
         href="https://feedback.snapseditor.com"
         color="foreground"
         size="sm"
         isBlock
         isExternal
         showAnchorIcon
+        className="text-xs hover:text-default-900 font-bold"
       >
         Feedback
       </Link>
-      <Link
-        className="text-xs hover:text-default-900"
-        href="https://feedback.snapseditor.com/changelog"
-        color="foreground"
+      <Button
+        onClick={openTaku}
+        id="taku-launcher"
+        variant="light"
         size="sm"
-        isBlock
-        isExternal
-        showAnchorIcon
+        className="text-xs font-normal"
       >
         🎉 What&apos;s new
-      </Link>
+      </Button>
     </div>
   )
 }
