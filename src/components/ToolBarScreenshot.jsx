@@ -248,7 +248,7 @@ const ToolBarScreenshot = ({
                       input: 'w-full',
                       inputWrapper: ['min-h-9', 'h-9'],
                     }}
-                    value={canvasWidth}
+                    defaultValue={canvasWidth}
                   />
                   <p className="text-default-500">x</p>
                   <Input
@@ -268,11 +268,8 @@ const ToolBarScreenshot = ({
                       input: 'w-full',
                       inputWrapper: ['min-h-9', 'h-9'],
                     }}
-                    value={canvasHeight}
+                    defaultValue={canvasHeight}
                   />
-                  {sizeError && (
-                    <p className="text-danger text-sm">{sizeError}</p>
-                  )}
                   <Dropdown className="dark">
                     <DropdownTrigger>
                       <Button isIconOnly size="sm" variant="faded">
@@ -298,6 +295,9 @@ const ToolBarScreenshot = ({
                     </DropdownMenu>
                   </Dropdown>
                 </div>
+                {sizeError && (
+                  <p className="text-danger text-sm">{sizeError}</p>
+                )}
               </div>
               <Divider />
               <div className="flex flex-col items-start gap-2">
