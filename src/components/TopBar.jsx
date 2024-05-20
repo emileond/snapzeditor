@@ -43,7 +43,7 @@ const TopBar = ({
 }) => {
   const { mode } = useEditorMode()
 
-  const [exportSize, setExportSize] = useState('1x')
+  const [exportSize, setExportSize] = useState('1')
   const [isOpen, setIsOpen] = useState(false)
   const {
     isOpen: isLicenseOpen,
@@ -179,12 +179,13 @@ const TopBar = ({
                     </Button>
                   </DropdownTrigger>
                   <DropdownMenu
+                    aria-label="Export size"
                     className="dark"
                     selectionMode="single"
                     selectedKeys={exportSize}
-                    onSelectionChange={(selectedKeys) =>
-                      setExportSize(selectedKeys)
-                    }
+                    onSelectionChange={(key) => {
+                      setExportSize(Object.values(key)[0])
+                    }}
                   >
                     <DropdownItem
                       className="dark"
@@ -203,7 +204,8 @@ const TopBar = ({
                   </DropdownMenu>
                 </Dropdown>
                 <span className="text-default-500">
-                  {canvasWidth} x {canvasHeight}
+                  {canvasWidth * parseInt(exportSize)} x{' '}
+                  {canvasHeight * parseInt(exportSize)}
                 </span>
               </div>
               <Divider />

@@ -130,7 +130,7 @@ const CanvasComponent = forwardRef(
               </div>
             </div>
           )}
-          {mode === 'screenshot' && imgVisibility && (
+          {mode === 'screenshot' && imgVisibility && imgSrc && (
             <img src={imgSrc} alt="Uploaded image preview" />
           )}
           {mode === 'dev' && <CodeEditor />}

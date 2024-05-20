@@ -324,11 +324,13 @@ const CanvasArea = ({
 
   const handleExport = async (options) => {
     if (canvasRef.current) {
+      const scale = parseInt(options.size) || 1
       if (options.type === 'download') {
+        console.log('Exporting...', scale)
         try {
           const dataUrl = await toPng(canvasRef.current, {
-            canvasWidth: canvasWidth,
-            canvasHeight: canvasHeight,
+            canvasWidth: canvasWidth * scale,
+            canvasHeight: canvasHeight * scale,
           })
 
           // Trigger download
@@ -342,8 +344,8 @@ const CanvasArea = ({
       } else if (options.type === 'clipboard') {
         try {
           const blob = await toBlob(canvasRef.current, {
-            canvasWidth: canvasWidth,
-            canvasHeight: canvasHeight,
+            canvasWidth: canvasWidth * scale,
+            canvasHeight: canvasHeight * scale,
           })
 
           const clipboardItem = new ClipboardItem({ [blob.type]: blob })
