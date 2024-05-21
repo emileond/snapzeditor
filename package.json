@@ -11,6 +11,7 @@
     "dev:cf": "npx wrangler pages dev -- npm run dev"
   },
   "dependencies": {
+    "@aws-sdk/client-bedrock-runtime": "^3.577.0",
     "@lemonsqueezy/lemonsqueezy.js": "^2.2.0",
     "@nextui-org/react": "^2.3.6",
     "@radix-ui/react-slider": "^1.1.2",
@@ -46,6 +47,7 @@
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.2.1",
     "autoprefixer": "^10.4.19",
+    "esbuild": "^0.21.3",
     "eslint": "^8.45.0",
     "eslint-plugin-react": "^7.34.1",
     "eslint-plugin-react-hooks": "^4.6.2",
@@ -53,6 +55,6 @@
     "postcss": "^8.4.38",
     "tailwindcss": "^3.4.3",
     "vite": "^5.2.11",
-    "wrangler": "^3.56.0"
+    "wrangler": "^3.57.0"
   }
 }
