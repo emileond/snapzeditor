@@ -17,6 +17,7 @@ import ToolBarAI from './components/ToolBarAI'
 import EditorLinks from './components/EditorLinks'
 import AICanvasFeed from './components/AICanvasFeed'
 import { editorModes } from './components/editorModes'
+import ToolBarCode from './components/ToolBarCode'
 
 function useQuery() {
   const { search } = useLocation()
@@ -287,7 +288,13 @@ function App() {
             <AICanvasFeed />
           </>
         )}
-        {mode !== 'ai' && (
+        {mode === 'code' && (
+          <>
+            <ToolBarCode />
+            <AICanvasFeed />
+          </>
+        )}
+        {mode === 'screenshot' && (
           <CanvasArea
             canvasRef={canvasRef}
             imgScale={imgScale}

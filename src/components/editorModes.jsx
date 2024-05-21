@@ -25,4 +25,10 @@ export const editorModes = [
     mode: 'ai',
     isDisabled: false,
   },
+  {
+    title: 'Codepilot',
+    description: 'Generate code snippets from images.',
+    icon: <PiCodeBlockDuotone fontSize="1.5rem" />,
+    mode: 'code',
+  },
 ]

@@ -1,8 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
-import {
-  BedrockRuntimeClient,
-  InvokeModelCommand,
-} from '@aws-sdk/client-bedrock-runtime'
+import OpenAI from 'openai'
 import { Buffer } from 'buffer'
 
 export async function onRequestPost(context) {
@@ -42,49 +39,38 @@ export async function onRequestPost(context) {
   //     )
   //   }
 
-  const client = new BedrockRuntimeClient({
-    region: 'us-west-2',
-    credentials: {
-      accessKeyId: context.env.AWS_ACCESS_KEY_ID,
-      secretAccessKey: context.env.AWS_SECRET_ACCESS_KEY,
-    },
+  const openai = new OpenAI({
+    apiKey: context.env.OPENAI_API_KEY,
+    baseURL:
+      'https://gateway.ai.cloudflare.com/v1/606654cc2bf282f29537dc173f405984/snapseditor/openai',
   })
 
-  const input = {
-    modelId: 'anthropic.claude-3-sonnet-20240229-v1:0',
-    contentType: 'application/json',
-    accept: 'application/json',
-    body: {
-      anthropic_version: 'bedrock-2023-05-31',
-      max_tokens: 1000,
-      messages: [
-        {
-          role: 'user',
-          content: [
-            // {
-            //   "type": "image",
-            //   "source": {
-            //     "type": "base64",
-            //     "media_type": "image/jpeg",
-            //     "data": "iVBORw..."
-            //   }
-            // },
-            {
-              type: 'text',
-              text: 'Hello, tell me a story about a dragon and a knight.',
+  const response = await openai.chat.completions.create({
+    model: 'gpt-4o',
+    messages: [
+      {
+        role: 'system',
+        content:
+          'You are coding assistant, your goal is to help the user write front-end code that follows best practices. Reply with the code only, dont include any comments or extra information.',
+      },
+      {
+        role: 'user',
+        content: [
+          {
+            type: 'text',
+            text: 'Write a react component for this image, using the latest mui library.',
+          },
+          {
+            type: 'image_url',
+            image_url: {
+              url: 'https://tailwindui.com/img/category-thumbnails/application-ui/stats.png',
             },
-          ],
-        },
-      ],
-    },
-  }
-
-  const command = new InvokeModelCommand(input)
-  const response = await client.send(command)
-
-  const completion = JSON.parse(Buffer.from(response.body).toString('utf8'))
-
-  console.log(completion)
+          },
+        ],
+      },
+    ],
+  })
+  console.log(response.choices[0])
 
   // Deduct the required credits from the license
   //   const { error: creditsError } = await supabase.rpc('decrement_balance', {
@@ -98,7 +84,7 @@ export async function onRequestPost(context) {
 
   // Return the completion result
 
-  return new Response(JSON.stringify(completion), {
+  return new Response(JSON.stringify(response), {
     headers: {
       'Content-Type': 'application/json',
     },
