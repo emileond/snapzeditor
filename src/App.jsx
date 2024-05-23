@@ -18,6 +18,7 @@ import EditorLinks from './components/EditorLinks'
 import AICanvasFeed from './components/AICanvasFeed'
 import { editorModes } from './components/editorModes'
 import ToolBarCode from './components/ToolBarCode'
+import AICodeView from './components/AICodeView'
 
 function useQuery() {
   const { search } = useLocation()
@@ -291,7 +292,7 @@ function App() {
         {mode === 'code' && (
           <>
             <ToolBarCode />
-            <AICanvasFeed />
+            <AICodeView />
           </>
         )}
         {mode === 'screenshot' && (

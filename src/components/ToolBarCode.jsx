@@ -1,97 +1,83 @@
 import { useEffect, useState } from 'react'
 import {
   PiMagicWandBold,
-  PiSparkleBold,
-  PiSunDimBold,
   PiMagicWandDuotone,
-  PiCubeBold,
-  PiBuildingsBold,
-  PiCardsBold,
-  PiImagesBold,
   PiCoinVerticalBold,
   PiCrownSimpleBold,
   PiArrowSquareOutBold,
-  PiWarehouseBold,
-  PiCouchBold,
 } from 'react-icons/pi'
 import {
   Button,
   Card,
   Chip,
   Divider,
-  Input,
   Select,
   SelectItem,
-  Textarea,
   useDisclosure,
 } from '@nextui-org/react'
 import { useLicense } from '../context/LicenseContext'
 import Paywall from './Paywall'
 import axios from 'axios'
 import ImageInput from './ImageInput'
-import HelpIndicator from './HelpIndicator'
-import { useForm } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 import { useAiImages } from '../context/AiImagesContext'
 import { useCheckAiCredits } from '../hooks/useCheckAiCredits'
 import { displayToast } from '../utils/displayToast'
 import ChipPro from './ChipPro'
+import {
+  SiTypescript,
+  SiJavascript,
+  SiReact,
+  SiVuedotjs,
+  SiAngular,
+  SiSvelte,
+  SiSolid,
+  SiNextdotjs,
+  SiNuxtdotjs,
+  SiMui,
+  SiAntdesign,
+  SiChakraui,
+  SiNextui,
+  SiAtlassian,
+  SiRadixui,
+  SiBootstrap,
+  SiMaterialdesign,
+  SiVuetify,
+  SiBuefy,
+} from 'react-icons/si'
+import { LuComponent } from 'react-icons/lu'
 
 const ToolBarCode = () => {
   const { license } = useLicense()
   const { checkAiCredits } = useCheckAiCredits()
-  const {
-    register,
-    watch,
-    handleSubmit,
-    formState: { errors },
-  } = useForm()
-  const [inputImage, setInputImage] = useState(null)
-  const { addImage, updateImage } = useAiImages()
+  const { addImage } = useAiImages()
   const { isOpen, onOpen, onOpenChange } = useDisclosure()
   const [isLoading, setIsLoading] = useState(false)
   const [imgError, setImgError] = useState()
   const [runCount, setRunCount] = useState(0)
 
+  const {
+    control,
+    watch,
+    handleSubmit,
+    formState: { errors },
+  } = useForm()
+
+  const [inputImage, setInputImage] = useState(null)
+  const [aiCredits, setAiCredits] = useState(0)
+
   const creditsCost = watch('num_samples') * 4
-
-  const interiorDesignStyles = [
-    'modern',
-    'minimalist',
-    'vintage',
-    'retro',
-    'industrial',
-    'bohemian',
-    'scandinavian',
-    'rustic',
-    'shabby chic',
-    'mid-century modern',
-    'contemporary',
-    'traditional',
-    'futuristic',
-    'art deco',
-    'mediterranean',
-    'tropical',
-    'coastal',
-    'mexican',
-  ]
-
-  const dayTimes = ['morning', 'afternoon', 'evening', 'night']
-
-  const [interiorDesignStyle, setInteriorDesignStyle] = useState(
-    interiorDesignStyles[0]
-  )
-  const [dayTime, setDayTime] = useState(dayTimes[0])
 
   const languages = [
     {
       key: 'js',
       name: 'JavaScript',
-      icon: <PiCubeBold fontSize="1.1rem" />,
+      icon: <SiJavascript fontSize="1.1rem" color="#f0db4f" />,
     },
     {
       key: 'ts',
       name: 'TypeScript',
-      icon: <PiCubeBold fontSize="1.1rem" />,
+      icon: <SiTypescript fontSize="1.1rem" color="#3178c6" />,
     },
   ]
 
@@ -99,59 +85,198 @@ const ToolBarCode = () => {
     {
       key: 'react',
       name: 'React',
-      icon: <PiBuildingsBold fontSize="1.1rem" />,
+      icon: <SiReact fontSize="1.1rem" color="#61dafb" />,
     },
     {
       key: 'vue',
       name: 'Vue',
-      icon: <PiBuildingsBold fontSize="1.1rem" />,
+      icon: <SiVuedotjs fontSize="1.1rem" color="#41b883" />,
     },
     {
       key: 'angular',
       name: 'Angular',
-      icon: <PiBuildingsBold fontSize="1.1rem" />,
+      icon: <SiAngular fontSize="1.1rem" color="#dd0031" />,
     },
     {
       key: 'svelte',
       name: 'Svelte',
-      icon: <PiBuildingsBold fontSize="1.1rem" />,
-    },
-    {
-      key: 'next',
-      name: 'Next.js',
-      icon: <PiBuildingsBold fontSize="1.1rem" />,
-    },
-    {
-      key: 'nuxt',
-      name: 'Nuxt.js',
-      icon: <PiBuildingsBold fontSize="1.1rem" />,
+      icon: <SiSvelte fontSize="1.1rem" color="#ff3e00" />,
     },
     {
       key: 'solid',
       name: 'Solid.js',
-      icon: <PiBuildingsBold fontSize="1.1rem" />,
+      icon: <SiSolid fontSize="1.1rem" color="#3c4888" />,
     },
   ]
 
-  const [useCase, setUseCase] = useState(useCaseOptions[0])
-  const [aiCredits, setAiCredits] = useState(0)
+  const uiLibraries = [
+    {
+      key: 'antd',
+      framework: 'react',
+      name: 'Ant Design',
+      icon: <SiAntdesign fontSize="1.1rem" />,
+    },
+    {
+      key: 'arkui',
+      framework: 'react',
+      name: 'Ark UI',
+      icon: <LuComponent fontSize="1.1rem" />,
+    },
+    {
+      key: 'atlaskit',
+      framework: 'react',
+      name: 'Atlaskit',
+      icon: <SiAtlassian fontSize="1.1rem" />,
+    },
+    {
+      key: 'chakra',
+      framework: 'react',
+      name: 'Chakra UI',
+      icon: <SiChakraui fontSize="1.1rem" />,
+    },
+    {
+      key: 'fluentui',
+      framework: 'react',
+      name: 'Fluent UI',
+      icon: <LuComponent fontSize="1.1rem" />,
+    },
+    {
+      key: 'mui',
+      framework: 'react',
+      name: 'MUI',
+      icon: <SiMui fontSize="1.1rem" />,
+    },
+    {
+      key: 'nextui',
+      framework: 'react',
+      name: 'NextUI',
+      icon: <SiNextui fontSize="1.1rem" />,
+    },
+    {
+      key: 'radix',
+      framework: 'react',
+      name: 'Radix UI',
+      icon: <SiRadixui fontSize="1.1rem" />,
+    },
+    {
+      key: 'reactbootstrap',
+      framework: 'react',
+      name: 'React Bootstrap',
+      icon: <SiBootstrap fontSize="1.1rem" />,
+    },
+    {
+      key: 'clarity',
+      framework: 'angular',
+      name: 'Clarity',
+      icon: <LuComponent fontSize="1.1rem" />,
+    },
+    {
+      key: 'material',
+      framework: 'angular',
+      name: 'Angular Material',
+      icon: <SiMaterialdesign fontSize="1.1rem" />,
+    },
+    {
+      key: 'nebular',
+      framework: 'angular',
+      name: 'Nebular',
+      icon: <LuComponent fontSize="1.1rem" />,
+    },
+    {
+      key: 'primeng',
+      framework: 'angular',
+      name: 'PrimeNG',
+      icon: <LuComponent fontSize="1.1rem" />,
+    },
+    {
+      key: 'taiga',
+      framework: 'angular',
+      name: 'Taiga UI',
+      icon: <LuComponent fontSize="1.1rem" />,
+    },
+    {
+      key: 'arkui',
+      framework: 'vue',
+      name: 'Ark UI',
+      icon: <LuComponent fontSize="1.1rem" />,
+    },
+    {
+      key: 'buefy',
+      framework: 'vue',
+      name: 'Buefy',
+      icon: <SiBuefy fontSize="1.1rem" />,
+    },
+    {
+      key: 'primevuw',
+      framework: 'vue',
+      name: 'PrimeVue',
+      icon: <LuComponent fontSize="1.1rem" />,
+    },
+    {
+      key: 'vuetify',
+      framework: 'vue',
+      name: 'Vuetify',
+      icon: <SiVuetify fontSize="1.1rem" />,
+    },
+    {
+      key: 'attractions',
+      framework: 'svelte',
+      name: 'Attractions',
+      icon: <LuComponent fontSize="1.1rem" />,
+    },
+    {
+      key: 'svelteui',
+      framework: 'svelte',
+      name: 'Svelte UI',
+      icon: <LuComponent fontSize="1.1rem" />,
+    },
+    {
+      key: 'arkui',
+      framework: 'solid',
+      name: 'Ark UI',
+      icon: <LuComponent fontSize="1.1rem" />,
+    },
+    {
+      key: 'kovalte',
+      framework: 'solid',
+      name: 'Kovalte',
+      icon: <LuComponent fontSize="1.1rem" />,
+    },
+    {
+      key: 'solidui',
+      framework: 'solid',
+      name: 'Solid UI',
+      icon: <LuComponent fontSize="1.1rem" />,
+    },
+    {
+      key: 'suid',
+      framework: 'solid',
+      name: 'SUID',
+      icon: <LuComponent fontSize="1.1rem" />,
+    },
+  ]
+
+  const filteredUiLibs = uiLibraries.filter(
+    (lib) => lib.framework === watch('framework')
+  )
 
   const onSubmit = async (data) => {
+    console.log('data:', data)
     if (!license?.isLicensed) return onOpen()
     if (!inputImage) return setImgError('Image is required')
 
     setIsLoading(true)
     // Prepare the JSON payload
     const payload = {
-      image: inputImage.src, // Base64 string of the image
-      prompt: `${useCase.basePrompt} ${data.prompt}${
-        useCase.key === 'interior'
-          ? `in ${interiorDesignStyle} architecture style`
-          : ','
-      } ${data?.attributes}, ${useCase.baseAttributes}`,
-      num_samples: data.num_samples,
-      negative_prompt: `${useCase.negativePrompt}`,
-      license_key: license?.deviceLicense?.license_key,
+      // image: inputImage.src, // Base64 string of the image
+      // prompt: `${useCase.basePrompt} ${data.prompt}${
+      //   useCase.key === 'interior'
+      //     ? `in ${interiorDesignStyle} architecture style`
+      //     : ','
+      // } ${data?.attributes}, ${useCase.baseAttributes}`,
+      // num_samples: data.num_samples,
+      // negative_prompt: `${useCase.negativePrompt}`,
+      // license_key: license?.deviceLicense?.license_key,
     }
 
     try {
@@ -175,7 +300,7 @@ const ToolBarCode = () => {
         logs: response.data.logs,
       })
       displayToast('info', 'Image generation started')
-      return checkPredictionStatus(response.data.id)
+      return
     } catch (error) {
       console.error('Error creating prediction:', error)
       setIsLoading(false)
@@ -249,103 +374,112 @@ const ToolBarCode = () => {
           />
           {imgError && <p className="text-tiny text-danger">{imgError}</p>}
           <Divider />
-          <div>
-            <div className="flex flex-col gap-3">
-              <div className="flex items-center gap-2">
-                <PiSparkleBold fontSize="1.1rem" />
-                <h5>Use case</h5>
-              </div>
-              <Select
-                aria-label="Use case"
-                startContent={useCase.icon}
-                defaultSelectedKeys={[useCase.key]}
-              >
-                {useCaseOptions.map((option) => (
-                  <SelectItem
-                    key={option.key}
-                    value={option}
-                    startContent={option.icon}
-                    description={option.description}
-                    onClick={() => setUseCase(option)}
-                  >
-                    {option.name}
-                  </SelectItem>
-                ))}
-              </Select>
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center gap-2">
+              <h5>Language</h5>
             </div>
-          </div>
-          <Divider />
-          {useCase.key === 'interior' && (
-            <>
-              <div className="flex flex-col gap-3">
-                <div className="flex items-center gap-2">
-                  <PiWarehouseBold fontSize="1.1rem" />
-                  <h5>Design Style</h5>
-                </div>
+            <Controller
+              name="language"
+              control={control}
+              defaultValue={languages[0].key}
+              render={({ field }) => (
                 <Select
-                  defaultSelectedKeys={[interiorDesignStyle]}
-                  aria-label="Interior design style"
+                  {...field}
+                  startContent={
+                    languages?.find((lang) => lang?.key === field?.value).icon
+                  }
+                  aria-label="Code Language"
+                  isRequired
+                  isInvalid={errors.language && true}
+                  selectionMode="single"
+                  onSelectionChange={(key) => field.onChange(key)}
+                  disabledKeys={[field.value]}
+                  defaultSelectedKeys={[field.value]}
                 >
-                  {interiorDesignStyles.map((option) => (
+                  {languages.map((option) => (
                     <SelectItem
-                      key={option}
-                      value={option}
-                      onClick={() => setInteriorDesignStyle(option)}
+                      key={option.key}
+                      value={option.key}
+                      startContent={option.icon}
                     >
-                      {option}
+                      {option.name}
                     </SelectItem>
                   ))}
                 </Select>
-              </div>
-              <Divider />
-            </>
-          )}
-          <div className="flex flex-col items-start gap-3">
-            <div className="flex items-center gap-2">
-              {useCase.key === 'interior' ? (
-                <PiCouchBold fontSize="1.1rem" />
-              ) : (
-                <PiSunDimBold fontSize="1.1rem" />
               )}
-              <h5>{useCase.key === 'interior' ? 'Room type' : 'Prompt'} </h5>
-              <HelpIndicator
-                content={`Provide a description of the ${
-                  useCase.key === 'interior'
-                    ? 'room you want to redesign, example: a bedroom'
-                    : 'image you want to generate, example: a futuristic car'
-                }`}
-              />
-            </div>
-            <Textarea
-              placeholder={`i.e. A ${
-                useCase.key === 'interior' ? 'living room' : 'race car'
-              }`}
-              {...register('prompt', {
-                required: 'Prompt is required',
-                shouldUnregister: true,
-              })}
-              isInvalid={errors?.prompt && true}
-              errorMessage={errors?.prompt?.message}
             />
           </div>
           <Divider />
-          <div className="flex flex-col items-start gap-3">
+          <div className="flex flex-col gap-3">
             <div className="flex items-center gap-2">
-              <PiCardsBold fontSize="1.1rem" />
-              <h5>Attributes</h5>
-              <HelpIndicator
-                content="
-              You can provide additional instructions to generate images with specific characteristics. For example, yellow color, big size, etc."
-              />
+              <h5>Framework</h5>
             </div>
-            <Textarea
-              placeholder="i.e. Purple color, futuristic"
-              {...register('attributes', {
-                required: false,
-                shouldUnregister: true,
-              })}
+            <Controller
+              name="framework"
+              control={control}
+              defaultValue={frameworks[0].key}
+              render={({ field }) => (
+                <Select
+                  {...field}
+                  startContent={
+                    frameworks.find((lang) => lang?.key === field?.value).icon
+                  }
+                  aria-label="Framework"
+                  isRequired
+                  isInvalid={errors.framework && true}
+                  selectionMode="single"
+                  onSelectionChange={(key) => field.onChange(key)}
+                  disabledKeys={[field.value]}
+                  defaultSelectedKeys={[field.value]}
+                >
+                  {frameworks.map((option) => (
+                    <SelectItem
+                      key={option.key}
+                      value={option.key}
+                      startContent={option.icon}
+                    >
+                      {option.name}
+                    </SelectItem>
+                  ))}
+                </Select>
+              )}
             />
           </div>
+          <Divider />
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center gap-2">
+              <h5>UI Library</h5>
+            </div>
+            <Controller
+              name="uilib"
+              control={control}
+              defaultValue=""
+              render={({ field }) => (
+                <Select
+                  {...field}
+                  startContent={
+                    filteredUiLibs.find((lib) => lib?.key === field?.value)
+                      ?.icon
+                  }
+                  aria-label="UI Library"
+                  isInvalid={errors.uilib && true}
+                  selectionMode="single"
+                  onSelectionChange={(key) => field.onChange(key)}
+                >
+                  {filteredUiLibs.map((option) => (
+                    <SelectItem
+                      key={option.key}
+                      value={option.key}
+                      startContent={option.icon}
+                    >
+                      {option.name}
+                    </SelectItem>
+                  ))}
+                </Select>
+              )}
+            />
+          </div>
+          <Divider />
           <div className="flex flex-col gap-2">
             <Button
               type="submit"

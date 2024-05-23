@@ -12,21 +12,15 @@ import {
   Tooltip,
   CardHeader,
   CardFooter,
-  Divider,
   Image,
   Progress,
 } from '@nextui-org/react' // Assuming Text is available for textual feedback
 import { useAiImages } from '../context/AiImagesContext'
 import {
-  PiCloudArrowUpBold,
   PiDownloadSimpleBold,
   PiPlayCircleBold,
-  PiSlidersHorizontalBold,
   PiTerminalBold,
-  PiTrashSimpleBold,
 } from 'react-icons/pi'
-import ImgEmptyState from './ImgEmptyState'
-import ImageInput from './ImageInput'
 
 export default function AICanvasFeed() {
   const { images } = useAiImages()
